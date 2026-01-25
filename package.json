@@ -12,48 +12,20 @@
     "electron:dev": "electron .",
     "electron:build:win": "npm run build && electron-builder --win"
   },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.3",
+    "uuid": "^9.0.1"
+  },
   "devDependencies": {
+    "@vitejs/plugin-react-swc": "^3.5.0",
     "electron": "^33.2.1",
     "electron-builder": "^24.13.3",
+    "unplugin-auto-import": "^0.17.5",
     "vite": "^7.0.3"
-  },
-  "build": {
-    "appId": "com.netmuhasebe.ai",
-    "productName": "NetMuhasebe.ai",
-    "files": [
-      "out/**/*",
-      "electron/**/*",
-      "server/**/*",
-      "landing.html",
-      "package.json"
-    ],
-    "extraResources": [
-      {
-        "from": "server",
-        "to": "server",
-        "filter": [
-          "**/*",
-          "!node_modules"
-        ]
-      }
-    ],
-    "directories": {
-      "output": "dist_electron"
-    },
-    "win": {
-      "target": [
-        "nsis",
-        "portable"
-      ],
-      "icon": "electron/icon.png"
-    },
-    "nsis": {
-      "oneClick": true,
-      "allowToChangeInstallationDirectory": false,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "NetMuhasebe.ai"
-    },
-    "asar": true
   }
 }
