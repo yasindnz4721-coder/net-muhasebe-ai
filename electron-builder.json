@@ -1,0 +1,40 @@
+{
+  "appId": "com.muhasebe.app",
+  "productName": "Muhasebe Uygulaması",
+  "directories": {
+    "output": "dist-electron",
+    "buildResources": "electron"
+  },
+  "files": [
+    "out/**/*",
+    "electron/**/*",
+    "package.json"
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "electron/icon.png"
+  },
+  "mac": {
+    "target": ["dmg"],
+    "icon": "electron/icon.png",
+    "category": "public.app-category.finance"
+  },
+  "linux": {
+    "target": ["AppImage"],
+    "icon": "electron/icon.png",
+    "category": "Finance"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "allowElevation": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Muhasebe Uygulaması"
+  }
+}

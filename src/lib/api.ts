@@ -1,0 +1,381 @@
+// API Client - PostgreSQL Backend ile iletişim
+const API_URL = import.meta.env.VITE_API_URL || '';
+
+// Token yönetimi
+const getToken = () => localStorage.getItem('auth_token');
+const setToken = (token: string) => localStorage.setItem('auth_token', token);
+const removeToken = () => localStorage.removeItem('auth_token');
+
+// Fetch wrapper
+async function fetchApi<T>(
+    endpoint: string,
+    options: RequestInit = {}
+): Promise<{ data: T | null; error: string | null }> {
+    try {
+        const token = getToken();
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...options.headers,
+        };
+
+        const response = await fetch(`${API_URL}${endpoint}`, {
+            ...options,
+            headers,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            return { data: null, error: data.error || 'Bir hata oluştu' };
+        }
+
+        return { data, error: null };
+    } catch (error) {
+        console.error('API Error:', error);
+        return { data: null, error: 'Sunucuya bağlanılamadı' };
+    }
+}
+
+// Auth API
+export const auth = {
+    async login(email: string, password: string) {
+        const result = await fetchApi<{ user: User; token: string }>('/api/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password }),
+        });
+
+        if (result.data?.token) {
+            setToken(result.data.token);
+        }
+
+        return result;
+    },
+
+    async register(email: string, password: string, companyName?: string) {
+        const result = await fetchApi<{ user: User; token: string }>('/api/auth/register', {
+            method: 'POST',
+            body: JSON.stringify({ email, password, companyName }),
+        });
+
+        if (result.data?.token) {
+            setToken(result.data.token);
+        }
+
+        return result;
+    },
+
+    async getUser() {
+        return fetchApi<{ user: User }>('/api/auth/user');
+    },
+
+    async updatePassword(password: string) {
+        return fetchApi<{ message: string }>('/api/auth/update-password', {
+            method: 'POST',
+            body: JSON.stringify({ password }),
+        });
+    },
+
+    async logout() {
+        removeToken();
+        return { data: { message: 'Çıkış başarılı' }, error: null };
+    },
+
+    isAuthenticated() {
+        return !!getToken();
+    },
+};
+
+// Profiles API
+export const profiles = {
+    async get() {
+        return fetchApi<Profile>('/api/profiles');
+    },
+
+    async update(name: string, logo_url?: string) {
+        return fetchApi<Profile>('/api/profiles', {
+            method: 'PUT',
+            body: JSON.stringify({ name, logo_url }),
+        });
+    },
+};
+
+// Cariler API
+export const cariler = {
+    async getAll(profile_id: string) {
+        return fetchApi<Cari[]>(`/api/cariler?profile_id=${profile_id}`);
+    },
+
+    async getById(id: string) {
+        return fetchApi<Cari>(`/api/cariler/${id}`);
+    },
+
+    async create(data: Omit<Cari, 'id' | 'created_at' | 'updated_at'>) {
+        return fetchApi<Cari>('/api/cariler', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async update(id: string, data: Partial<Cari>) {
+        return fetchApi<Cari>(`/api/cariler/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async delete(id: string) {
+        return fetchApi<{ message: string; id: string }>(`/api/cariler/${id}`, {
+            method: 'DELETE',
+        });
+    },
+};
+
+// Ürünler API
+export const urunler = {
+    async getAll(profile_id: string) {
+        return fetchApi<Urun[]>(`/api/urunler?profile_id=${profile_id}`);
+    },
+
+    async getById(id: string) {
+        return fetchApi<Urun>(`/api/urunler/${id}`);
+    },
+
+    async create(data: Omit<Urun, 'id' | 'created_at' | 'updated_at'>) {
+        return fetchApi<Urun>('/api/urunler', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async update(id: string, data: Partial<Urun>) {
+        return fetchApi<Urun>(`/api/urunler/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async delete(id: string) {
+        return fetchApi<{ message: string; id: string }>(`/api/urunler/${id}`, {
+            method: 'DELETE',
+        });
+    },
+};
+
+// Kategoriler API
+export const kategoriler = {
+    async getAll(profile_id: string) {
+        return fetchApi<Kategori[]>(`/api/kategoriler?profile_id=${profile_id}`);
+    },
+
+    async create(data: { ad: string; profile_id: string }) {
+        return fetchApi<Kategori>('/api/kategoriler', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async delete(id: string) {
+        return fetchApi<{ message: string; id: string }>(`/api/kategoriler/${id}`, {
+            method: 'DELETE',
+        });
+    },
+};
+
+// Satış Faturaları API
+export const satisFaturalari = {
+    async getAll(profile_id: string) {
+        return fetchApi<SatisFaturasi[]>(`/api/satis-faturalari?profile_id=${profile_id}`);
+    },
+
+    async create(data: Omit<SatisFaturasi, 'id' | 'created_at'>) {
+        return fetchApi<SatisFaturasi>('/api/satis-faturalari', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async update(id: string, data: Partial<SatisFaturasi>) {
+        return fetchApi<SatisFaturasi>(`/api/satis-faturalari/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async delete(id: string) {
+        return fetchApi<{ message: string; id: string }>(`/api/satis-faturalari/${id}`, {
+            method: 'DELETE',
+        });
+    },
+};
+
+// Alış Faturaları API
+export const alisFaturalari = {
+    async getAll(profile_id: string) {
+        return fetchApi<AlisFaturasi[]>(`/api/alis-faturalari?profile_id=${profile_id}`);
+    },
+
+    async create(data: Omit<AlisFaturasi, 'id' | 'created_at'>) {
+        return fetchApi<AlisFaturasi>('/api/alis-faturalari', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async update(id: string, data: Partial<AlisFaturasi>) {
+        return fetchApi<AlisFaturasi>(`/api/alis-faturalari/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async delete(id: string) {
+        return fetchApi<{ message: string; id: string }>(`/api/alis-faturalari/${id}`, {
+            method: 'DELETE',
+        });
+    },
+};
+
+// Ödemeler API
+export const odemeler = {
+    async getAll(profile_id: string) {
+        return fetchApi<Odeme[]>(`/api/odemeler?profile_id=${profile_id}`);
+    },
+
+    async create(data: Omit<Odeme, 'id' | 'created_at'>) {
+        return fetchApi<Odeme>('/api/odemeler', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async delete(id: string) {
+        return fetchApi<{ message: string; id: string }>(`/api/odemeler/${id}`, {
+            method: 'DELETE',
+        });
+    },
+};
+
+// Stok Hareketleri API
+export const stokHareketleri = {
+    async getAll(profile_id: string) {
+        return fetchApi<StokHareketi[]>(`/api/stok?profile_id=${profile_id}`);
+    },
+
+    async create(data: Omit<StokHareketi, 'id' | 'created_at'>) {
+        return fetchApi<StokHareketi>('/api/stok', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async delete(id: string) {
+        return fetchApi<{ message: string; id: string }>(`/api/stok/${id}`, {
+            method: 'DELETE',
+        });
+    },
+};
+
+// Tip tanımlamaları
+export interface User {
+    id: string;
+    email: string;
+    created_at?: string;
+}
+
+export interface Profile {
+    id: string;
+    name: string;
+    logo_url?: string;
+    created_at?: string;
+}
+
+export interface Cari {
+    id: string;
+    ad: string;
+    telefon: string;
+    email: string;
+    adres: string;
+    vergi_no: string;
+    vergi_dairesi: string;
+    profile_id?: string;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface Kategori {
+    id: string;
+    ad: string;
+    profile_id?: string;
+    created_at?: string;
+}
+
+export interface Urun {
+    id: string;
+    ad: string;
+    kategori_id: string;
+    birim: string;
+    stok_miktari: number;
+    profile_id?: string;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface SatisFaturasi {
+    id: string;
+    cari_id: string;
+    cari_ad: string;
+    fatura_no: string;
+    tarih: string;
+    tutar: number;
+    kdv: number;
+    toplam: number;
+    durum: string;
+    aciklama?: string;
+    urunler?: any[];
+    profile_id?: string;
+    created_at?: string;
+}
+
+export interface AlisFaturasi {
+    id: string;
+    cari_id: string;
+    cari_ad: string;
+    fatura_no: string;
+    tarih: string;
+    tutar: number;
+    kdv: number;
+    toplam: number;
+    durum: string;
+    aciklama?: string;
+    urunler?: any[];
+    profile_id?: string;
+    created_at?: string;
+}
+
+export interface Odeme {
+    id: string;
+    cari_id: string;
+    cari_ad: string;
+    tip: string;
+    tutar: number;
+    tarih: string;
+    odeme_yontemi: string;
+    aciklama?: string;
+    profile_id?: string;
+    created_at?: string;
+}
+
+export interface StokHareketi {
+    id: string;
+    urun_id: string;
+    urun_ad: string;
+    hareket_tipi: string;
+    miktar: number;
+    tarih: string;
+    aciklama?: string;
+    profile_id?: string;
+    cari_id?: string;
+    cari_ad?: string;
+    created_at?: string;
+}

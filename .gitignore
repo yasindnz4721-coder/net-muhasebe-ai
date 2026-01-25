@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dist_electron/
+out/
+.env
+*.log
+*.txt
+.DS_Store
+package-lock.json
+*.bak
+* - Kopya/
+* - Kopya.*
