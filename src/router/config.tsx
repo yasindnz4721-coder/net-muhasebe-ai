@@ -21,13 +21,13 @@ import PremiumPage from '../pages/premium/page';
 import AIAnalizPage from '../pages/ai-analiz/page';
 import AdminPage from '../pages/admin/page';
 import GizlilikPolitikasiPage from '../pages/gizlilik-politikasi/page';
-import ReklamPage from '../pages/reklam/page';
+import TanitimPage from '../pages/tanitim/page';
 import NotFoundPage from '../pages/NotFound';
 
 const routes: RouteObject[] = [
   {
-    path: '/reklam',
-    element: <ReklamPage />,
+    path: '/tanitim-filmi',
+    element: <TanitimPage />,
   },
   {
     path: '/login',

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-export default function ReklamPage() {
+export default function TanitimPage() {
     return (
         <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-hidden relative">
             {/* Background Cinematic Effects */}
