@@ -1,77 +1,124 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function TanitimPage() {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [scene, setScene] = useState(0);
+
+    useEffect(() => {
+        if (isPlaying) {
+            const timer = setInterval(() => {
+                setScene(prev => (prev < 3 ? prev + 1 : prev));
+            }, 4000);
+            return () => clearInterval(timer);
+        }
+    }, [isPlaying]);
+
+    if (!isPlaying) {
+        return (
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center cursor-pointer group" onClick={() => setIsPlaying(true)}>
+                <div className="absolute inset-0 z-0 opacity-40">
+                    <img src="/ad-hero.png" alt="BG" className="w-full h-full object-cover blur-sm" />
+                </div>
+                <div className="relative z-10 space-y-8">
+                    <div className="w-32 h-32 bg-indigo-600 rounded-full flex items-center justify-center mx-auto shadow-[0_0_50px_rgba(79,70,229,0.5)] group-hover:scale-110 transition-transform">
+                        <i className="ri-play-fill text-6xl text-white ml-2"></i>
+                    </div>
+                    <div className="space-y-2">
+                        <h2 className="text-4xl font-black tracking-tighter uppercase">NET MUHASEBE AI</h2>
+                        <p className="text-indigo-400 font-bold tracking-[0.3em] text-sm italic">TANITIM FİLMİNİ BAŞLATMAK İÇİN TIKLAYIN</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-hidden relative">
-            {/* Background Cinematic Effects */}
-            <div className="absolute inset-0 z-0 overflow-hidden">
+        <div className="min-h-screen bg-black text-white overflow-hidden relative font-sans">
+            {/* Cinematic Overlay */}
+            <div className="fixed top-0 left-0 w-full h-[10vh] bg-black z-50"></div>
+            <div className="fixed bottom-0 left-0 w-full h-[10vh] bg-black z-50"></div>
+
+            {/* Stage: Background */}
+            <div className="absolute inset-0 z-0">
                 <img
                     src="/ad-hero.png"
-                    alt="Campaign Hero"
-                    className="w-full h-full object-cover opacity-30 scale-110 animate-pulse-slow active:scale-100 transition-transform duration-[10000ms]"
+                    alt="Background"
+                    className={`w-full h-full object-cover opacity-30 transition-transform duration-[20000ms] ${isPlaying ? 'scale-150' : 'scale-100'}`}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-[#020617]"></div>
-                <div className="absolute inset-0 bg-indigo-600/5 backdrop-blur-[2px]"></div>
-
-                {/* Glowing Orbs */}
-                <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] animate-aurora-1"></div>
-                <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] animate-aurora-2"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-950/20 to-black"></div>
             </div>
 
-            <div className="relative z-10 min-h-screen flex flex-col">
-                <nav className="p-8 md:px-16 flex items-center justify-between">
-                    <Link to="/" className="flex items-center gap-3 group">
-                        <img src="/logo.png" alt="Logo" className="w-10 h-10 group-hover:rotate-12 transition-transform" />
-                        <span className="text-xl font-black tracking-tighter uppercase">Net Muhasebe <span className="text-indigo-400">AI</span></span>
-                    </Link>
-                    <Link to="/login" className="premium-button px-6 h-12 text-xs">GİRİŞ YAP</Link>
-                </nav>
+            {/* SCENE 1: INTRODUCTION */}
+            {scene === 0 && (
+                <div className="relative z-10 h-screen flex flex-col items-center justify-center p-12 animate-fade-in">
+                    <div className="w-24 h-24 mb-8">
+                        <img src="/logo.png" alt="Logo" className="w-full h-full object-contain animate-pulse" />
+                    </div>
+                    <h1 className="text-4xl md:text-6xl font-black tracking-[0.5em] uppercase text-indigo-500 animate-slide-up">NET MUHASEBE AI</h1>
+                    <div className="mt-8 w-32 h-1 bg-white/20 rounded-full overflow-hidden">
+                        <div className="h-full bg-indigo-500 animate-[progress_4s_linear]"></div>
+                    </div>
+                </div>
+            )}
 
-                <main className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-                    <div className="max-w-4xl space-y-12">
-                        <div className="space-y-4 animate-slide-up">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-xs font-black uppercase tracking-[0.3em]">
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-                                </span>
-                                TANITIM FİLMİ 2026
-                            </div>
-                            <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-none">
-                                Muhasebenin <br />
-                                <span className="text-gradient">Yeni Boyutu.</span>
-                            </h1>
+            {/* SCENE 2: VALUE PROP */}
+            {scene === 1 && (
+                <div className="relative z-10 h-screen flex flex-col items-center justify-center p-12 text-center animate-slide-up">
+                    <h2 className="text-6xl md:text-9xl font-black tracking-tighter leading-none mb-8">
+                        Muhasebenin <br />
+                        <span className="text-gradient">Yeni Boyutu.</span>
+                    </h2>
+                    <p className="text-xl md:text-2xl text-slate-400 max-w-2xl font-medium leading-relaxed italic">
+                        "Yapay zeka artik işinizi sizin için takip ediyor."
+                    </p>
+                </div>
+            )}
+
+            {/* SCENE 3: SPEED & PRECISION */}
+            {scene === 2 && (
+                <div className="relative z-10 h-screen flex flex-col items-center justify-center p-12 text-center animate-fade-in">
+                    <div className="flex gap-12 mb-12">
+                        <div className="text-center space-y-2">
+                            <i className="ri-speed-up-line text-7xl text-indigo-500"></i>
+                            <p className="font-black text-xs tracking-widest uppercase">Ultra Hız</p>
                         </div>
-
-                        <p className="text-slate-400 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed animate-fade-in delay-300">
-                            Yapay zeka ile güçlendirilmiş, hata kabul etmeyen ve işletmenizin her kuruşunu mili-saniyeler içinde analiz eden dijital finans ortağınız.
-                        </p>
-
-                        <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-12 animate-slide-up delay-500">
-                            <Link to="/kayit" className="premium-button px-12 h-20 text-lg group w-full md:w-auto">
-                                HEMEN ÜCRETSİZ DENE
-                                <i className="ri-arrow-right-line group-hover:translate-x-2 transition-transform"></i>
-                            </Link>
-                            <button className="px-12 h-20 text-lg font-black bg-white/5 border border-white/10 text-white rounded-[2rem] hover:bg-white/10 transition-all backdrop-blur-xl w-full md:w-auto">
-                                ÖZELLİKLERİ İNCELE
-                            </button>
+                        <div className="text-center space-y-2">
+                            <i className="ri-brain-line text-7xl text-blue-500"></i>
+                            <p className="font-black text-xs tracking-widest uppercase">Akıllı Analiz</p>
+                        </div>
+                        <div className="text-center space-y-2">
+                            <i className="ri-shield-star-line text-7xl text-teal-500"></i>
+                            <p className="font-black text-xs tracking-widest uppercase">Tam Güvenlik</p>
                         </div>
                     </div>
-                </main>
+                    <h3 className="text-4xl md:text-5xl font-black max-w-3xl leading-tight uppercase tracking-tighter">
+                        İşletmeniz İçin <br /> <span className="text-white">En Akıllı Kararları Verin.</span>
+                    </h3>
+                </div>
+            )}
 
-                <footer className="p-12 text-center opacity-50">
-                    <div className="flex items-center justify-center gap-8 mb-4">
-                        <i className="ri-ai-generate text-3xl text-indigo-400 animate-pulse"></i>
-                        <i className="ri-shield-check-line text-3xl"></i>
-                        <i className="ri-speed-up-line text-3xl"></i>
+            {/* SCENE 4: CALL TO ACTION */}
+            {scene === 3 && (
+                <div className="relative z-10 h-screen flex flex-col items-center justify-center p-12 text-center animate-zoom-in">
+                    <div className="premium-card p-16 space-y-12">
+                        <h4 className="text-5xl font-black tracking-tighter">Geleceğe Hazır mısınız?</h4>
+                        <div className="flex flex-col md:flex-row gap-6">
+                            <Link to="/kayit" className="premium-button px-12 h-20 text-lg">HEMEN BAŞLA</Link>
+                            <button onClick={() => setScene(0)} className="px-12 h-20 bg-white/5 border border-white/10 rounded-[2rem] font-bold hover:bg-white/10 transition-all uppercase tracking-widest text-xs">TEKRAR İZLE</button>
+                        </div>
                     </div>
-                    <p className="text-[10px] font-black tracking-[0.5em] uppercase">Powered by Advanced Intelligence Units</p>
-                </footer>
-            </div>
+                </div>
+            )}
 
-            {/* Cinematic Frame Stripes */}
-            <div className="fixed top-0 left-0 w-full h-12 bg-black/80 z-50 pointer-events-none"></div>
-            <div className="fixed bottom-0 left-0 w-full h-12 bg-black/80 z-50 pointer-events-none"></div>
+            {/* Skip Button */}
+            <button
+                onClick={() => setIsPlaying(false)}
+                className="fixed top-20 right-12 z-[60] text-[10px] font-black tracking-widest text-white/40 hover:text-white transition-colors"
+            >
+                VİDEODAN ÇIK <i className="ri-close-line"></i>
+            </button>
         </div>
     );
 }
+

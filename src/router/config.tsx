@@ -30,6 +30,10 @@ const routes: RouteObject[] = [
     element: <TanitimPage />,
   },
   {
+    path: '/tanitim_filmi',
+    element: <TanitimPage />,
+  },
+  {
     path: '/login',
     element: <LoginPage />,
   },
