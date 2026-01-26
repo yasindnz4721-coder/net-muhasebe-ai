@@ -21,6 +21,7 @@ import PremiumPage from '../pages/premium/page';
 import AIAnalizPage from '../pages/ai-analiz/page';
 import AdminPage from '../pages/admin/page';
 import GizlilikPolitikasiPage from '../pages/gizlilik-politikasi/page';
+import ReklamPage from '../pages/reklam/page';
 import NotFoundPage from '../pages/NotFound';
 
 const routes: RouteObject[] = [
@@ -99,6 +100,10 @@ const routes: RouteObject[] = [
   {
     path: '/gizlilik-politikasi',
     element: <GizlilikPolitikasiPage />,
+  },
+  {
+    path: '/reklam',
+    element: <ReklamPage />,
   },
   {
     path: '*',

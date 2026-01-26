@@ -105,17 +105,26 @@ export default function LoginPage() {
             ))}
           </div>
 
-          <div className="pt-12 flex items-center gap-6">
-            <div className="flex -space-x-4">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="w-12 h-12 rounded-full border-4 border-[#020617] bg-slate-800 flex items-center justify-center overflow-hidden">
-                  <img src={`https://i.pravatar.cc/100?u=${i}`} alt="user" />
-                </div>
-              ))}
-            </div>
-            <div>
-              <p className="text-sm font-bold">10,000+ Şirket</p>
-              <p className="text-xs text-slate-500">Bize güveniyor ve büyüyor.</p>
+          <div className="pt-12 flex flex-col sm:flex-row items-center gap-6">
+            <Link
+              to="/reklam"
+              className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all hover:scale-105"
+            >
+              <i className="ri-play-circle-fill text-2xl text-indigo-400"></i>
+              TANITIM VİDEOSUNU İZLE
+            </Link>
+            <div className="flex items-center gap-6">
+              <div className="flex -space-x-4">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="w-12 h-12 rounded-full border-4 border-[#020617] bg-slate-800 flex items-center justify-center overflow-hidden">
+                    <img src={`https://i.pravatar.cc/100?u=${i}`} alt="user" />
+                  </div>
+                ))}
+              </div>
+              <div>
+                <p className="text-sm font-bold">10,000+ Şirket</p>
+                <p className="text-xs text-slate-500">Bize güveniyor ve büyüyor.</p>
+              </div>
             </div>
           </div>
         </div>
