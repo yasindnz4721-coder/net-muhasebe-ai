@@ -59,13 +59,13 @@ export default function LoginPage() {
       </div>
 
       <nav className="relative z-50 p-8 md:px-16 flex items-center justify-between">
-        <div className="flex items-center gap-3 group cursor-pointer">
-          <div className="w-12 h-12 bg-gradient-to-tr from-indigo-600 to-blue-500 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-600/30 group-hover:rotate-12 transition-all">
-            <i className="ri-file-list-3-line text-2xl text-white"></i>
+        <div className="flex items-center gap-4 group cursor-pointer">
+          <div className="w-14 h-14 bg-white/5 backdrop-blur-3xl rounded-2xl flex items-center justify-center border border-white/10 shadow-2xl group-hover:scale-110 transition-all p-2">
+            <img src="/logo.png" alt="Net Muhasebe AI" className="w-full h-full object-contain" />
           </div>
           <div className="flex flex-col">
-            <span className="text-2xl font-black tracking-tighter uppercase text-white">Net Muhasebe <span className="text-indigo-500">AI</span></span>
-            <span className="text-[10px] font-black text-slate-500 tracking-[0.3em] uppercase leading-none mt-1">netmuhasebe.net.tr</span>
+            <span className="text-2xl font-black tracking-tighter uppercase text-white">Net Muhasebe <span className="text-indigo-500 italic">AI</span></span>
+            <span className="text-[10px] font-black text-slate-500 tracking-[0.3em] uppercase leading-none mt-1">Geleceğin Finansal Teknolojisi</span>
           </div>
         </div>
 
@@ -203,6 +203,14 @@ export default function LoginPage() {
                   <Link to="/kayit" className="text-white hover:text-indigo-400 transition-colors underline decoration-indigo-500/30 decoration-4 underline-offset-8">Yeni Hesap Oluşturun</Link>
                 </p>
               </div>
+
+              {/* Yasal Uyarı Notu */}
+              <div className="pt-6 border-t border-white/5">
+                <div className="p-4 rounded-2xl bg-orange-500/5 border border-orange-500/10 text-[10px] font-bold text-orange-400/80 leading-relaxed text-center">
+                  <i className="ri-information-line mr-1"></i>
+                  UYARI: Bu platform resmi muhasebe hizmeti sunmaz. Vergisel ve yasal süreçleriniz için mutlaka yetkili bir Mali Müşavir ile görüşün.
+                </div>
+              </div>
             </form>
           </div>
         </div>
@@ -214,7 +222,7 @@ export default function LoginPage() {
           <p className="text-[10px] font-black tracking-widest text-slate-600 uppercase">MÜŞTERİ DESTEK: 534 740 12 56</p>
         </div>
         <div className="flex gap-8">
-          <Link to="/" className="text-[10px] font-black text-slate-500 hover:text-white transition-colors uppercase tracking-[0.2em]">Gizlilik</Link>
+          <Link to="/gizlilik-politikasi" className="text-[10px] font-black text-slate-500 hover:text-white transition-colors uppercase tracking-[0.2em]">Gizlilik</Link>
           <Link to="/" className="text-[10px] font-black text-slate-500 hover:text-white transition-colors uppercase tracking-[0.2em]">Kullanım Şartları</Link>
           <Link to="/" className="text-[10px] font-black text-slate-500 hover:text-white transition-colors uppercase tracking-[0.2em]">netmuhasebe.net.tr</Link>
         </div>

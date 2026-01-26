@@ -68,12 +68,12 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
       `}>
         <div className="p-8 mt-12 lg:mt-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <i className="ri-file-list-3-line text-2xl text-white"></i>
+            <div className="w-10 h-10 bg-white/5 backdrop-blur-2xl rounded-xl flex items-center justify-center border border-white/10 shadow-lg p-1.5 transition-transform hover:scale-110">
+              <img src="/logo.png" alt="Net Muhasebe AI" className="w-full h-full object-contain" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white tracking-tight leading-none mb-1">Net Muhasebe AI</h1>
-              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">netmuhasebe.net.tr</span>
+              <h1 className="text-xl font-bold text-white tracking-tight leading-none mb-1">Net Muhasebe <span className="text-indigo-400 italic">AI</span></h1>
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">FİNANSAL TEKNOLOJİ</span>
             </div>
           </div>
         </div>
@@ -129,6 +129,15 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
               </div>
               <span className="text-sm">534 740 12 56</span>
             </a>
+          </div>
+
+          <div className="mt-6 px-2">
+            <Link
+              to="/gizlilik-politikasi"
+              className="text-[9px] font-black text-slate-600 hover:text-indigo-400 transition-colors uppercase tracking-[0.2em] block text-center"
+            >
+              Gizlilik Politikası & Yasal Uyarı
+            </Link>
           </div>
         </div>
       </aside>

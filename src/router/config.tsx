@@ -20,6 +20,7 @@ import YeniSifrePage from '../pages/yeni-sifre/page';
 import PremiumPage from '../pages/premium/page';
 import AIAnalizPage from '../pages/ai-analiz/page';
 import AdminPage from '../pages/admin/page';
+import GizlilikPolitikasiPage from '../pages/gizlilik-politikasi/page';
 import NotFoundPage from '../pages/NotFound';
 
 const routes: RouteObject[] = [
@@ -94,6 +95,10 @@ const routes: RouteObject[] = [
   {
     path: '/ai-analiz',
     element: <AIAnalizPage />,
+  },
+  {
+    path: '/gizlilik-politikasi',
+    element: <GizlilikPolitikasiPage />,
   },
   {
     path: '*',
