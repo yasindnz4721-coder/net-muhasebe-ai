@@ -82,7 +82,10 @@ export default function KayitPage() {
             <div className="w-12 h-12 bg-gradient-to-tr from-indigo-600 to-blue-500 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-600/30 group-hover:rotate-12 transition-all">
               <i className="ri-file-list-3-line text-2xl text-white"></i>
             </div>
-            <span className="text-2xl font-black tracking-tighter">NET MUHASEBE</span>
+            <div className="flex flex-col">
+              <span className="text-2xl font-black tracking-tighter uppercase text-white">Net Muhasebe <span className="text-indigo-500">AI</span></span>
+              <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase leading-none mt-1">netmuhasebe.net.tr</span>
+            </div>
           </Link>
           <Link to="/login" className="text-sm font-black text-slate-500 hover:text-white transition-colors uppercase tracking-widest">GİRİŞ YAP</Link>
         </nav>

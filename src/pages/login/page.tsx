@@ -64,8 +64,8 @@ export default function LoginPage() {
             <i className="ri-file-list-3-line text-2xl text-white"></i>
           </div>
           <div className="flex flex-col">
-            <span className="text-2xl font-black tracking-tighter">NET MUHASEBE</span>
-            <span className="text-[10px] font-black text-indigo-400 tracking-[0.3em] uppercase leading-none">AI Intelligence</span>
+            <span className="text-2xl font-black tracking-tighter uppercase text-white">Net Muhasebe <span className="text-indigo-500">AI</span></span>
+            <span className="text-[10px] font-black text-slate-500 tracking-[0.3em] uppercase leading-none mt-1">netmuhasebe.net.tr</span>
           </div>
         </div>
 
