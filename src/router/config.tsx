@@ -26,6 +26,10 @@ import NotFoundPage from '../pages/NotFound';
 
 const routes: RouteObject[] = [
   {
+    path: '/reklam',
+    element: <ReklamPage />,
+  },
+  {
     path: '/login',
     element: <LoginPage />,
   },
@@ -100,10 +104,6 @@ const routes: RouteObject[] = [
   {
     path: '/gizlilik-politikasi',
     element: <GizlilikPolitikasiPage />,
-  },
-  {
-    path: '/reklam',
-    element: <ReklamPage />,
   },
   {
     path: '*',
