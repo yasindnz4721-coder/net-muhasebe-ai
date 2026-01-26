@@ -322,7 +322,7 @@ export default function Odemeler() {
                           }`}>
                           {odeme.tip === 'Tahsilat' ? '+' : '-'}₺{parseFloat(odeme.tutar).toLocaleString()}
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{odeme.tarih}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{new Date(odeme.tarih).toLocaleDateString('tr-TR')}</td>
                         <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{odeme.odeme_yontemi}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <button

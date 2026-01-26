@@ -11,6 +11,7 @@ interface ProfileContextType {
   refreshProfiles: () => Promise<void>;
   currentUser: any;
   isPro: boolean;
+  isAdmin: boolean;
   togglePro: () => void;
 }
 
@@ -22,14 +23,11 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [isPro, setIsPro] = useState<boolean>(() => {
-    return localStorage.getItem('isPro') === 'true';
-  });
+  const [isPro] = useState<boolean>(true); // All users are PRO now
 
   // Kullanıcı oturum kontrolü
   useEffect(() => {
     const checkAuth = async () => {
-      // Token var mı kontrol et
       if (!auth.isAuthenticated()) {
         const currentPath = window.location.pathname;
         const publicPaths = ['/login', '/kayit', '/sifre-sifirlama', '/yeni-sifre'];
@@ -41,11 +39,9 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Kullanıcı bilgisini al
       const { data, error: userError } = await auth.getUser();
 
       if (userError || !data?.user) {
-        // Token geçersiz, temizle ve login'e yönlendir
         await auth.logout();
         const currentPath = window.location.pathname;
         const publicPaths = ['/login', '/kayit', '/sifre-sifirlama', '/yeni-sifre'];
@@ -75,7 +71,6 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Profil bilgisini al
       const { data, error: fetchError } = await profiles.get();
 
       if (fetchError) {
@@ -89,9 +84,10 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         setProfileList([]);
         setSelectedProfileState(null);
       }
+
     } catch (err) {
       console.error('Profil yüklenirken hata:', err);
-      setError('Profil yüklenemedi. Lütfen internet bağlantınızı kontrol edin.');
+      setError('Profil verileri alınamadı.');
       setProfileList([]);
       setSelectedProfileState(null);
     } finally {
@@ -102,10 +98,6 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (currentUser) {
       loadProfiles();
-      // Sync Pro status from database
-      const proStatus = currentUser.subscription_tier === 'pro';
-      setIsPro(proStatus);
-      localStorage.setItem('isPro', proStatus.toString());
     }
   }, [currentUser]);
 
@@ -114,11 +106,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   };
 
   const togglePro = () => {
-    setIsPro(prev => {
-      const next = !prev;
-      localStorage.setItem('isPro', next.toString());
-      return next;
-    });
+    // No longer needed as everyone is Pro, but kept for compatibility
+    console.log('Tüm kullanıcılar zaten PRO sürümündedir.');
   };
 
   const refreshProfiles = async () => {
@@ -135,7 +124,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         error,
         refreshProfiles,
         currentUser,
-        isPro,
+        isPro: true,
+        isAdmin: currentUser?.role === 'admin',
         togglePro,
       }}
     >

@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import ProfileSelector from './ProfileSelector';
 import { auth } from '../../lib/api';
-import { useProfile } from '../../contexts/ProfileContext';
 
 export default function Header() {
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -11,7 +10,6 @@ export default function Header() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { i18n, t } = useTranslation();
   const navigate = useNavigate();
-  const { isPro } = useProfile();
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -25,135 +23,95 @@ export default function Header() {
     window.location.href = '/login';
   };
 
-  const handleSettingsClick = () => {
-    setShowUserMenu(false);
-    navigate('/profil-ayarlari');
-  };
-
   return (
     <>
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <ProfileSelector />
-              {isPro && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-full shadow-sm animate-pulse">
-                  <i className="ri-vip-diamond-fill text-amber-500"></i>
-                  <span className="text-[10px] font-black text-amber-700 tracking-wider">PREMIUM MODE</span>
+      <header className="bg-[#020617] border-b border-white/5 sticky top-0 z-40 px-8 py-4 backdrop-blur-3xl">
+        <div className="max-w-[1600px] mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <ProfileSelector />
+            <div className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+              </span>
+              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Sistem Aktif</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-5">
+            {/* Language Selection */}
+            <div className="relative">
+              <button
+                onClick={() => setShowLangMenu(!showLangMenu)}
+                className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all font-bold text-xs"
+              >
+                {currentLanguage}
+              </button>
+              {showLangMenu && (
+                <div className="absolute right-0 mt-3 w-40 bg-[#0f172a] border border-white/10 rounded-2xl shadow-2xl py-2 z-50 animate-slide-up">
+                  <button onClick={() => changeLanguage('tr')} className="w-full px-5 py-3 text-left text-sm hover:bg-indigo-600/20 flex items-center gap-3 transition-colors">
+                    <span className="w-2 h-2 rounded-full bg-red-500"></span> Türkçe
+                  </button>
+                  <button onClick={() => changeLanguage('en')} className="w-full px-5 py-3 text-left text-sm hover:bg-indigo-600/20 flex items-center gap-3 transition-colors">
+                    <span className="w-2 h-2 rounded-full bg-blue-500"></span> English
+                  </button>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center gap-4">
-              {/* Language Selector */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowLangMenu(!showLangMenu)}
-                  className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
-                >
-                  <span className="text-sm font-semibold text-gray-700">{currentLanguage}</span>
-                </button>
+            <button className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all relative">
+              <i className="ri-notification-3-line text-slate-400"></i>
+              <span className="absolute top-2 right-2 w-2 h-2 bg-indigo-500 rounded-full"></span>
+            </button>
 
-                {showLangMenu && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setShowLangMenu(false)}
-                    ></div>
-                    <div className="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                      <button
-                        onClick={() => changeLanguage('tr')}
-                        className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors cursor-pointer flex items-center gap-2 ${i18n.language === 'tr' ? 'text-teal-600 font-semibold' : 'text-gray-600'
-                          }`}
-                      >
-                        <i className="ri-checkbox-circle-fill"></i>
-                        Türkçe
-                      </button>
-                      <button
-                        onClick={() => changeLanguage('en')}
-                        className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors cursor-pointer flex items-center gap-2 ${i18n.language === 'en' ? 'text-teal-600 font-semibold' : 'text-gray-600'
-                          }`}
-                      >
-                        <i className="ri-checkbox-circle-fill"></i>
-                        English
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
+            <div className="h-8 w-px bg-white/5 mx-2"></div>
 
-              <button className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
-                <i className="ri-notification-3-line text-xl text-gray-600"></i>
-              </button>
-
-              <div className="relative">
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-teal-500 to-cyan-600 rounded-lg cursor-pointer"
-                >
-                  <i className="ri-user-line text-xl text-white"></i>
-                </button>
-
-                {showUserMenu && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setShowUserMenu(false)}
-                    ></div>
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                      <button
-                        onClick={handleSettingsClick}
-                        className="w-full px-4 py-2 text-left text-sm text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer flex items-center gap-2"
-                      >
-                        <i className="ri-settings-3-line"></i>
-                        {t('settings')}
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Çıkış Butonu */}
+            <div className="relative">
               <button
-                onClick={() => setShowLogoutModal(true)}
-                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer whitespace-nowrap"
-                title="Çıkış Yap"
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center shadow-lg shadow-indigo-600/20 hover:scale-105 transition-all"
               >
-                <i className="ri-logout-box-line text-xl"></i>
-                <span className="text-sm font-medium">Çıkış</span>
+                <i className="ri-user-smile-line text-xl text-white"></i>
               </button>
+              {showUserMenu && (
+                <div className="absolute right-0 mt-3 w-56 bg-[#0f172a] border border-white/10 rounded-2xl shadow-2xl py-3 z-50 animate-slide-up overflow-hidden">
+                  <div className="px-5 py-3 mb-2 border-b border-white/5">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Kullanıcı Paneli</p>
+                  </div>
+                  <button onClick={() => navigate('/profil-ayarlari')} className="w-full px-5 py-3 text-left text-sm hover:bg-white/5 flex items-center gap-4 transition-colors">
+                    <i className="ri-settings-4-line text-lg text-indigo-400"></i> {t('settings')}
+                  </button>
+                  <button onClick={() => setShowLogoutModal(true)} className="w-full px-5 py-3 text-left text-sm hover:bg-red-500/10 text-red-400 flex items-center gap-4 transition-colors">
+                    <i className="ri-logout-circle-r-line text-lg"></i> Güvenli Çıkış
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </header>
 
-      {/* Çıkış Onay Modalı */}
+      {/* Logout Modal */}
       {showLogoutModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md mx-4">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="ri-logout-box-line text-3xl text-red-600"></i>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                Çıkış Yapmak İstiyor Musunuz?
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Çıkış yaptığınızda tekrar giriş yapmanız gerekecek.
-              </p>
+        <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-xl flex items-center justify-center z-[100] p-6">
+          <div className="premium-card p-10 max-w-md w-full text-center">
+            <div className="w-20 h-20 bg-red-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <i className="ri-logout-box-r-line text-4xl text-red-500"></i>
             </div>
-
-            <div className="flex gap-3">
+            <h3 className="text-2xl font-black mb-3">Seni özleyeceğiz!</h3>
+            <p className="text-slate-400 font-medium mb-10">
+              Oturumunuzu sonlandırmak istediğinize emin misiniz?
+            </p>
+            <div className="flex gap-4">
               <button
                 onClick={() => setShowLogoutModal(false)}
-                className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
+                className="flex-1 py-4 bg-white/5 border border-white/10 rounded-2xl font-bold hover:bg-white/10 transition-all uppercase tracking-widest text-xs"
               >
-                İptal
+                İptal Et
               </button>
               <button
                 onClick={handleLogout}
-                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
+                className="flex-1 py-4 bg-red-600 text-white rounded-2xl font-bold shadow-xl shadow-red-600/20 hover:bg-red-500 transition-all uppercase tracking-widest text-xs"
               >
                 Çıkış Yap
               </button>

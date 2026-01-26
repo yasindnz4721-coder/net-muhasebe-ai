@@ -1,74 +1,116 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useProfile } from '../../contexts/ProfileContext';
 
 export default function Sidebar() {
   const location = useLocation();
-  const { isPro } = useProfile();
+  const { isAdmin } = useProfile();
+  const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'ri-dashboard-line', path: '/' },
-    { id: 'cariler', label: 'Cariler', icon: 'ri-user-line', path: '/cariler' },
-    { id: 'urunler', label: 'Ürünler', icon: 'ri-box-line', path: '/urunler' },
-    { id: 'satis', label: 'Satış Faturası', icon: 'ri-file-text-line', path: '/satis-faturasi' },
-    { id: 'alis', label: 'Alış Faturası', icon: 'ri-file-list-line', path: '/alis-faturasi' },
-    { id: 'odemeler', label: 'Ödemeler', icon: 'ri-money-dollar-circle-line', path: '/odemeler' },
-    { id: 'stok', label: 'Depodaki Stok', icon: 'ri-archive-line', path: '/stok' },
-    { id: 'islemler', label: 'Tüm İşlemler', icon: 'ri-list-check-2', path: '/tum-islemler' },
-    { id: 'raporlar', label: 'Raporlar', icon: 'ri-bar-chart-box-line', path: '/raporlar' },
-    { id: 'ai-analiz', label: 'AI Finansal Analiz', icon: 'ri-magic-line', path: '/ai-analiz', pro: true },
-    { id: 'pro-raporlar', label: 'Gelişmiş Raporlar', icon: 'ri-pulse-line', path: '/pro-raporlar', pro: true },
+    { id: 'dashboard', label: 'Dashboard', icon: 'ri-dashboard-3-line', path: '/' },
+    { id: 'cariler', label: 'Cariler', icon: 'ri-team-line', path: '/cariler' },
+    { id: 'urunler', label: 'Ürünlerimiz', icon: 'ri-box-3-line', path: '/urunler' },
+    { id: 'satis', label: 'Satış Faturaları', icon: 'ri-file-text-line', path: '/satis-faturasi' },
+    { id: 'alis', label: 'Alış Faturaları', icon: 'ri-file-list-3-line', path: '/alis-faturasi' },
+    { id: 'odemeler', label: 'Kasa & Ödemeler', icon: 'ri-wallet-3-line', path: '/odemeler' },
+    { id: 'stok', label: 'Stok Takibi', icon: 'ri-archive-line', path: '/stok' },
+    { id: 'islemler', label: 'İşlem Geçmişi', icon: 'ri-history-line', path: '/tum-islemler' },
+    { id: 'raporlar', label: 'Finansal Raporlar', icon: 'ri-pie-chart-2-line', path: '/raporlar' },
+    { id: 'ai-analiz', label: 'AI Akıllı Analiz', icon: 'ri-sparkling-2-line', path: '/ai-analiz' },
+    { id: 'admin', label: 'Yönetici Paneli', icon: 'ri-settings-5-line', path: '/admin', adminOnly: true },
   ];
 
+  const toggleSidebar = () => setIsOpen(!isOpen);
+
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 h-screen sticky top-0 overflow-y-auto">
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold text-gray-900">Muhasebe</h1>
-          {isPro && (
-            <span className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded flex items-center gap-1 shadow-sm">
-              <i className="ri-star-fill"></i> PRO
-            </span>
-          )}
+    <>
+      {/* Mobile Hamburger Button */}
+      <button
+        onClick={toggleSidebar}
+        className="lg:hidden fixed top-5 left-5 z-[60] w-12 h-12 flex items-center justify-center bg-[#020617] text-white rounded-2xl shadow-2xl border border-white/10 hover:bg-slate-900 transition-all active:scale-90"
+      >
+        <i className={isOpen ? "ri-close-line text-2xl" : "ri-menu-3-line text-2xl"}></i>
+      </button>
+
+      {/* Backdrop for mobile */}
+      {isOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-[#020617]/80 backdrop-blur-md z-40 transition-opacity duration-300"
+          onClick={toggleSidebar}
+        ></div>
+      )}
+
+      {/* Sidebar Content */}
+      <aside className={`
+        fixed lg:sticky top-0 left-0 h-screen w-72 bg-[#020617] border-r border-white/5 
+        overflow-y-auto z-50 transition-all duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        <div className="p-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <i className="ri-file-list-3-line text-2xl text-white"></i>
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white tracking-tight leading-none mb-1">Net Muhasebe AI</h1>
+              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">netmuhasebe.net.tr</span>
+            </div>
+          </div>
         </div>
-      </div>
-      <nav className="p-4 space-y-1">
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <Link
-              key={item.id}
-              to={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all cursor-pointer ${isActive
-                ? 'bg-gradient-to-r from-teal-500 to-cyan-600 text-white shadow-lg'
-                : 'text-gray-700 hover:bg-gray-100'
-                }`}
-            >
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-3">
-                  <i className={`${item.icon} text-xl`}></i>
-                  <span className="font-medium whitespace-nowrap">{item.label}</span>
-                </div>
-                {item.pro && (
-                  isPro ? (
-                    <i className="ri-star-fill text-amber-400 text-xs shadow-sm"></i>
-                  ) : (
-                    <i className="ri-lock-2-line text-gray-400 text-xs"></i>
-                  )
+
+        <nav className="px-4 py-2 space-y-1">
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            const isHidden = item.adminOnly && !isAdmin;
+
+            if (isHidden) return null;
+
+            return (
+              <Link
+                key={item.id}
+                to={item.path}
+                onClick={() => setIsOpen(false)}
+                className={`
+                  flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden
+                  ${isActive
+                    ? 'bg-indigo-600/10 text-white border border-white/10'
+                    : 'text-slate-500 hover:text-white hover:bg-white/5'
+                  }
+                `}
+              >
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-indigo-500 rounded-r-full shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
                 )}
+
+                <i className={`${item.icon} text-xl ${isActive ? 'text-indigo-400' : 'group-hover:scale-110 group-hover:text-indigo-400 transition-all'}`}></i>
+                <span className={`font-bold text-sm tracking-tight ${isActive ? 'translate-x-1 transition-transform' : ''}`}>{item.label}</span>
+
+                {isActive && (
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="p-6 mt-8">
+          <div className="p-5 rounded-3xl bg-indigo-600/5 border border-indigo-500/10 relative overflow-hidden group hover:bg-indigo-600/10 transition-colors">
+            <div className="absolute -top-10 -right-10 w-24 h-24 bg-indigo-600/10 blur-[40px] rounded-full group-hover:bg-indigo-600/20 transition-all"></div>
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">7/24 Teknik Destek</p>
+            <a
+              href="tel:5347401256"
+              className="flex items-center gap-3 text-white font-bold group-hover:translate-x-1 transition-transform"
+            >
+              <div className="w-8 h-8 rounded-xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <i className="ri-phone-fill text-sm"></i>
               </div>
-            </Link>
-          );
-        })}
-      </nav>
-      <div className="absolute bottom-0 left-0 w-full p-4 border-t border-gray-100">
-        <Link
-          to="/premium"
-          className="flex items-center justify-center gap-2 w-full py-3 bg-indigo-50 text-indigo-700 rounded-xl text-sm font-bold hover:bg-indigo-600 hover:text-white transition-all cursor-pointer group"
-        >
-          <i className="ri-vip-crown-2-line text-lg group-hover:rotate-12 transition-transform"></i>
-          <span>Pro'ya Geç</span>
-        </Link>
-      </div>
-    </aside>
+              <span className="text-sm">534 740 12 56</span>
+            </a>
+          </div>
+        </div>
+      </aside>
+    </>
   );
 }
+

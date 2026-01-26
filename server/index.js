@@ -23,6 +23,7 @@ const alisFaturalariRoutes = require('./routes/alis-faturalari');
 const odemelerRoutes = require('./routes/odemeler');
 const stokRoutes = require('./routes/stok');
 const profilesRoutes = require('./routes/profiles');
+const adminRoutes = require('./routes/admin');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/cariler', carilerRoutes);
@@ -33,6 +34,7 @@ app.use('/api/alis-faturalari', alisFaturalariRoutes);
 app.use('/api/odemeler', odemelerRoutes);
 app.use('/api/stok', stokRoutes);
 app.use('/api/profiles', profilesRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/api/health', async (req, res) => {

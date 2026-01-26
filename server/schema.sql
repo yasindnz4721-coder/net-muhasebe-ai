@@ -4,21 +4,32 @@
 -- UUID extension
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+-- Profiller tablosu (Önce bunu oluşturmalıyız çünkü kullanıcılar buna referans verecek)
+CREATE TABLE IF NOT EXISTS profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  logo_url TEXT DEFAULT '',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Kullanıcılar tablosu
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
+  current_profile_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  role VARCHAR(50) DEFAULT 'user',
+  subscription_tier VARCHAR(50) DEFAULT 'free',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Profiller tablosu
-CREATE TABLE IF NOT EXISTS profiles (
-  id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-  name VARCHAR(255) NOT NULL,
-  logo_url TEXT DEFAULT '',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- Kullanıcı-Profil İlişki tablosu (Ortak kullanım için)
+CREATE TABLE IF NOT EXISTS user_profiles (
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  PRIMARY KEY (user_id, profile_id)
 );
+
 
 -- Kategoriler tablosu
 CREATE TABLE IF NOT EXISTS kategoriler (

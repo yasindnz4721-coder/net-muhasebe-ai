@@ -276,10 +276,30 @@ export const stokHareketleri = {
     },
 };
 
+// Admin API
+export const admin = {
+    async getStats() {
+        return fetchApi<any>('/api/admin/stats');
+    },
+    async getUsers() {
+        return fetchApi<any[]>('/api/admin/users');
+    }
+};
+
+// Generic API for cases where specialized objects aren't available
+export const api = {
+    get: <T>(url: string) => fetchApi<T>(url),
+    post: <T>(url: string, data: any) => fetchApi<T>(url, { method: 'POST', body: JSON.stringify(data) }),
+    put: <T>(url: string, data: any) => fetchApi<T>(url, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: <T>(url: string) => fetchApi<T>(url, { method: 'DELETE' }),
+};
+
 // Tip tanımlamaları
 export interface User {
     id: string;
     email: string;
+    role: string;
+    subscription_tier?: string;
     created_at?: string;
 }
 

@@ -48,9 +48,10 @@ router.post('/register', async (req, res) => {
                 await query('UPDATE users SET current_profile_id = $1 WHERE id = $2', [profileId, userId]);
             } else {
                 const userResult = await query(
-                    'INSERT INTO users (email, password_hash, current_profile_id) VALUES ($1, $2, $3) RETURNING id',
-                    [userEmail, passwordHash, profileId]
+                    'INSERT INTO users (email, password_hash, current_profile_id, subscription_tier) VALUES ($1, $2, $3, $4) RETURNING id',
+                    [userEmail, passwordHash, profileId, 'pro']
                 );
+
                 userId = userResult.rows[0].id;
             }
 
@@ -63,11 +64,14 @@ router.post('/register', async (req, res) => {
             createdUsers.push({ id: userId, email: userEmail });
         }
 
-        const primaryUser = createdUsers[0];
+        const primaryEmail = emails[0];
+        const primaryUserQuery = await query('SELECT id, email, role FROM users WHERE email = $1', [primaryEmail]);
+
+        const primaryUser = primaryUserQuery.rows[0];
 
         // JWT token oluştur (ilk kullanıcı için)
         const token = jwt.sign(
-            { id: primaryUser.id, email: primaryUser.email },
+            { id: primaryUser.id, email: primaryUser.email, role: primaryUser.role },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -77,6 +81,7 @@ router.post('/register', async (req, res) => {
             token,
             shared_with: createdUsers.slice(1).map(u => u.email)
         });
+
     } catch (error) {
         console.error('Kayıt hatası:', error);
         res.status(500).json({ error: 'Kayıt işlemi başarısız' });
@@ -115,9 +120,15 @@ router.post('/login', async (req, res) => {
         );
 
         res.json({
-            user: { id: user.id, email: user.email, subscription_tier: user.subscription_tier },
+            user: {
+                id: user.id,
+                email: user.email,
+                role: user.role,
+                subscription_tier: user.subscription_tier
+            },
             token
         });
+
     } catch (error) {
         console.error('Giriş hatası:', error);
         res.status(500).json({ error: 'Giriş işlemi başarısız' });
@@ -127,13 +138,14 @@ router.post('/login', async (req, res) => {
 // Mevcut kullanıcı bilgisi
 router.get('/user', authMiddleware, async (req, res) => {
     try {
-        const result = await query('SELECT id, email, subscription_tier, created_at FROM users WHERE id = $1', [req.user.id]);
+        const result = await query('SELECT id, email, role, subscription_tier, created_at FROM users WHERE id = $1', [req.user.id]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Kullanıcı bulunamadı' });
         }
 
         res.json({ user: result.rows[0] });
+
     } catch (error) {
         console.error('Kullanıcı bilgisi hatası:', error);
         res.status(500).json({ error: 'Kullanıcı bilgisi alınamadı' });

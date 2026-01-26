@@ -8,29 +8,6 @@ export default function AIAnalizPage() {
     const navigate = useNavigate();
     const { isPro } = useProfile();
 
-    if (!isPro) {
-        return (
-            <div className="flex h-screen bg-gray-50 items-center justify-center p-8">
-                <div className="bg-white p-12 rounded-3xl shadow-xl text-center max-w-lg border border-indigo-100">
-                    <div className="w-24 h-24 bg-indigo-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8 text-indigo-600 shadow-inner">
-                        <i className="ri-shield-user-line text-5xl"></i>
-                    </div>
-                    <h2 className="text-3xl font-black text-gray-900 mb-4">Pro Erişim Gerekli</h2>
-                    <p className="text-gray-500 mb-10 leading-relaxed">
-                        Yapay zeka destekli sektör analizleri, vergi planlama simülasyonları ve derin finansal öngörülere erişmek için Pro üyeliğinizin aktif olması gerekmektedir.
-                    </p>
-                    <button
-                        onClick={() => navigate('/premium')}
-                        className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 cursor-pointer"
-                    >
-                        PRO'YA YÜKSELT
-                    </button>
-                    <button onClick={() => navigate('/')} className="mt-6 text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors uppercase tracking-widest">Geri Dön</button>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="flex h-screen bg-gray-50">
             <Sidebar />

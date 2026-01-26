@@ -12,8 +12,8 @@ const authMiddleware = async (req, res, next) => {
         const token = authHeader.split(' ')[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // Kullanıcının mevcut profilini veritabanından doğrula
-        const userResult = await query('SELECT current_profile_id FROM users WHERE id = $1', [decoded.id]);
+        // Kullanıcının mevcut profilini ve rolünü veritabanından doğrula
+        const userResult = await query('SELECT role, current_profile_id FROM users WHERE id = $1', [decoded.id]);
 
         if (userResult.rows.length === 0) {
             return res.status(401).json({ error: 'Kullanıcı bulunamadı' });
@@ -21,8 +21,10 @@ const authMiddleware = async (req, res, next) => {
 
         req.user = {
             ...decoded,
+            role: userResult.rows[0].role,
             profile_id: userResult.rows[0].current_profile_id
         };
+
 
         next();
     } catch (error) {

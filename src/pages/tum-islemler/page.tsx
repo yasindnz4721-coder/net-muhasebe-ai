@@ -240,7 +240,7 @@ export default function TumIslemler() {
                   <tbody className="divide-y divide-slate-200">
                     {filteredIslemler.map((islem, index) => (
                       <tr key={`${islem.tip}-${islem.id}-${index}`} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{islem.tarih}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{new Date(islem.tarih).toLocaleDateString('tr-TR')}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-3 py-1 text-xs font-medium rounded-full ${islem.tip === 'Satış Faturası' ? 'bg-green-100 text-green-700' :
                             islem.tip === 'Alış Faturası' ? 'bg-orange-100 text-orange-700' :

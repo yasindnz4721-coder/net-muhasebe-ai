@@ -199,14 +199,14 @@ export default function HomePage() {
         gunlukTahsilat: gunlukTahsilatToplam,
         aylikTrend: aylikTrendData,
         sonIslemler: islemler,
-        tahminlemeData: isPro ? [
+        tahminlemeData: [
           ...aylikTrendData,
           { name: 'Gelecek 1', satis: aylikSatisToplam * 1.15, alis: aylikAlisToplam * 0.95, type: 'Tahmin' },
           { name: 'Gelecek 2', satis: aylikSatisToplam * 1.25, alis: aylikAlisToplam * 0.9, type: 'Tahmin' }
-        ] : [],
-        aiHealthScore: isPro ? Math.min(100, Math.round((netAlacak / (netBorc || 1)) * 40 + (tahsilatlar / (toplamSatisFaturalari || 1)) * 60)) : undefined,
-        cariOran: isPro ? Number((netAlacak / (netBorc || 1)).toFixed(2)) : undefined,
-        tahsilatVerimi: isPro ? Math.round((tahsilatlar / (toplamSatisFaturalari || 1)) * 100) : undefined,
+        ],
+        aiHealthScore: Math.min(100, Math.round((netAlacak / (netBorc || 1)) * 40 + (tahsilatlar / (toplamSatisFaturalari || 1)) * 60)),
+        cariOran: Number((netAlacak / (netBorc || 1)).toFixed(2)),
+        tahsilatVerimi: Math.round((tahsilatlar / (toplamSatisFaturalari || 1)) * 100),
       });
     } catch (err) {
       console.error('İstatistikler yüklenirken hata:', err);
@@ -272,55 +272,54 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* AI Advisor - Pro Only */}
-          {isPro && (
-            <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-[32px] p-px shadow-2xl relative group overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
-              <div className="bg-slate-900/90 backdrop-blur-xl rounded-[31px] p-8 text-white relative z-10">
-                <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">
-                  <div className="flex flex-col items-center gap-3 shrink-0">
-                    <div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center border border-indigo-500/20 shadow-inner">
-                      <i className="ri-brain-line text-4xl text-indigo-400"></i>
-                    </div>
-                    <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
-                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                      <span className="text-[10px] font-bold tracking-widest text-indigo-300 uppercase">AI Live</span>
-                    </div>
+          {/* AI Advisor */}
+          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-[32px] p-px shadow-2xl relative group overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+            <div className="bg-slate-900/90 backdrop-blur-xl rounded-[31px] p-8 text-white relative z-10">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">
+                <div className="flex flex-col items-center gap-3 shrink-0">
+                  <div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center border border-indigo-500/20 shadow-inner">
+                    <i className="ri-brain-line text-4xl text-indigo-400"></i>
                   </div>
-                  <div className="flex-1 space-y-4">
-                    <div>
-                      <h2 className="text-xl font-black mb-2 bg-gradient-to-r from-white to-indigo-300 bg-clip-text text-transparent">Finansal Strateji Raporu</h2>
-                      <div className="text-slate-300 text-sm leading-relaxed max-w-3xl">
-                        {stats.toplamAlacak > stats.toplamBorc * 1.5
-                          ? <p>İşletmeniz <strong>yüksek likidite</strong> bölgesinde. Cari oranınız (<strong>{stats.cariOran}</strong>) sektör ortalamasının üzerinde. Bu durum, önümüzdeki 3 ay için agresif büyüme fırsatı sunuyor.</p>
-                          : (stats.cariOran || 0) < 1
-                            ? <p><strong className="text-rose-400">Kritik Uyarı:</strong> Cari oran 1.00'in altında. Kısa vadeli nakit akışınızı güçlendirmek için tahsilatlara öncelik verin.</p>
-                            : <p><strong>Dengeli Yapı:</strong> Finansal göstergeleriniz stabil. Mevcut alacak-borç dengesi büyüme hedeflerinizi destekliyor.</p>
-                        }
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                      <div className="p-4 bg-white/5 bg-gradient-to-br from-white/5 to-transparent rounded-2xl border border-white/5">
-                        <div className="text-[10px] text-slate-500 font-bold uppercase mb-1 tracking-wider">Cari Oran</div>
-                        <div className="text-xl font-bold text-indigo-400">{stats.cariOran} <span className="text-xs font-normal opacity-50 px-1">Seviyesi</span></div>
-                      </div>
-                      <div className="p-4 bg-white/5 bg-gradient-to-br from-white/5 to-transparent rounded-2xl border border-white/5">
-                        <div className="text-[10px] text-slate-500 font-bold uppercase mb-1 tracking-wider">Tahsilat Verimi</div>
-                        <div className="text-xl font-bold text-emerald-400">%{stats.tahsilatVerimi} <span className="text-xs font-normal opacity-50 px-1">Başarı</span></div>
-                      </div>
-                      <div className="p-4 bg-white/5 bg-gradient-to-br from-white/5 to-transparent rounded-2xl border border-white/5">
-                        <div className="text-[10px] text-slate-500 font-bold uppercase mb-1 tracking-wider">Yapay Zeka Büyüme Skoru</div>
-                        <div className="text-xl font-bold text-amber-400">%{stats.aiHealthScore} <span className="text-xs font-normal opacity-50 px-1">Skor</span></div>
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                    <span className="text-[10px] font-bold tracking-widest text-indigo-300 uppercase">AI Live</span>
                   </div>
-                  <button onClick={() => navigate('/ai-analiz')} className="group px-8 py-4 bg-white text-slate-900 rounded-2xl font-black text-sm transition-all hover:scale-105 active:scale-95 shrink-0 shadow-xl cursor-pointer">
-                    STRATEJİ RAPORU
-                  </button>
                 </div>
+                <div className="flex-1 space-y-4">
+                  <div>
+                    <h2 className="text-xl font-black mb-2 bg-gradient-to-r from-white to-indigo-300 bg-clip-text text-transparent">Finansal Strateji Raporu</h2>
+                    <div className="text-slate-300 text-sm leading-relaxed max-w-3xl">
+                      {stats.toplamAlacak > stats.toplamBorc * 1.5
+                        ? <p>İşletmeniz <strong>yüksek likidite</strong> bölgesinde. Cari oranınız (<strong>{stats.cariOran}</strong>) sektör ortalamasının üzerinde. Bu durum, önümüzdeki 3 ay için agresif büyüme fırsatı sunuyor.</p>
+                        : (stats.cariOran || 0) < 1
+                          ? <p><strong className="text-rose-400">Kritik Uyarı:</strong> Cari oran 1.00'in altında. Kısa vadeli nakit akışınızı güçlendirmek için tahsilatlara öncelik verin.</p>
+                          : <p><strong>Dengeli Yapı:</strong> Finansal göstergeleriniz stabil. Mevcut alacak-borç dengesi büyüme hedeflerinizi destekliyor.</p>
+                      }
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                    <div className="p-4 bg-white/5 bg-gradient-to-br from-white/5 to-transparent rounded-2xl border border-white/5">
+                      <div className="text-[10px] text-slate-500 font-bold uppercase mb-1 tracking-wider">Cari Oran</div>
+                      <div className="text-xl font-bold text-indigo-400">{stats.cariOran} <span className="text-xs font-normal opacity-50 px-1">Seviyesi</span></div>
+                    </div>
+                    <div className="p-4 bg-white/5 bg-gradient-to-br from-white/5 to-transparent rounded-2xl border border-white/5">
+                      <div className="text-[10px] text-slate-500 font-bold uppercase mb-1 tracking-wider">Tahsilat Verimi</div>
+                      <div className="text-xl font-bold text-emerald-400">%{stats.tahsilatVerimi} <span className="text-xs font-normal opacity-50 px-1">Başarı</span></div>
+                    </div>
+                    <div className="p-4 bg-white/5 bg-gradient-to-br from-white/5 to-transparent rounded-2xl border border-white/5">
+                      <div className="text-[10px] text-slate-500 font-bold uppercase mb-1 tracking-wider">Yapay Zeka Büyüme Skoru</div>
+                      <div className="text-xl font-bold text-amber-400">%{stats.aiHealthScore} <span className="text-xs font-normal opacity-50 px-1">Skor</span></div>
+                    </div>
+                  </div>
+                </div>
+                <button onClick={() => navigate('/ai-analiz')} className="group px-8 py-4 bg-white text-slate-900 rounded-2xl font-black text-sm transition-all hover:scale-105 active:scale-95 shrink-0 shadow-xl cursor-pointer">
+                  STRATEJİ RAPORU
+                </button>
               </div>
             </div>
-          )}
+          </div>
+
 
           {/* Quick Actions */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -352,8 +351,8 @@ export default function HomePage() {
             <div className="lg:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900">{isPro ? 'Gelişmiş Trend ve Tahminleme' : 'Finansal Hareketler'}</h2>
-                  <p className="text-sm text-gray-500">{isPro ? 'AI Destekli gelecek öngörüsü aktif' : 'Son 6 aylık veriler'}</p>
+                  <h2 className="text-lg font-bold text-gray-900">Gelişmiş Trend ve Tahminleme</h2>
+                  <p className="text-sm text-gray-500">AI Destekli gelecek öngörüsü aktif</p>
                 </div>
                 <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider">
                   <span className="flex items-center gap-1.5 text-teal-600"><span className="w-2 h-2 bg-teal-500 rounded-full"></span> Satiş</span>
@@ -362,26 +361,15 @@ export default function HomePage() {
               </div>
               <div className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  {isPro ? (
-                    <ComposedChart data={stats.tahminlemeData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} tickFormatter={(val) => `${val.toLocaleString('tr-TR')} ₺`} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Area type="monotone" dataKey="satis" stroke="#0d9488" strokeWidth={3} fill="#0d9488" fillOpacity={0.05} />
-                      <Bar dataKey="alis" barSize={12} fill="#ea580c" radius={[4, 4, 0, 0]} />
-                      <Line type="basis" dataKey="satis" stroke="#6366f1" strokeWidth={2} strokeDasharray="6 6" dot={false} name="AI Tahmini" />
-                    </ComposedChart>
-                  ) : (
-                    <AreaChart data={stats.aylikTrend}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Area type="monotone" dataKey="satis" stroke="#10b981" fill="#10b981" fillOpacity={0.1} />
-                      <Area type="monotone" dataKey="alis" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.1} />
-                    </AreaChart>
-                  )}
+                  <ComposedChart data={stats.tahminlemeData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} tickFormatter={(val) => `${val.toLocaleString('tr-TR')} ₺`} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area type="monotone" dataKey="satis" stroke="#0d9488" strokeWidth={3} fill="#0d9488" fillOpacity={0.05} />
+                    <Bar dataKey="alis" barSize={12} fill="#ea580c" radius={[4, 4, 0, 0]} />
+                    <Line type="basis" dataKey="satis" stroke="#6366f1" strokeWidth={2} strokeDasharray="6 6" dot={false} name="AI Tahmini" />
+                  </ComposedChart>
                 </ResponsiveContainer>
               </div>
             </div>

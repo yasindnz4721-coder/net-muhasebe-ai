@@ -19,6 +19,7 @@ import SifreSifirlamaPage from '../pages/sifre-sifirlama/page';
 import YeniSifrePage from '../pages/yeni-sifre/page';
 import PremiumPage from '../pages/premium/page';
 import AIAnalizPage from '../pages/ai-analiz/page';
+import AdminPage from '../pages/admin/page';
 import NotFoundPage from '../pages/NotFound';
 
 const routes: RouteObject[] = [
@@ -41,6 +42,10 @@ const routes: RouteObject[] = [
   {
     path: '/',
     element: <HomePage />,
+  },
+  {
+    path: '/admin',
+    element: <AdminPage />,
   },
   {
     path: '/cariler',

@@ -607,7 +607,7 @@ export default function SatisFaturasi() {
                       >
                         <td className="px-6 py-4 text-sm font-medium text-slate-800 whitespace-nowrap">{fatura.fatura_no}</td>
                         <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{fatura.cari_ad}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{fatura.tarih}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{new Date(fatura.tarih).toLocaleDateString('tr-TR')}</td>
                         <td className="px-6 py-4 text-sm font-semibold text-green-600 whitespace-nowrap">₺{Number(fatura.toplam).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-3 py-1 text-xs font-medium rounded-full ${fatura.durum === 'Onaylandı' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
@@ -920,7 +920,7 @@ export default function SatisFaturasi() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-slate-600">Tarih:</p>
-                    <p className="font-semibold">{selectedFatura.tarih}</p>
+                    <p className="font-semibold">{new Date(selectedFatura.tarih).toLocaleDateString('tr-TR')}</p>
                   </div>
                 </div>
 

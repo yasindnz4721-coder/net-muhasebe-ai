@@ -1,11 +1,19 @@
-
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config();
+
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+    require('dotenv').config({ path: envPath });
+} else {
+    require('dotenv').config();
+}
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 async function setupDatabase() {
@@ -33,7 +41,7 @@ async function setupDatabase() {
                     // 42P07: relation already exists, 42710: extension/index already exists
                     continue;
                 }
-                console.error(`Sorgu hatası (${sql.substring(0, 50)}...):`, err.message);
+                console.error(`Sorgu hatası:`, err.message);
             }
         }
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { auth } from '../../lib/api';
 
 export default function LoginPage() {
@@ -9,7 +10,6 @@ export default function LoginPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Zaten giriş yapmış mı kontrol et
     if (auth.isAuthenticated()) {
       window.location.href = '/';
     }
@@ -29,128 +29,196 @@ export default function LoginPage() {
       }
 
       if (data?.user) {
-        // Başarılı giriş
         window.location.href = '/';
       }
     } catch (err) {
       console.error('Giriş hatası:', err);
-      setError('Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.');
+      setError('Sistem şu an meşgul. Lütfen daha sonra tekrar deneyin.');
     } finally {
       setLoading(false);
     }
   };
 
+  const featureHighlights = [
+    { icon: 'ri-command-fill', text: 'Tam Otomasyon' },
+    { icon: 'ri-brain-line', text: 'AI Finansal Analiz' },
+    { icon: 'ri-shield-star-line', text: 'Bulut Güvenliği' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo ve Başlık */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl mb-4 shadow-lg">
-            <i className="ri-file-list-3-line text-4xl text-white"></i>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Hoş Geldiniz</h1>
-          <p className="text-gray-600">Hesabınıza giriş yapın</p>
-        </div>
+    <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-hidden relative">
+      {/* Hyper-Modern Background Elements */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-[-20%] left-[-10%] w-[700px] h-[700px] bg-indigo-600/20 rounded-full blur-[120px] animate-aurora-1"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] animate-aurora-2"></div>
+        <div className="absolute top-[20%] right-[10%] w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[100px] animate-pulse"></div>
 
-        {/* Giriş Formu */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form onSubmit={handleLogin} className="space-y-6">
-            {/* Hata Mesajı */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-                <i className="ri-error-warning-line text-xl text-red-600 mt-0.5"></i>
-                <p className="text-sm text-red-800">{error}</p>
-              </div>
-            )}
-
-            {/* E-posta */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                E-posta Adresi
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <i className="ri-mail-line text-gray-400"></i>
-                </div>
-                <input
-                  type="email"
-                  required
-                  disabled={loading}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="ornek@email.com"
-                />
-              </div>
-            </div>
-
-            {/* Şifre */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Şifre
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <i className="ri-lock-line text-gray-400"></i>
-                </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  disabled={loading}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer"
-                  disabled={loading}
-                >
-                  <i className={`${showPassword ? 'ri-eye-off-line' : 'ri-eye-line'} text-gray-400 hover:text-gray-600`}></i>
-                </button>
-              </div>
-            </div>
-
-            {/* Şifremi Unuttum */}
-            <div className="flex justify-end">
-              <a
-                href="/sifre-sifirlama"
-                className="text-sm text-teal-600 hover:text-teal-700 font-medium"
-              >
-                Şifremi Unuttum
-              </a>
-            </div>
-
-            {/* Giriş Butonu */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-lg hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
-            >
-              {loading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Giriş Yapılıyor...
-                </>
-              ) : (
-                <>
-                  <i className="ri-login-box-line text-xl"></i>
-                  Giriş Yap
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-
-        {/* Alt Bilgi */}
-        <div className="text-center mt-6">
-          <p className="text-sm text-gray-600">
-            Hesabınız yok mu? Yöneticinizle iletişime geçin.
-          </p>
-        </div>
+        {/* Grid Pattern Overlay */}
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px]"></div>
       </div>
+
+      <nav className="relative z-50 p-8 md:px-16 flex items-center justify-between">
+        <div className="flex items-center gap-3 group cursor-pointer">
+          <div className="w-12 h-12 bg-gradient-to-tr from-indigo-600 to-blue-500 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-600/30 group-hover:rotate-12 transition-all">
+            <i className="ri-file-list-3-line text-2xl text-white"></i>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-2xl font-black tracking-tighter">NET MUHASEBE</span>
+            <span className="text-[10px] font-black text-indigo-400 tracking-[0.3em] uppercase leading-none">AI Intelligence</span>
+          </div>
+        </div>
+
+        <div className="hidden md:flex items-center gap-8 bg-white/5 backdrop-blur-xl px-1 py-1 rounded-2xl border border-white/10">
+          <Link to="/login" className="px-6 py-3 text-sm font-bold text-white hover:text-indigo-400 transition-colors">Giriş Yap</Link>
+          <Link to="/kayit" className="px-8 py-3 text-sm font-black bg-white text-black rounded-xl hover:bg-slate-200 transition-all">HEMEN BAŞLA</Link>
+        </div>
+      </nav>
+
+      <main className="relative z-10 pt-12 pb-24 px-6 max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
+        {/* Left Section: Value Proposition */}
+        <div className="space-y-12">
+          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+            </span>
+            <span>2026 Nesil Muhasebe Yazılımı</span>
+          </div>
+
+          <h1 className="text-6xl md:text-8xl font-black tracking-tight leading-[0.9]">
+            Finansal <br />
+            <span className="text-gradient">Zekayı</span> <br />
+            Keşfedin.
+          </h1>
+
+          <p className="text-slate-400 text-xl font-medium max-w-lg leading-relaxed">
+            Karmaşık işlemleri saniyeler içinde çözen, yapay zeka destekli ilk muhasebe platformu. İşletmeniz için en akıllı kararları verin.
+          </p>
+
+          <div className="flex flex-wrap gap-6 mt-12">
+            {featureHighlights.map((f, i) => (
+              <div key={i} className="flex items-center gap-3 text-sm font-bold text-slate-300">
+                <i className={`${f.icon} text-indigo-500 text-xl`}></i>
+                {f.text}
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-12 flex items-center gap-6">
+            <div className="flex -space-x-4">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="w-12 h-12 rounded-full border-4 border-[#020617] bg-slate-800 flex items-center justify-center overflow-hidden">
+                  <img src={`https://i.pravatar.cc/100?u=${i}`} alt="user" />
+                </div>
+              ))}
+            </div>
+            <div>
+              <p className="text-sm font-bold">10,000+ Şirket</p>
+              <p className="text-xs text-slate-500">Bize güveniyor ve büyüyor.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Section: Login Form */}
+        <div className="relative group">
+          <div className="absolute -inset-4 bg-gradient-to-tr from-indigo-600 to-blue-600 rounded-[3rem] opacity-20 blur-2xl group-hover:opacity-30 transition-opacity"></div>
+
+          <div className="premium-card p-10 md:p-14 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/10 blur-3xl"></div>
+
+            <form onSubmit={handleLogin} className="space-y-8 relative z-10">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-black tracking-tight">Giriş Yap</h2>
+                <p className="text-slate-500 font-medium">İşletmenizi yönetmeye hazır mısınız?</p>
+              </div>
+
+              {error && (
+                <div className="p-5 rounded-3xl bg-red-500/10 border border-red-500/20 text-red-200 text-sm font-bold flex gap-3 animate-shake">
+                  <i className="ri-error-warning-fill text-lg"></i>
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">İş E-Postası</label>
+                  <div className="relative">
+                    <i className="ri-mail-line absolute left-6 top-1/2 -translate-y-1/2 text-slate-550 text-xl"></i>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="premium-input pl-14"
+                      placeholder="ad@sirketiniz.com"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center px-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Şifre</label>
+                    <Link to="/sifre-sifirlama" className="text-[10px] font-black text-indigo-400 hover:text-white transition-colors">ŞİFREMİ UNUTTUM</Link>
+                  </div>
+                  <div className="relative">
+                    <i className="ri-lock-line absolute left-6 top-1/2 -translate-y-1/2 text-slate-550 text-xl"></i>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="premium-input px-14"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
+                    >
+                      <i className={showPassword ? 'ri-eye-off-line' : 'ri-eye-line'}></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="premium-button w-full h-[72px] text-lg"
+              >
+                {loading ? (
+                  <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+                ) : (
+                  <>
+                    SONRAKİ ADIM
+                    <i className="ri-arrow-right-up-line text-2xl"></i>
+                  </>
+                )}
+              </button>
+
+              <div className="text-center pt-4">
+                <p className="text-slate-500 font-bold text-sm">
+                  Henüz üye değil misiniz? <br />
+                  <Link to="/kayit" className="text-white hover:text-indigo-400 transition-colors underline decoration-indigo-500/30 decoration-4 underline-offset-8">Yeni Hesap Oluşturun</Link>
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+
+      <footer className="relative z-10 max-w-7xl mx-auto px-8 py-12 flex flex-col md:row items-center justify-between gap-8 border-t border-white/5">
+        <div className="flex items-center gap-10">
+          <p className="text-[10px] font-black tracking-widest text-slate-600 uppercase">© 2026 NET MUHASEBE AI</p>
+          <p className="text-[10px] font-black tracking-widest text-slate-600 uppercase">MÜŞTERİ DESTEK: 534 740 12 56</p>
+        </div>
+        <div className="flex gap-8">
+          <Link to="/" className="text-[10px] font-black text-slate-500 hover:text-white transition-colors uppercase tracking-[0.2em]">Gizlilik</Link>
+          <Link to="/" className="text-[10px] font-black text-slate-500 hover:text-white transition-colors uppercase tracking-[0.2em]">Kullanım Şartları</Link>
+          <Link to="/" className="text-[10px] font-black text-slate-500 hover:text-white transition-colors uppercase tracking-[0.2em]">netmuhasebe.net.tr</Link>
+        </div>
+      </footer>
     </div>
   );
 }
