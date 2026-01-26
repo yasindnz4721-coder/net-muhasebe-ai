@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { odemeler as odemelerApi, cariler as carilerApi, Odeme, Cari } from '../../lib/api';
 import { useProfile } from '../../contexts/ProfileContext';
-import ProfileSelector from '../../components/feature/ProfileSelector';
+import Header from '../../components/feature/Header';
+import Sidebar from '../../components/feature/Sidebar';
 
 export default function Odemeler() {
   const { selectedProfile } = useProfile();
@@ -133,10 +134,10 @@ export default function Odemeler() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
-        <div className="text-center">
-          <i className="ri-loader-4-line text-6xl text-indigo-500 animate-spin mb-4"></i>
-          <p className="text-slate-600">Yükleniyor...</p>
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto"></div>
+          <p className="text-slate-500 font-black text-xs tracking-widest uppercase">Finansal Veriler İşleniyor...</p>
         </div>
       </div>
     );
@@ -144,306 +145,331 @@ export default function Odemeler() {
 
   if (!selectedProfile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
-        <ProfileSelector />
+      <div className="min-h-screen bg-[#020617] text-white flex items-center justify-center p-6 text-center">
+        <div className="premium-card p-12 max-w-md animate-slide-up">
+          <div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-indigo-500/20">
+            <i className="ri-profile-line text-4xl text-indigo-500"></i>
+          </div>
+          <h3 className="text-2xl font-black uppercase tracking-tight mb-4">Profil Seçimi Gerekli</h3>
+          <p className="text-slate-400 font-medium mb-8">Ödemeleri yönetmek için bir profil seçmelisiniz.</p>
+          <button onClick={() => window.location.reload()} className="premium-button px-10 h-14 text-xs tracking-widest uppercase bg-indigo-600 hover:bg-indigo-700 border-indigo-500/30">YENİDEN DENE</button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to="/">
-                <img
-                  src="https://public.readdy.ai/ai/img_res/599009ac-e967-4692-9000-451db39762de.png"
-                  alt="Logo"
-                  className="h-10 w-auto object-contain cursor-pointer"
-                />
-              </Link>
-              <div className="h-8 w-px bg-slate-300"></div>
-              <h1 className="text-xl font-bold text-slate-800">Ödeme Yönetimi</h1>
-            </div>
-            <ProfileSelector />
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-x-hidden relative">
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[140px] animate-aurora-2"></div>
+        <div className="absolute bottom-[-20%] right-[-10%] w-[700px] h-[700px] bg-purple-600/5 rounded-full blur-[120px] animate-aurora-1"></div>
+      </div>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-white border-r border-slate-200 min-h-[calc(100vh-73px)] sticky top-[73px]">
-          <nav className="p-4 space-y-1">
-            <Link to="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
-              <i className="ri-dashboard-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Dashboard</span>
-            </Link>
-            <Link to="/cariler" className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
-              <i className="ri-user-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Cariler</span>
-            </Link>
-            <Link to="/satis-faturasi" className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
-              <i className="ri-file-text-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Satış Faturası</span>
-            </Link>
-            <Link to="/alis-faturasi" className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
-              <i className="ri-file-list-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Alış Faturası</span>
-            </Link>
-            <Link to="/odemeler" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-200 transition-all cursor-pointer">
-              <i className="ri-money-dollar-circle-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Ödemeler</span>
-            </Link>
-            <Link to="/raporlar" className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
-              <i className="ri-bar-chart-box-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Raporlar</span>
-            </Link>
-            <Link to="/stok" className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
-              <i className="ri-archive-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Stok Yönetimi</span>
-            </Link>
-            <Link to="/urunler" className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
-              <i className="ri-product-hunt-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Ürünler</span>
-            </Link>
-          </nav>
-        </aside>
+      <div className="flex relative z-10">
+        <Sidebar mbOpen={false} setMbOpen={() => { }} />
 
-        {/* Main Content */}
-        <main className="flex-1 p-8">
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600 mb-2">Toplam Alınan</p>
-                  <h3 className="text-2xl font-bold text-green-600">₺{toplamAlınan.toLocaleString()}</h3>
-                </div>
-                <div className="bg-green-500 w-12 h-12 rounded-lg flex items-center justify-center">
-                  <i className="ri-arrow-down-line text-2xl text-white"></i>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600 mb-2">Toplam Verilen</p>
-                  <h3 className="text-2xl font-bold text-red-600">₺{toplamVerilen.toLocaleString()}</h3>
-                </div>
-                <div className="bg-red-500 w-12 h-12 rounded-lg flex items-center justify-center">
-                  <i className="ri-arrow-up-line text-2xl text-white"></i>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600 mb-2">Net Bakiye</p>
-                  <h3 className={`text-2xl font-bold ${toplamAlınan - toplamVerilen >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    ₺{(toplamAlınan - toplamVerilen).toLocaleString()}
-                  </h3>
-                </div>
-                <div className="bg-indigo-500 w-12 h-12 rounded-lg flex items-center justify-center">
-                  <i className="ri-wallet-line text-2xl text-white"></i>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="flex-1 flex flex-col min-h-screen max-w-full overflow-hidden">
+          <Header onMenuClick={() => { }} />
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-800">Ödemeler</h2>
-                <p className="text-sm text-slate-600 mt-1">Toplam {odemeler.length} ödeme</p>
+          <main className="flex-1 p-6 md:p-10 space-y-10 animate-fade-in">
+            {/* Header Section */}
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest">
+                  <i className="ri-money-dollar-circle-line"></i>
+                  <span>FİNANS VE KASA YÖNETİMİ</span>
+                </div>
+                <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-none">
+                  Nakit <span className="text-gradient from-indigo-400 to-purple-500">Akışı.</span>
+                </h1>
+                <p className="text-slate-500 text-lg font-medium max-w-xl">Tahsilat ve tediye işlemlerinizi kaydedin, kasanızın anlık durumunu izleyin.</p>
               </div>
+
               <button
                 onClick={() => setShowModal(true)}
-                className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all font-medium whitespace-nowrap cursor-pointer"
+                className="premium-button px-8 h-16 text-sm uppercase tracking-widest group bg-indigo-600/20 border-indigo-500/30 text-indigo-400 hover:bg-indigo-600 hover:text-white"
               >
-                <i className="ri-add-line mr-2"></i>
-                Yeni Ödeme Ekle
+                <span>YENİ İŞLEM EKLE</span>
+                <i className="ri-add-line text-xl group-hover:rotate-90 transition-transform"></i>
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="relative">
-                <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                <input
-                  type="text"
-                  placeholder="Cari adı ile ara..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                />
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="premium-card p-8 border-emerald-500/10 hover:border-emerald-500/30 transition-all group overflow-hidden relative">
+                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-all">
+                  <i className="ri-arrow-left-down-line text-9xl -rotate-12 translate-x-8 -translate-y-8"></i>
+                </div>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 group-hover:bg-emerald-500 transition-colors group-hover:text-white text-emerald-500">
+                    <i className="ri-arrow-left-down-line text-2xl"></i>
+                  </div>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">TOPLAM TAHSİLAT</span>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-3xl font-black tracking-tighter text-white">₺{toplamAlınan.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
+                  <div className="text-[10px] font-black text-emerald-400/60 uppercase tracking-widest">GELEN NAKİT AKIŞI</div>
+                </div>
               </div>
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-              >
-                <option value="all">Tüm Ödemeler</option>
-                <option value="Tahsilat">Alınan Ödemeler</option>
-                <option value="Tediye">Yapılan Ödemeler</option>
-              </select>
+
+              <div className="premium-card p-8 border-rose-500/10 hover:border-rose-500/30 transition-all group overflow-hidden relative">
+                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-all">
+                  <i className="ri-arrow-right-up-line text-9xl -rotate-12 translate-x-8 -translate-y-8"></i>
+                </div>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-rose-500/10 rounded-2xl flex items-center justify-center border border-rose-500/20 group-hover:bg-rose-500 transition-colors group-hover:text-white text-rose-500">
+                    <i className="ri-arrow-right-up-line text-2xl"></i>
+                  </div>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">TOPLAM TEDİYE</span>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-3xl font-black tracking-tighter text-white">₺{toplamVerilen.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
+                  <div className="text-[10px] font-black text-rose-400/60 uppercase tracking-widest">ÇIKAN NAKİT AKIŞI</div>
+                </div>
+              </div>
+
+              <div className="premium-card p-8 border-indigo-500/10 hover:border-indigo-500/30 transition-all group overflow-hidden relative">
+                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-all">
+                  <i className="ri-wallet-3-line text-9xl -rotate-12 translate-x-8 -translate-y-8"></i>
+                </div>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20 group-hover:bg-indigo-500 transition-colors group-hover:text-white text-indigo-500">
+                    <i className="ri-wallet-3-line text-2xl"></i>
+                  </div>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">NET DURUM</span>
+                </div>
+                <div className="space-y-1">
+                  <div className={`text-3xl font-black tracking-tighter ${toplamAlınan - toplamVerilen >= 0 ? 'text-indigo-400' : 'text-rose-500'}`}>
+                    ₺{(toplamAlınan - toplamVerilen).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                  </div>
+                  <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">KASA BAKİYESİ</div>
+                </div>
+              </div>
             </div>
 
-            {filteredOdemeler.length === 0 ? (
-              <div className="text-center py-16">
-                <i className="ri-money-dollar-circle-line text-6xl text-slate-300 mb-4"></i>
-                <p className="text-slate-500 text-lg mb-2">Henüz ödeme kaydı yok</p>
-                <p className="text-slate-400 text-sm">Yeni ödeme ekleyerek başlayın</p>
+            {/* List Section */}
+            <div className="premium-card overflow-hidden">
+              <div className="p-8 border-b border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="relative w-full md:max-w-md group">
+                  <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
+                  <input
+                    type="text"
+                    placeholder="Cari adı ile ara..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="premium-input pl-12 h-14"
+                  />
+                </div>
+                <div className="flex gap-2 p-1 bg-white/[0.02] border border-white/5 rounded-2xl">
+                  {['all', 'Tahsilat', 'Tediye'].map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setFilterType(type)}
+                      className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterType === type
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
+                        : 'text-slate-500 hover:text-white'
+                        }`}
+                    >
+                      {type === 'all' ? 'TÜMÜ' : type === 'Tahsilat' ? 'TAHSİLAT' : 'TEDİYE'}
+                    </button>
+                  ))}
+                </div>
               </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-50 border-b border-slate-200">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap">Cari</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap">Tip</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap">Tutar</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap">Tarih</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap">Yöntem</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap">İşlemler</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200">
-                    {filteredOdemeler.map((odeme) => (
-                      <tr key={odeme.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-medium text-slate-800 whitespace-nowrap">{odeme.cari_ad}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${odeme.tip === 'Tahsilat' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                            }`}>
-                            {odeme.tip === 'Tahsilat' ? 'Ödeme Alındı' : 'Ödeme Yapıldı'}
-                          </span>
-                        </td>
-                        <td className={`px-6 py-4 text-sm font-semibold whitespace-nowrap ${odeme.tip === 'Tahsilat' ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                          {odeme.tip === 'Tahsilat' ? '+' : '-'}₺{parseFloat(odeme.tutar).toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{new Date(odeme.tarih).toLocaleDateString('tr-TR')}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600 whitespace-nowrap">{odeme.odeme_yontemi}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <button
-                            onClick={() => {
-                              setSelectedOdeme(odeme);
-                              setShowDeleteModal(true);
-                            }}
-                            className="text-red-600 hover:text-red-700 cursor-pointer"
-                          >
-                            <i className="ri-delete-bin-line text-lg"></i>
-                          </button>
-                        </td>
+
+              {filteredOdemeler.length === 0 ? (
+                <div className="p-24 text-center space-y-6">
+                  <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
+                    <i className="ri-money-dollar-circle-line text-5xl text-slate-700"></i>
+                  </div>
+                  <h3 className="text-2xl font-black tracking-tight text-slate-200 uppercase">İşlem Bulunamadı</h3>
+                  <p className="text-slate-500 font-bold max-w-sm mx-auto uppercase tracking-widest text-[10px]">Herhangi bir ödeme veya tahsilat işlemi kaydı bulunamadı.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-white/[0.02]">
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">CARİ HESAP</th>
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">İŞLEM TİPİ</th>
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ÖDEME YÖNTEMİ</th>
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TARİH</th>
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TUTAR</th>
+                        <th className="px-8 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">AKSİYON</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </main>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-sm">
+                      {filteredOdemeler.map((odeme) => (
+                        <tr key={odeme.id} className="hover:bg-white/[0.02] transition-colors group/row">
+                          <td className="px-8 py-6">
+                            <div className="font-bold text-slate-300">{odeme.cari_ad.toUpperCase()}</div>
+                            <div className="text-[10px] text-slate-600 font-bold uppercase tracking-widest mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">{odeme.aciklama || 'Açıklama yok'}</div>
+                          </td>
+                          <td className="px-8 py-6">
+                            <span className={`inline-flex px-3 py-1 rounded-lg text-[10px] font-black tracking-widest uppercase ${odeme.tip === 'Tahsilat' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                              }`}>
+                              {odeme.tip === 'Tahsilat' ? 'TAHSİLAT (GİRİŞ)' : 'TEDİYE (ÇIKIŞ)'}
+                            </span>
+                          </td>
+                          <td className="px-8 py-6">
+                            <div className="inline-flex items-center gap-2 text-slate-400 font-bold">
+                              <i className={`text-lg ${odeme.odeme_yontemi === 'Nakit' ? 'ri-money-cny-box-line' :
+                                odeme.odeme_yontemi === 'Kredi Kartı' ? 'ri-bank-card-line' :
+                                  'ri-bank-line'
+                                }`}></i>
+                              <span className="uppercase tracking-widest text-[10px]">{odeme.odeme_yontemi}</span>
+                            </div>
+                          </td>
+                          <td className="px-8 py-6 text-slate-500 font-bold">
+                            {new Date(odeme.tarih).toLocaleDateString('tr-TR')}
+                          </td>
+                          <td className="px-8 py-6">
+                            <div className={`text-lg font-black tracking-tighter ${odeme.tip === 'Tahsilat' ? 'text-emerald-400' : 'text-rose-500'}`}>
+                              {odeme.tip === 'Tahsilat' ? '+' : '-'} ₺{parseFloat(odeme.tutar).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                            </div>
+                          </td>
+                          <td className="px-8 py-6 text-right">
+                            <button
+                              onClick={() => { setSelectedOdeme(odeme); setShowDeleteModal(true); }}
+                              className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-white transition-all opacity-0 group-hover/row:opacity-100"
+                            >
+                              <i className="ri-delete-bin-line"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
       </div>
 
       {/* Add Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl">
-            <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-slate-800">Yeni Ödeme Ekle</h3>
-              <button onClick={() => { setShowModal(false); resetForm(); }} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+        <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[110] p-4 animate-fade-in">
+          <div className="premium-card p-0 w-full max-w-2xl animate-slide-up border-white/10 relative overflow-hidden">
+            <div className="px-10 py-10 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.01]">
+              <div className="space-y-1">
+                <h3 className="text-3xl font-black tracking-tight text-white uppercase leading-none">Finansal İşlem Girişi</h3>
+                <p className="text-slate-500 font-bold text-sm uppercase tracking-widest text-indigo-400/80">Kasa hareketini veya cari ödemeyi kaydedin.</p>
+              </div>
+              <button
+                onClick={() => { setShowModal(false); resetForm(); }}
+                className="w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-all"
+              >
                 <i className="ri-close-line text-2xl"></i>
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Cari Seçin *</label>
+
+            <form onSubmit={handleSubmit} className="p-10 space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">CARİ HESAP SEÇİMİ *</label>
                   <select
                     value={formData.cari_id}
                     onChange={(e) => handleCariChange(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                    className="premium-input h-14"
                     required
                   >
-                    <option value="">Cari seçin...</option>
+                    <option value="">CARİ SEÇİN...</option>
                     {cariler.map(cari => (
-                      <option key={cari.id} value={cari.id}>{cari.ad}</option>
+                      <option key={cari.id} value={cari.id}>{cari.ad.toUpperCase()}</option>
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Ödeme Tipi *</label>
-                  <select
-                    value={formData.tip}
-                    onChange={(e) => setFormData({ ...formData, tip: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                    required
-                  >
-                    <option value="Tahsilat">Ödeme Alındı</option>
-                    <option value="Tediye">Ödeme Yapıldı</option>
-                  </select>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">İŞLEM TİPİ *</label>
+                  <div className="grid grid-cols-2 gap-2 p-1 bg-white/[0.02] border border-white/5 rounded-2xl h-14">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, tip: 'Tahsilat' })}
+                      className={`rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${formData.tip === 'Tahsilat' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-white'
+                        }`}
+                    >
+                      TAHSİLAT
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, tip: 'Tediye' })}
+                      className={`rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${formData.tip === 'Tediye' ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/20' : 'text-slate-500 hover:text-white'
+                        }`}
+                    >
+                      TEDİYE
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Tutar (₺) *</label>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">İŞLEM TUTARI ₺ *</label>
                   <input
                     type="number"
                     value={formData.tutar}
                     onChange={(e) => setFormData({ ...formData, tutar: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                    className="premium-input h-14 font-black text-lg"
+                    placeholder="0.00"
                     min="0"
                     step="0.01"
                     required
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Tarih *</label>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">İŞLEM TARİHİ *</label>
                   <input
                     type="date"
                     value={formData.tarih}
                     onChange={(e) => setFormData({ ...formData, tarih: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                    className="premium-input h-14 font-black"
                     required
                   />
                 </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Ödeme Yöntemi *</label>
-                  <select
-                    value={formData.odeme_yontemi}
-                    onChange={(e) => setFormData({ ...formData, odeme_yontemi: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                    required
-                  >
-                    <option value="Nakit">Nakit</option>
-                    <option value="Banka Transferi">Banka Transferi</option>
-                    <option value="Kredi Kartı">Kredi Kartı</option>
-                    <option value="Çek">Çek</option>
-                    <option value="Senet">Senet</option>
-                  </select>
+
+                <div className="col-span-2 space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">ÖDEME YÖNTEMİ *</label>
+                  <div className="grid grid-cols-5 gap-2">
+                    {['Nakit', 'Banka Transferi', 'Kredi Kartı', 'Çek', 'Senet'].map((method) => (
+                      <button
+                        key={method}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, odeme_yontemi: method })}
+                        className={`h-14 rounded-2xl text-[8px] font-black uppercase tracking-widest transition-all border ${formData.odeme_yontemi === method
+                            ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/20'
+                            : 'bg-white/5 border-white/10 text-slate-500 hover:text-white hover:border-white/20'
+                          }`}
+                      >
+                        {method}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Açıklama</label>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">BORÇ/ALACAK NOTU</label>
                 <textarea
                   value={formData.aciklama}
                   onChange={(e) => setFormData({ ...formData, aciklama: e.target.value })}
-                  rows={3}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                  placeholder="Ödeme ile ilgili notlar..."
+                  className="premium-input p-6 h-32 resize-none"
+                  placeholder="İşlem detayı hakkında kısa bir not..."
                 />
               </div>
-              <div className="flex gap-3 justify-end pt-4 border-t border-slate-200">
+
+              <div className="flex gap-4 pt-4">
                 <button
                   type="button"
                   onClick={() => { setShowModal(false); resetForm(); }}
-                  className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors whitespace-nowrap cursor-pointer"
+                  className="flex-1 h-14 text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors border border-white/5 rounded-2xl"
                 >
-                  İptal
+                  VAZGEÇ
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all whitespace-nowrap cursor-pointer"
+                  className="premium-button flex-[2] h-14 text-[10px] tracking-widest uppercase font-black bg-indigo-600 hover:bg-indigo-700 border-indigo-500/30 text-white"
                 >
-                  Ödeme Ekle
+                  İŞLEMİ KAYDET VE BİTİR
                 </button>
               </div>
             </form>
@@ -453,30 +479,28 @@ export default function Odemeler() {
 
       {/* Delete Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
-            <div className="p-6">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="ri-delete-bin-line text-2xl text-red-600"></i>
-              </div>
-              <h3 className="text-xl font-bold text-slate-800 text-center mb-2">Ödemeyi Sil</h3>
-              <p className="text-slate-600 text-center mb-6">
-                Bu ödemeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => { setShowDeleteModal(false); setSelectedOdeme(null); }}
-                  className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors whitespace-nowrap cursor-pointer"
-                >
-                  İptal
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors whitespace-nowrap cursor-pointer"
-                >
-                  Sil
-                </button>
-              </div>
+        <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[110] p-4 animate-fade-in">
+          <div className="premium-card p-10 w-full max-w-md animate-slide-up border-red-500/20 text-center">
+            <div className="w-20 h-20 bg-red-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-red-500/20">
+              <i className="ri-delete-bin-line text-4xl text-red-500"></i>
+            </div>
+            <h3 className="text-2xl font-black uppercase tracking-tight mb-4">İşlemi Sil</h3>
+            <p className="text-slate-400 font-medium mb-10">
+              Bu finansal hareketi sildiğinizde cari bakiye ve kasa durumu anında güncellenecektir. Bu işlem geri alınamaz.
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => { setShowDeleteModal(false); setSelectedOdeme(null); }}
+                className="flex-1 h-14 text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors border border-white/5 rounded-2xl"
+              >
+                VAZGEÇ
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 h-14 bg-red-600 text-white rounded-2xl font-black text-[10px] tracking-widest uppercase hover:bg-red-700 transition-all shadow-lg shadow-red-600/20"
+              >
+                ONAYLA VE SİL
+              </button>
             </div>
           </div>
         </div>

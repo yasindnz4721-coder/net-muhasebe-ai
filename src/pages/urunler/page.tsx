@@ -114,18 +114,12 @@ export default function Urunler() {
     return stok < 10;
   });
 
-  if (profileLoading) {
+  if (profileLoading || loading) {
     return (
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600">Yükleniyor...</p>
-            </div>
-          </main>
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto"></div>
+          <p className="text-slate-500 font-black text-xs tracking-widest uppercase">Envanter Verileri İşleniyor...</p>
         </div>
       </div>
     );
@@ -133,261 +127,292 @@ export default function Urunler() {
 
   if (profileError || !selectedProfile) {
     return (
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 flex items-center justify-center">
-            <div className="text-center max-w-md">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="ri-error-warning-line text-3xl text-red-500"></i>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Profil Hatası</h3>
-              <p className="text-gray-600 mb-4">{profileError || 'Lütfen bir profil seçin'}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors whitespace-nowrap"
-              >
-                Yeniden Dene
-              </button>
-            </div>
-          </main>
+      <div className="min-h-screen bg-[#020617] text-white flex items-center justify-center p-6 text-center">
+        <div className="premium-card p-12 max-w-md animate-slide-up">
+          <div className="w-20 h-20 bg-red-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-red-500/20">
+            <i className="ri-error-warning-line text-4xl text-red-500"></i>
+          </div>
+          <h3 className="text-2xl font-black uppercase tracking-tight mb-4">Profil Erişimi Gerekli</h3>
+          <p className="text-slate-400 font-medium mb-8">Ürünlerinizi yönetmek için lütfen üst menüden bir profil seçin.</p>
+          <button onClick={() => window.location.reload()} className="premium-button px-10 h-14 text-xs tracking-widest uppercase">YENİDEN DENE</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-8">
-          {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <i className="ri-error-warning-line text-xl text-red-500"></i>
-                <p className="text-red-700">{error}</p>
-              </div>
-              <button
-                onClick={() => setError(null)}
-                className="text-red-600 hover:text-red-700"
-              >
-                <i className="ri-close-line text-xl"></i>
-              </button>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-2">Toplam Ürün</p>
-                  <h3 className="text-2xl font-bold text-gray-800">{toplamUrunSayisi}</h3>
-                </div>
-                <div className="bg-indigo-500 w-12 h-12 rounded-lg flex items-center justify-center">
-                  <i className="ri-product-hunt-line text-2xl text-white"></i>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-2">Toplam Stok Değeri</p>
-                  <h3 className="text-2xl font-bold text-green-600">₺{toplamStokDegeri.toLocaleString()}</h3>
-                </div>
-                <div className="bg-green-500 w-12 h-12 rounded-lg flex items-center justify-center">
-                  <i className="ri-money-dollar-circle-line text-2xl text-white"></i>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-2">Düşük Stok Uyarısı</p>
-                  <h3 className="text-2xl font-bold text-amber-600">{dusukStokUrunler.length}</h3>
-                </div>
-                <div className="bg-amber-500 w-12 h-12 rounded-lg flex items-center justify-center">
-                  <i className="ri-alert-line text-2xl text-white"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">Ürünler</h2>
-                <p className="text-sm text-gray-600 mt-1">Toplam {urunler.length} ürün</p>
-              </div>
-              <button
-                onClick={() => setShowModal(true)}
-                className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-lg font-medium hover:shadow-lg transition-all whitespace-nowrap cursor-pointer"
-              >
-                <i className="ri-add-line mr-2"></i>
-                Yeni Ürün Ekle
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="relative">
-                <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
-                <input
-                  type="text"
-                  placeholder="Ürün adı ile ara..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                />
-              </div>
-              <select
-                value={filterKategori}
-                onChange={(e) => setFilterKategori(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-              >
-                <option value="all">Tüm Kategoriler</option>
-                {kategoriler.map(kat => (
-                  <option key={kat.id} value={kat.ad}>{kat.ad}</option>
-                ))}
-              </select>
-            </div>
-
-            {loading ? (
-              <div className="text-center py-12">
-                <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-gray-600">Ürünler yükleniyor...</p>
-              </div>
-            ) : filteredUrunler.length === 0 ? (
-              <div className="text-center py-16">
-                <i className="ri-product-hunt-line text-6xl text-gray-300 mb-4"></i>
-                <p className="text-gray-500 text-lg mb-2">
-                  {searchTerm || filterKategori !== 'all' ? 'Ürün bulunamadı' : 'Henüz ürün eklenmemiş'}
-                </p>
-                <p className="text-gray-400 text-sm">
-                  {searchTerm || filterKategori !== 'all' ? 'Arama kriterlerinizi değiştirin' : 'Yeni ürün ekleyerek başlayın'}
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Ürün Adı</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Kategori</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Stok</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Satış Fiyatı</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Alış Fiyatı</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">İşlemler</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {filteredUrunler.map((urun) => (
-                      <tr key={urun.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap">{urun.ad}</td>
-                        <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
-                          {urun.kategori && (
-                            <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">
-                              {urun.kategori}
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-sm whitespace-nowrap">
-                          <span className={`font-semibold ${(urun.stok_miktari || 0) < 10 ? 'text-red-600' : 'text-gray-800'
-                            }`}>
-                            {(urun.stok_miktari || 0).toLocaleString()} {urun.birim}
-                          </span>
-                          {(urun.stok_miktari || 0) < 10 && (
-                            <i className="ri-alert-line text-red-600 ml-2"></i>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-sm font-semibold text-green-600 whitespace-nowrap">
-                          ₺{parseFloat(urun.satis_fiyati || 0).toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4 text-sm font-semibold text-gray-600 whitespace-nowrap">
-                          ₺{parseFloat(urun.alis_fiyati || 0).toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <button
-                            onClick={() => handleDelete(urun.id)}
-                            className="text-red-600 hover:text-red-700 cursor-pointer"
-                          >
-                            <i className="ri-delete-bin-line text-lg"></i>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </main>
+    <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-x-hidden relative">
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-indigo-600/15 rounded-full blur-[140px] animate-aurora-1"></div>
+        <div className="absolute bottom-[-20%] left-[-10%] w-[700px] h-[700px] bg-blue-600/10 rounded-full blur-[120px] animate-aurora-2"></div>
       </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-gray-800">Yeni Ürün Ekle</h3>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="text-gray-400 hover:text-gray-600 cursor-pointer"
-                >
-                  <i className="ri-close-line text-2xl"></i>
-                </button>
+      <div className="flex relative z-10">
+        <Sidebar mbOpen={false} setMbOpen={() => { }} />
+
+        <div className="flex-1 flex flex-col min-h-screen max-w-full overflow-hidden">
+          <Header onMenuClick={() => { }} />
+
+          <main className="flex-1 p-6 md:p-10 space-y-10 animate-fade-in">
+            {/* Header Section */}
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest">
+                  <i className="ri-box-3-line"></i>
+                  <span>STOK VE ENVANTER</span>
+                </div>
+                <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-none">
+                  Ürün <span className="text-gradient">Portföyü.</span>
+                </h1>
+                <p className="text-slate-500 text-lg font-medium max-w-xl">Ürünlerinizi, stok seviyelerinizi ve ticari değerlerinizi akıllıca takip edin.</p>
+              </div>
+
+              <button
+                onClick={() => setShowModal(true)}
+                className="premium-button px-8 h-16 text-sm uppercase tracking-widest group"
+              >
+                <span>YENİ ÜRÜN EKLE</span>
+                <i className="ri-add-line text-xl group-hover:rotate-90 transition-transform"></i>
+              </button>
+            </div>
+
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="premium-card p-8 group hover:border-indigo-500/40 transition-all">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="w-14 h-14 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform">
+                    <i className="ri-product-hunt-line text-2xl text-white"></i>
+                  </div>
+                  <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">TOPLAM ÜRÜN</span>
+                </div>
+                <div className="text-4xl font-black tracking-tighter">{toplamUrunSayisi}</div>
+              </div>
+
+              <div className="premium-card p-8 group hover:border-emerald-500/40 transition-all">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="w-14 h-14 bg-gradient-to-tr from-emerald-600 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-600/20 group-hover:scale-110 transition-transform">
+                    <i className="ri-money-dollar-circle-line text-2xl text-white"></i>
+                  </div>
+                  <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">ENVANTER DEĞERİ</span>
+                </div>
+                <div className="text-4xl font-black tracking-tighter text-emerald-500">₺{toplamStokDegeri.toLocaleString()}</div>
+              </div>
+
+              <div className="premium-card p-8 group hover:border-rose-500/40 transition-all">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="w-14 h-14 bg-gradient-to-tr from-rose-600 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-rose-600/20 group-hover:scale-110 transition-transform">
+                    <i className="ri-alert-line text-2xl text-white"></i>
+                  </div>
+                  <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">KRİTİK STOK</span>
+                </div>
+                <div className="text-4xl font-black tracking-tighter text-rose-500">{dusukStokUrunler.length}</div>
               </div>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Ürün Adı *</label>
+
+            {error && (
+              <div className="p-6 rounded-3xl bg-red-500/10 border border-red-500/20 text-red-200 text-sm font-bold flex items-center gap-4 animate-shake">
+                <i className="ri-error-warning-fill text-xl"></i>
+                <div className="flex-1">{error}</div>
+                <button onClick={() => setError(null)}>
+                  <i className="ri-close-line text-xl font-black"></i>
+                </button>
+              </div>
+            )}
+
+            {/* Inventory Table Section */}
+            <div className="premium-card overflow-hidden">
+              <div className="p-8 border-b border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="relative w-full md:max-w-md group">
+                  <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
+                  <input
+                    type="text"
+                    placeholder="Ürün adı veya kodu ile ara..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="premium-input pl-12 h-14"
+                  />
+                </div>
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                  <select
+                    value={filterKategori}
+                    onChange={(e) => setFilterKategori(e.target.value)}
+                    className="premium-input h-14 px-6 md:w-64"
+                  >
+                    <option value="all">TÜM KATEGORİLER</option>
+                    {kategoriler.map(kat => (
+                      <option key={kat.id} value={kat.ad}>{kat.ad.toUpperCase()}</option>
+                    ))}
+                  </select>
+                  <button className="w-14 h-14 shrink-0 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                    <i className="ri-arrow-up-down-line text-xl"></i>
+                  </button>
+                </div>
+              </div>
+
+              {filteredUrunler.length === 0 ? (
+                <div className="p-24 text-center space-y-6">
+                  <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
+                    <i className="ri-box-3-line text-5xl text-slate-700"></i>
+                  </div>
+                  <h3 className="text-2xl font-black tracking-tight text-slate-200 uppercase">Ürün Bulunamadı</h3>
+                  {!searchTerm && (
+                    <button
+                      onClick={() => setShowModal(true)}
+                      className="px-8 py-4 bg-white text-black rounded-2xl font-black tracking-widest uppercase hover:bg-slate-200 transition-all"
+                    >
+                      İLK ÜRÜNÜ EKLE
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-white/[0.02]">
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ÜRÜN DETAYI</th>
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">KATEGORİ</th>
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">STOK SEVİYESİ</th>
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">BİRİM FİYAT (SATIŞ)</th>
+                        <th className="px-8 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">AKSİYON</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-sm">
+                      {filteredUrunler.map((urun) => (
+                        <tr key={urun.id} className="hover:bg-indigo-500/[0.02] transition-all group/row">
+                          <td className="px-8 py-6">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-white/5 to-white/[0.01] border border-white/5 flex items-center justify-center text-slate-400 font-black text-xs shrink-0 group-hover/row:scale-110 transition-transform">
+                                <i className="ri-box-3-fill text-xl text-indigo-500/50"></i>
+                              </div>
+                              <div>
+                                <div className="font-black text-slate-200 tracking-tight text-lg leading-none group-hover/row:text-white transition-colors">{urun.ad}</div>
+                                <div className="text-[10px] font-black text-slate-600 mt-1 uppercase tracking-widest italic">Ürün Kodu: #{urun.id.substring(0, 6)}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-8 py-6">
+                            {urun.kategori && (
+                              <span className="inline-flex px-3 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-black text-indigo-400 tracking-widest uppercase">
+                                {urun.kategori}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-8 py-6 font-bold">
+                            <div className="flex flex-col gap-1">
+                              <div className={`text-lg font-black tracking-tighter ${(urun.stok_miktari || 0) < 10 ? 'text-rose-500' : 'text-slate-200'}`}>
+                                {(urun.stok_miktari || 0).toLocaleString()} <span className="text-xs font-bold text-slate-500">{urun.birim}</span>
+                              </div>
+                              {(urun.stok_miktari || 0) < 10 && (
+                                <div className="flex items-center gap-1 text-[9px] font-black text-rose-500/80 uppercase tracking-tighter">
+                                  <i className="ri-error-warning-fill"></i>
+                                  KRİTİK SEVİYE UYARISI
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-8 py-6">
+                            <div className="text-lg font-black tracking-tighter text-emerald-500">
+                              ₺{parseFloat(urun.satis_fiyati || 0).toLocaleString()}
+                            </div>
+                            <div className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter mt-1">
+                              Alış: ₺{parseFloat(urun.alis_fiyati || 0).toLocaleString()}
+                            </div>
+                          </td>
+                          <td className="px-8 py-6 text-right">
+                            <div className="flex items-center justify-end gap-3 opacity-0 group-hover/row:opacity-100 transition-all translate-x-4 group-hover/row:translate-x-0">
+                              <button className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all shadow-lg shadow-indigo-600/10">
+                                <i className="ri-edit-line"></i>
+                              </button>
+                              <button
+                                onClick={() => handleDelete(urun.id)}
+                                className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 hover:bg-red-600 hover:text-white transition-all shadow-lg shadow-red-600/10"
+                              >
+                                <i className="ri-delete-bin-line"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
+      </div>
+
+      {/* Premium Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fade-in">
+          <div className="premium-card p-0 w-full max-w-lg flex flex-col animate-slide-up border-white/10 relative overflow-hidden">
+            <div className="px-10 py-10 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.01]">
+              <div className="space-y-1">
+                <h3 className="text-3xl font-black tracking-tight text-white uppercase leading-none">Ürün Kaydet</h3>
+                <p className="text-slate-500 font-bold text-sm">Envanterinize yeni bir değer ekleyin.</p>
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-all"
+              >
+                <i className="ri-close-line text-2xl"></i>
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-10 space-y-8">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">ÜRÜN ADI / TANIMI *</label>
                 <input
                   type="text"
                   required
                   value={formData.ad}
                   onChange={(e) => setFormData({ ...formData, ad: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                  className="premium-input text-lg font-black"
+                  placeholder="Örn: Profesyonel Yazılım Paketi"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Birim *</label>
-                <select
-                  required
-                  value={formData.birim}
-                  onChange={(e) => setFormData({ ...formData, birim: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                >
-                  <option value="Adet">Adet</option>
-                  <option value="Kg">Kg</option>
-                  <option value="Lt">Lt</option>
-                  <option value="M">M</option>
-                  <option value="M2">M2</option>
-                  <option value="M3">M3</option>
-                </select>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">ÖLÇÜ BİRİMİ *</label>
+                  <select
+                    required
+                    value={formData.birim}
+                    onChange={(e) => setFormData({ ...formData, birim: e.target.value })}
+                    className="premium-input h-14"
+                  >
+                    <option value="Adet">ADET</option>
+                    <option value="Kg">KİLOGRAM (KG)</option>
+                    <option value="Lt">LİTRE (LT)</option>
+                    <option value="M">METRE (M)</option>
+                    <option value="M2">METREKARE (M2)</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">BAŞLANGIÇ STOĞU</label>
+                  <input
+                    type="number"
+                    value={formData.stok_miktari}
+                    onChange={(e) => setFormData({ ...formData, stok_miktari: parseInt(e.target.value) || 0 })}
+                    className="premium-input h-14 font-black"
+                    placeholder="0"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Başlangıç Stok Miktarı</label>
-                <input
-                  type="number"
-                  value={formData.stok_miktari}
-                  onChange={(e) => setFormData({ ...formData, stok_miktari: parseInt(e.target.value) || 0 })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-                />
-              </div>
-              <div className="flex gap-3 pt-4">
+
+              <div className="flex gap-4 pt-6">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all whitespace-nowrap cursor-pointer"
+                  className="flex-1 h-16 text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors border border-white/5 rounded-2xl"
                 >
-                  İptal
+                  İPTAL
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-lg font-medium hover:shadow-lg transition-all whitespace-nowrap cursor-pointer"
+                  className="premium-button flex-1 h-16 text-xs uppercase tracking-widest font-black"
                 >
-                  Kaydet
+                  ÜRÜNÜ SİSTEME İŞLE
                 </button>
               </div>
             </form>

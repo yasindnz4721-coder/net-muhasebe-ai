@@ -4,7 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import ProfileSelector from './ProfileSelector';
 import { auth } from '../../lib/api';
 
-export default function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export default function Header({ onMenuClick }: HeaderProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);

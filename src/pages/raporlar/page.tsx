@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { satisFaturalari as satisApi, alisFaturalari as alisApi, odemeler as odemelerApi, SatisFaturasi, AlisFaturasi, Odeme } from '../../lib/api';
 import { useProfile } from '../../contexts/ProfileContext';
-import ProfileSelector from '../../components/feature/ProfileSelector';
+import Header from '../../components/feature/Header';
+import Sidebar from '../../components/feature/Sidebar';
 
 export default function Raporlar() {
   const { selectedProfile } = useProfile();
@@ -65,10 +66,10 @@ export default function Raporlar() {
   });
 
   // Mali hesaplamalar
-  const toplamSatis = filteredSatisFaturalari.reduce((sum, f) => sum + parseFloat(f.toplam), 0);
-  const toplamAlis = filteredAlisFaturalari.reduce((sum, f) => sum + parseFloat(f.toplam), 0);
-  const toplamAlinanOdeme = filteredOdemeler.filter(o => o.tip === 'Alınan Ödeme').reduce((sum, o) => sum + parseFloat(o.tutar), 0);
-  const toplamVerilenOdeme = filteredOdemeler.filter(o => o.tip === 'Verilen Ödeme').reduce((sum, o) => sum + parseFloat(o.tutar), 0);
+  const toplamSatis = filteredSatisFaturalari.reduce((sum, f) => sum + f.toplam, 0);
+  const toplamAlis = filteredAlisFaturalari.reduce((sum, f) => sum + f.toplam, 0);
+  const toplamAlinanOdeme = filteredOdemeler.filter(o => o.tip === 'Alınan Ödeme').reduce((sum, o) => sum + o.tutar, 0);
+  const toplamVerilenOdeme = filteredOdemeler.filter(o => o.tip === 'Verilen Ödeme').reduce((sum, o) => sum + o.tutar, 0);
 
   // KDV Hesaplamaları (Varsayılan %20)
   const kdvOrani = 0.20;
@@ -91,7 +92,7 @@ export default function Raporlar() {
       cariMap.set(f.cari_ad, { borc: 0, alacak: 0 });
     }
     const cari = cariMap.get(f.cari_ad);
-    cari.alacak += parseFloat(f.toplam);
+    cari.alacak += f.toplam;
   });
 
   filteredAlisFaturalari.forEach(f => {
@@ -99,7 +100,7 @@ export default function Raporlar() {
       cariMap.set(f.cari_ad, { borc: 0, alacak: 0 });
     }
     const cari = cariMap.get(f.cari_ad);
-    cari.borc += parseFloat(f.toplam);
+    cari.borc += f.toplam;
   });
 
   filteredOdemeler.forEach(o => {
@@ -108,9 +109,9 @@ export default function Raporlar() {
     }
     const cari = cariMap.get(o.cari_ad);
     if (o.tip === 'Alınan Ödeme') {
-      cari.borc += parseFloat(o.tutar);
+      cari.borc += o.tutar;
     } else {
-      cari.alacak += parseFloat(o.tutar);
+      cari.alacak += o.tutar;
     }
   });
 
@@ -157,7 +158,7 @@ export default function Raporlar() {
       id: `od-${o.id}`,
       cari: o.cari_ad,
       type: o.tip,
-      amount: o.tip === 'Alınan Ödeme' ? parseFloat(o.tutar) : -parseFloat(o.tutar),
+      amount: o.tip === 'Alınan Ödeme' ? o.tutar : -o.tutar,
       date: o.tarih,
       status: 'Tamamlandı'
     });
@@ -199,440 +200,398 @@ export default function Raporlar() {
     link.click();
   };
 
-  if (!selectedProfile) {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
-        <ProfileSelector />
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto"></div>
+          <p className="text-slate-500 font-black text-xs tracking-widest uppercase">Mali Raporlar Hazırlanıyor...</p>
+        </div>
       </div>
     );
   }
 
-  if (loading) {
+  if (!selectedProfile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
-        <div className="text-center">
-          <i className="ri-loader-4-line text-6xl text-indigo-500 animate-spin mb-4"></i>
-          <p className="text-slate-600">Yükleniyor...</p>
+      <div className="min-h-screen bg-[#020617] text-white flex items-center justify-center p-6 text-center">
+        <div className="premium-card p-12 max-w-md animate-slide-up">
+          <div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-indigo-500/20">
+            <i className="ri-bar-chart-box-line text-4xl text-indigo-500"></i>
+          </div>
+          <h3 className="text-2xl font-black uppercase tracking-tight mb-4">Profil Seçimi Gerekli</h3>
+          <p className="text-slate-400 font-medium mb-8">Raporları görüntülemek için bir profil seçmelisiniz.</p>
+          <button onClick={() => window.location.reload()} className="premium-button px-10 h-14 text-xs tracking-widest uppercase bg-indigo-600 hover:bg-indigo-700 border-indigo-500/30">YENİDEN DENE</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to="/">
-                <img
-                  src="https://public.readdy.ai/ai/img_res/599009ac-e967-4692-9000-451db39762de.png"
-                  alt="Logo"
-                  className="h-10 w-auto object-contain cursor-pointer"
-                />
-              </Link>
-              <div className="h-8 w-px bg-slate-300"></div>
-              <h1 className="text-xl font-bold text-slate-800">Mali Raporlar ve Yasal Uyum</h1>
-            </div>
-            <ProfileSelector />
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-x-hidden relative text-xs">
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[140px] animate-aurora-2"></div>
+        <div className="absolute bottom-[-20%] left-[-10%] w-[700px] h-[700px] bg-purple-600/5 rounded-full blur-[120px] animate-aurora-1"></div>
+      </div>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-white border-r border-slate-200 min-h-[calc(100vh-73px)] sticky top-[73px]">
-          <nav className="p-4 space-y-1">
-            <Link to="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
-              <i className="ri-dashboard-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Dashboard</span>
-            </Link>
-            <Link to="/cariler" className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
-              <i className="ri-user-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Cariler</span>
-            </Link>
-            <Link to="/satis-faturasi" className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
-              <i className="ri-file-text-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Satış Faturası</span>
-            </Link>
-            <Link to="/alis-faturasi" className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
-              <i className="ri-file-list-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Alış Faturası</span>
-            </Link>
-            <Link to="/odemeler" className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
-              <i className="ri-money-dollar-circle-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Ödemeler</span>
-            </Link>
-            <Link to="/raporlar" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-200 transition-all cursor-pointer">
-              <i className="ri-bar-chart-box-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Raporlar</span>
-            </Link>
-            <Link to="/stok" className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
-              <i className="ri-archive-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Stok Yönetimi</span>
-            </Link>
-            <Link to="/urunler" className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
-              <i className="ri-product-hunt-line text-xl"></i>
-              <span className="font-medium whitespace-nowrap">Ürünler</span>
-            </Link>
-          </nav>
-        </aside>
+      <div className="flex relative z-10">
+        <Sidebar mbOpen={false} setMbOpen={() => { }} />
 
-        <main className="flex-1 p-8">
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-slate-800 mb-2">Mali Raporlar ve Yasal Uyum</h1>
-                <p className="text-slate-600">Vergi beyannameleri ve mali tablolarınız</p>
+        <div className="flex-1 flex flex-col min-h-screen max-w-full overflow-hidden">
+          <Header onMenuClick={() => { }} />
+
+          <main className="flex-1 p-6 md:p-10 space-y-10 animate-fade-in">
+            {/* Header Section */}
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest">
+                  <i className="ri-bar-chart-box-line"></i>
+                  <span>İŞ ZEKSASI VE ANALİZ</span>
+                </div>
+                <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-none">
+                  Mali <span className="text-gradient from-indigo-400 to-purple-500">Raporlar.</span>
+                </h1>
+                <p className="text-slate-500 text-lg font-medium max-w-xl">İşletmenizin finansal performansını anlık olarak izleyin ve yasal uyum raporlarınızı hazırlayın.</p>
               </div>
+
               <button
                 onClick={exportToExcel}
-                className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all whitespace-nowrap cursor-pointer flex items-center gap-2"
+                className="premium-button px-8 h-16 text-[10px] uppercase tracking-widest group bg-emerald-600/20 border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white"
               >
-                <i className="ri-file-excel-line text-xl"></i>
-                Excel İndir
+                <span>EXCEL ÜRETEREK İNDİR</span>
+                <i className="ri-file-excel-line text-xl group-hover:translate-y-1 transition-transform"></i>
               </button>
             </div>
-          </div>
 
-          {/* Date Range Filter */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Başlangıç Tarihi</label>
-                <input
-                  type="date"
-                  value={dateRange.baslangic}
-                  onChange={(e) => setDateRange({ ...dateRange, baslangic: e.target.value })}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                />
+            {/* Date Filters */}
+            <div className="premium-card p-8 group overflow-hidden relative">
+              <div className="absolute top-0 right-0 p-4 opacity-[0.02]">
+                <i className="ri-calendar-event-line text-9xl"></i>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Bitiş Tarihi</label>
-                <input
-                  type="date"
-                  value={dateRange.bitis}
-                  onChange={(e) => setDateRange({ ...dateRange, bitis: e.target.value })}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                />
-              </div>
-              <button
-                onClick={loadData}
-                className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-lg font-medium hover:shadow-lg transition-all whitespace-nowrap cursor-pointer"
-              >
-                <i className="ri-refresh-line mr-2"></i>
-                Yenile
-              </button>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
-            <div className="border-b border-slate-200 px-6 py-4">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setActiveTab('ozet')}
-                  className={`px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap cursor-pointer ${activeTab === 'ozet'
-                      ? 'bg-indigo-500 text-white shadow-lg'
-                      : 'text-slate-600 hover:bg-slate-100'
-                    }`}
-                >
-                  <i className="ri-dashboard-line mr-2"></i>
-                  Finansal Özet
-                </button>
-                <button
-                  onClick={() => setActiveTab('kdv')}
-                  className={`px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap cursor-pointer ${activeTab === 'kdv'
-                      ? 'bg-indigo-500 text-white shadow-lg'
-                      : 'text-slate-600 hover:bg-slate-100'
-                    }`}
-                >
-                  <i className="ri-percent-line mr-2"></i>
-                  KDV Beyannamesi
-                </button>
-                <button
-                  onClick={() => setActiveTab('gelir-gider')}
-                  className={`px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap cursor-pointer ${activeTab === 'gelir-gider'
-                      ? 'bg-indigo-500 text-white shadow-lg'
-                      : 'text-slate-600 hover:bg-slate-100'
-                    }`}
-                >
-                  <i className="ri-line-chart-line mr-2"></i>
-                  Gelir-Gider Tablosu
-                </button>
-                <button
-                  onClick={() => setActiveTab('mizan')}
-                  className={`px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap cursor-pointer ${activeTab === 'mizan'
-                      ? 'bg-indigo-500 text-white shadow-lg'
-                      : 'text-slate-600 hover:bg-slate-100'
-                    }`}
-                >
-                  <i className="ri-scales-line mr-2"></i>
-                  Cari Mizan
-                </button>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-end relative z-10">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">BAŞLANGIÇ DÖNEMİ</label>
+                  <input
+                    type="date"
+                    value={dateRange.baslangic}
+                    onChange={(e) => setDateRange({ ...dateRange, baslangic: e.target.value })}
+                    className="premium-input h-14 font-black text-[10px]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">BİTİŞ DÖNEMİ</label>
+                  <input
+                    type="date"
+                    value={dateRange.bitis}
+                    onChange={(e) => setDateRange({ ...dateRange, bitis: e.target.value })}
+                    className="premium-input h-14 font-black text-[10px]"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <button
+                    onClick={loadData}
+                    className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/10 transition-all flex items-center justify-center gap-3"
+                  >
+                    <i className="ri-refresh-line text-lg text-indigo-400"></i>
+                    <span>VERİLERİ YENİDEN HESAPLA</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div className="p-6">
+            {/* Tab Navigation */}
+            <div className="flex flex-wrap gap-2 p-1 bg-white/[0.02] border border-white/5 rounded-3xl max-w-4xl mx-auto">
+              {[
+                { id: 'ozet', label: 'FİNANSAL ÖZET', icon: 'ri-dashboard-line' },
+                { id: 'kdv', label: 'KDV BEYANNAMESİ', icon: 'ri-percent-line' },
+                { id: 'gelir-gider', label: 'GELİR-GİDER', icon: 'ri-line-chart-line' },
+                { id: 'mizan', label: 'CARİ MİZAN', icon: 'ri-scales-line' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id
+                    ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/30'
+                    : 'text-slate-500 hover:text-white hover:bg-white/5'
+                    }`}
+                >
+                  <i className={`${tab.icon} text-lg`}></i>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="animate-slide-up space-y-10 pb-20">
               {activeTab === 'ozet' && (
-                <div>
-                  <h2 className="text-xl font-bold text-slate-800 mb-6">Finansal Özet</h2>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-medium opacity-90">Toplam Satış</h3>
-                        <i className="ri-arrow-up-line text-2xl"></i>
+                <div className="space-y-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Stat Cards */}
+                    <div className="premium-card p-10 relative overflow-hidden group border-emerald-500/10">
+                      <div className="flex items-center justify-between mb-8">
+                        <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                          <i className="ri-arrow-up-line text-2xl"></i>
+                        </div>
+                        <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">TOPLAM SATIŞ</span>
                       </div>
-                      <p className="text-3xl font-bold">₺{toplamSatis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</p>
+                      <div className="space-y-1">
+                        <div className="text-4xl font-black tracking-tighter">₺{toplamSatis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
+                        <p className="text-[10px] font-black text-emerald-400/60 uppercase tracking-widest">SATIŞ GELİRLERİ TOPLAMI</p>
+                      </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-6 text-white">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-medium opacity-90">Toplam Alış</h3>
-                        <i className="ri-arrow-down-line text-2xl"></i>
+                    <div className="premium-card p-10 relative overflow-hidden group border-rose-500/10">
+                      <div className="flex items-center justify-between mb-8">
+                        <div className="w-14 h-14 bg-rose-500/10 rounded-2xl flex items-center justify-center border border-rose-500/20 text-rose-500 group-hover:bg-rose-500 group-hover:text-white transition-all">
+                          <i className="ri-arrow-down-line text-2xl"></i>
+                        </div>
+                        <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">TOPLAM ALIŞ</span>
                       </div>
-                      <p className="text-3xl font-bold">₺{toplamAlis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</p>
+                      <div className="space-y-1">
+                        <div className="text-4xl font-black tracking-tighter">₺{toplamAlis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
+                        <p className="text-[10px] font-black text-rose-400/60 uppercase tracking-widest">MALİYET VE GİDER TOPLAMI</p>
+                      </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-medium opacity-90">Brüt Kar</h3>
-                        <i className="ri-money-dollar-circle-line text-2xl"></i>
+                    <div className="premium-card p-10 relative overflow-hidden group border-indigo-500/10">
+                      <div className="flex items-center justify-between mb-8">
+                        <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20 text-indigo-500 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+                          <i className="ri-wallet-3-line text-2xl"></i>
+                        </div>
+                        <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">BRÜT KAR</span>
                       </div>
-                      <p className="text-3xl font-bold">₺{brutKar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</p>
+                      <div className="space-y-1">
+                        <div className="text-4xl font-black tracking-tighter">₺{brutKar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">TEVKİFAT ÖNCESİ KAZANÇ</p>
+                      </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-medium opacity-90">Ödenecek KDV</h3>
-                        <i className="ri-percent-line text-2xl"></i>
+                    <div className="premium-card p-10 relative overflow-hidden group border-orange-500/10">
+                      <div className="flex items-center justify-between mb-8">
+                        <div className="w-14 h-14 bg-orange-500/10 rounded-2xl flex items-center justify-center border border-orange-500/20 text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-all">
+                          <i className="ri-percent-line text-2xl"></i>
+                        </div>
+                        <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">ÖDENECEK KDV</span>
                       </div>
-                      <p className="text-3xl font-bold">₺{odenecekKDV.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</p>
+                      <div className="space-y-1">
+                        <div className="text-4xl font-black tracking-tighter">₺{odenecekKDV.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
+                        <p className="text-[10px] font-black text-orange-400/60 uppercase tracking-widest">VERGİ YÜKÜMLÜLÜĞÜ</p>
+                      </div>
                     </div>
 
-                    <div className={`bg-gradient-to-br ${netKar >= 0 ? 'from-teal-500 to-teal-600' : 'from-red-500 to-red-600'} rounded-xl p-6 text-white`}>
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-medium opacity-90">Net Kar/Zarar</h3>
-                        <i className="ri-line-chart-line text-2xl"></i>
+                    <div className={`premium-card p-10 relative overflow-hidden group ${netKar >= 0 ? 'border-indigo-500/30' : 'border-rose-500/30'}`}>
+                      <div className="flex items-center justify-between mb-8">
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all ${netKar >= 0 ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-500 group-hover:bg-indigo-500 group-hover:text-white' : 'bg-rose-500/10 border-rose-500/20 text-rose-500 group-hover:bg-rose-500 group-hover:text-white'
+                          }`}>
+                          <i className="ri-line-chart-line text-2xl"></i>
+                        </div>
+                        <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">NET KAR/ZARAR</span>
                       </div>
-                      <p className="text-3xl font-bold">₺{netKar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</p>
+                      <div className="space-y-1">
+                        <div className={`text-4xl font-black tracking-tighter ${netKar >= 0 ? 'text-indigo-400' : 'text-rose-500'}`}>
+                          ₺{netKar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                        </div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">DÖNEM SONU PERFORMANSI</p>
+                      </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-medium opacity-90">Toplam İşlem</h3>
-                        <i className="ri-file-list-line text-2xl"></i>
+                    <div className="premium-card p-10 relative overflow-hidden group border-white/10">
+                      <div className="flex items-center justify-between mb-8">
+                        <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 text-slate-400 group-hover:bg-white group-hover:text-black transition-all">
+                          <i className="ri-file-list-3-line text-2xl"></i>
+                        </div>
+                        <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">İŞLEM HACMİ</span>
                       </div>
-                      <p className="text-3xl font-bold">{tumIslemler.length}</p>
+                      <div className="space-y-1">
+                        <div className="text-4xl font-black tracking-tighter">{tumIslemler.length}</div>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">TOPLAM BELGE SAYISI</p>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
-                    <i className="ri-information-line text-xl text-amber-600 mt-0.5"></i>
-                    <div className="text-sm text-amber-800">
-                      <p className="font-semibold mb-1">Yasal Uyarı:</p>
-                      <p>Bu rapor bilgilendirme amaçlıdır. Resmi beyannamelerinizi mali müşaviriniz ile kontrol ediniz.</p>
+                  <div className="bg-indigo-500/5 border border-indigo-500/20 rounded-3xl p-8 flex items-start gap-6 relative overflow-hidden group">
+                    <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20 text-indigo-400 shrink-0">
+                      <i className="ri-information-line text-3xl"></i>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm font-black text-indigo-400 uppercase tracking-widest">YASAL BİLGİLENDİRME</p>
+                      <p className="text-slate-400 font-medium leading-relaxed">
+                        Bu mali özet raporu, sistemdeki fatura ve ödeme kayıtlarına dayanarak oluşturulmuştur.
+                        Beyannameler ve vergi hesaplamaları için resmi evraklarınızı mali müşavirinizle birlikte kontrol etmeniz gerekmektedir.
+                        Veriler %20 KDV oranı baz alınarak hesaplanmıştır.
+                      </p>
                     </div>
                   </div>
                 </div>
               )}
 
               {activeTab === 'kdv' && (
-                <div>
-                  <h2 className="text-xl font-bold text-slate-800 mb-6">KDV Beyannamesi (Form 2A)</h2>
-
-                  <div className="bg-white border border-slate-200 rounded-lg overflow-hidden mb-6">
-                    <table className="w-full">
-                      <thead className="bg-slate-50">
-                        <tr>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Açıklama</th>
-                          <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">Matrah (₺)</th>
-                          <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">KDV (₺)</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200">
-                        <tr className="bg-green-50">
-                          <td className="px-6 py-4 text-sm font-medium text-slate-800">Mal ve Hizmet Satışları</td>
-                          <td className="px-6 py-4 text-sm text-right font-semibold text-green-700">
-                            {satisMatrah.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-right font-semibold text-green-700">
-                            {satisKDV.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                          </td>
-                        </tr>
-                        <tr className="bg-red-50">
-                          <td className="px-6 py-4 text-sm font-medium text-slate-800">Mal ve Hizmet Alışları</td>
-                          <td className="px-6 py-4 text-sm text-right font-semibold text-red-700">
-                            {alisMatrah.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-right font-semibold text-red-700">
-                            {alisKDV.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                          </td>
-                        </tr>
-                        <tr className="bg-indigo-50">
-                          <td className="px-6 py-4 text-sm font-bold text-slate-900">Ödenecek KDV</td>
-                          <td className="px-6 py-4 text-sm text-right"></td>
-                          <td className="px-6 py-4 text-sm text-right font-bold text-indigo-700 text-lg">
-                            {odenecekKDV.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-                        <i className="ri-information-line"></i>
-                        KDV Oranı
-                      </h3>
-                      <p className="text-sm text-blue-800">Bu hesaplamada %20 KDV oranı kullanılmıştır.</p>
+                <div className="premium-card overflow-hidden">
+                  <div className="p-10 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+                    <div className="space-y-1">
+                      <h2 className="text-2xl font-black uppercase tracking-tight">KDV Beyannamesi</h2>
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">KDV FORM 2A - ÖDEME YÜKÜMLÜLÜĞÜ TABLOSU</p>
                     </div>
-
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                      <h3 className="font-semibold text-amber-900 mb-2 flex items-center gap-2">
-                        <i className="ri-calendar-line"></i>
-                        Beyan Dönemi
-                      </h3>
-                      <p className="text-sm text-amber-800">{dateRange.baslangic} - {dateRange.bitis}</p>
+                    <div className="flex items-center gap-4">
+                      <div className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-[10px] font-black tracking-widest uppercase">%20 STANDART ORAN</div>
                     </div>
                   </div>
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-white/5">
+                        <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">İŞLEM AÇIKLAMASI</th>
+                        <th className="px-10 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">MATRAH (TL)</th>
+                        <th className="px-10 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">KDV (TL)</th>
+                        <th className="px-10 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TOPLAM (TL)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      <tr className="hover:bg-white/[0.02]">
+                        <td className="px-10 py-8 font-black text-slate-300">MAL VE HİZMET SATIŞLARI (HESAPLANAN)</td>
+                        <td className="px-10 py-8 text-right font-bold text-slate-400">₺{satisMatrah.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-10 py-8 text-right font-black text-emerald-400">₺{satisKDV.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-10 py-8 text-right font-black">₺{toplamSatis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                      </tr>
+                      <tr className="hover:bg-white/[0.02]">
+                        <td className="px-10 py-8 font-black text-slate-300">MAL VE HİZMET ALIŞLARI (İNDİRİLECEK)</td>
+                        <td className="px-10 py-8 text-right font-bold text-slate-400">₺{alisMatrah.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-10 py-8 text-right font-black text-rose-500">₺{alisKDV.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-10 py-8 text-right font-black">₺{toplamAlis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                      </tr>
+                      <tr className="bg-indigo-600">
+                        <td className="px-10 py-10 font-black text-white text-lg">ÖDENECEK KATMA DEĞER VERGİSİ (NET)</td>
+                        <td className="px-10 py-10 text-right font-black text-white/50 text-xl">—</td>
+                        <td className="px-10 py-10 text-right font-black text-white text-3xl tracking-tighter">₺{odenecekKDV.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-10 py-10 text-right font-black text-white/50 text-xl">—</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               )}
 
               {activeTab === 'gelir-gider' && (
-                <div>
-                  <h2 className="text-xl font-bold text-slate-800 mb-6">Gelir-Gider Tablosu</h2>
-
-                  <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-                    <table className="w-full">
-                      <thead className="bg-slate-50">
-                        <tr>
-                          <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Hesap</th>
-                          <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">Tutar (₺)</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-200">
-                        <tr className="bg-green-50">
-                          <td className="px-6 py-4 text-sm font-bold text-slate-900">GELİRLER</td>
-                          <td className="px-6 py-4"></td>
-                        </tr>
-                        <tr>
-                          <td className="px-6 py-4 text-sm text-slate-700 pl-12">Satış Gelirleri</td>
-                          <td className="px-6 py-4 text-sm text-right font-semibold text-green-700">
-                            {toplamSatis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="px-6 py-4 text-sm text-slate-700 pl-12">Alınan Ödemeler</td>
-                          <td className="px-6 py-4 text-sm text-right font-semibold text-green-700">
-                            {toplamAlinanOdeme.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                          </td>
-                        </tr>
-                        <tr className="bg-green-100">
-                          <td className="px-6 py-4 text-sm font-bold text-slate-900">TOPLAM GELİR</td>
-                          <td className="px-6 py-4 text-sm text-right font-bold text-green-700 text-lg">
-                            {(toplamSatis + toplamAlinanOdeme).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                          </td>
-                        </tr>
-
-                        <tr className="bg-red-50">
-                          <td className="px-6 py-4 text-sm font-bold text-slate-900">GİDERLER</td>
-                          <td className="px-6 py-4"></td>
-                        </tr>
-                        <tr>
-                          <td className="px-6 py-4 text-sm text-slate-700 pl-12">Alış Giderleri</td>
-                          <td className="px-6 py-4 text-sm text-right font-semibold text-red-700">
-                            {toplamAlis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="px-6 py-4 text-sm text-slate-700 pl-12">Yapılan Ödemeler</td>
-                          <td className="px-6 py-4 text-sm text-right font-semibold text-red-700">
-                            {toplamVerilenOdeme.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="px-6 py-4 text-sm text-slate-700 pl-12">KDV Gideri</td>
-                          <td className="px-6 py-4 text-sm text-right font-semibold text-red-700">
-                            {odenecekKDV.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                          </td>
-                        </tr>
-                        <tr className="bg-red-100">
-                          <td className="px-6 py-4 text-sm font-bold text-slate-900">TOPLAM GİDER</td>
-                          <td className="px-6 py-4 text-sm text-right font-bold text-red-700 text-lg">
-                            {(toplamAlis + toplamVerilenOdeme + odenecekKDV).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                          </td>
-                        </tr>
-
-                        <tr className={`${netKar >= 0 ? 'bg-teal-100' : 'bg-red-100'}`}>
-                          <td className="px-6 py-4 text-sm font-bold text-slate-900">NET KAR/ZARAR</td>
-                          <td className={`px-6 py-4 text-sm text-right font-bold text-lg ${netKar >= 0 ? 'text-teal-700' : 'text-red-700'}`}>
-                            {netKar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                <div className="premium-card overflow-hidden">
+                  <div className="p-10 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+                    <div className="space-y-1">
+                      <h2 className="text-2xl font-black uppercase tracking-tight">Gelir-Gider Tablosu</h2>
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">KONSOLİDE MALİ DURUM RAPORU</p>
+                    </div>
                   </div>
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-white/5">
+                        <th className="px-10 py-6 text-left text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">HESAP KALEMLERİ</th>
+                        <th className="px-10 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">GELİR (TL)</th>
+                        <th className="px-10 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">GİDER (TL)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      <tr>
+                        <td className="px-10 py-6 font-black text-emerald-400/80 bg-emerald-500/[0.02]">DÖNEM GELİRLERİ</td>
+                        <td colSpan={2}></td>
+                      </tr>
+                      <tr className="hover:bg-white/[0.01]">
+                        <td className="px-16 py-5 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Tiçari Satış Gelirleri</td>
+                        <td className="px-10 py-5 text-right font-black text-emerald-400">₺{toplamSatis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-10 py-5 text-right font-black text-slate-700">—</td>
+                      </tr>
+                      <tr className="hover:bg-white/[0.01]">
+                        <td className="px-16 py-5 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Cari Tahsilat Kayıtları</td>
+                        <td className="px-10 py-5 text-right font-black text-emerald-400">₺{toplamAlinanOdeme.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-10 py-5 text-right font-black text-slate-700">—</td>
+                      </tr>
+                      <tr className="bg-emerald-500/5">
+                        <td className="px-10 py-8 font-black text-white">BRÜT GELİR TOPLAMI</td>
+                        <td className="px-10 py-8 text-right font-black text-emerald-400 text-xl tracking-tighter">₺{(toplamSatis + toplamAlinanOdeme).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-10 py-8 text-right font-black text-slate-700">—</td>
+                      </tr>
+
+                      <tr>
+                        <td className="px-10 py-6 font-black text-rose-400/80 bg-rose-500/[0.02]">DÖNEM GİDERLERİ</td>
+                        <td colSpan={2}></td>
+                      </tr>
+                      <tr className="hover:bg-white/[0.01]">
+                        <td className="px-16 py-5 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Satın Alma ve Alış Maliyetleri</td>
+                        <td className="px-10 py-5 text-right font-black text-slate-700">—</td>
+                        <td className="px-10 py-5 text-right font-black text-rose-500">₺{toplamAlis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                      </tr>
+                      <tr className="hover:bg-white/[0.01]">
+                        <td className="px-16 py-5 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Yapılan Cari Ödemeler</td>
+                        <td className="px-10 py-5 text-right font-black text-slate-700">—</td>
+                        <td className="px-10 py-5 text-right font-black text-rose-500">₺{toplamVerilenOdeme.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                      </tr>
+                      <tr className="hover:bg-white/[0.01]">
+                        <td className="px-16 py-5 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Net KDV Ödeme Yükü</td>
+                        <td className="px-10 py-5 text-right font-black text-slate-700">—</td>
+                        <td className="px-10 py-5 text-right font-black text-rose-500">₺{odenecekKDV.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                      </tr>
+                      <tr className="bg-rose-500/5">
+                        <td className="px-10 py-8 font-black text-white">BRÜT GİDER TOPLAMI</td>
+                        <td className="px-10 py-8 text-right font-black text-slate-700">—</td>
+                        <td className="px-10 py-8 text-right font-black text-rose-500 text-xl tracking-tighter">₺{(toplamAlis + toplamVerilenOdeme + odenecekKDV).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                      </tr>
+
+                      <tr className={`border-t-4 ${netKar >= 0 ? 'border-indigo-500 bg-indigo-500/10' : 'border-rose-500 bg-rose-500/10'}`}>
+                        <td className="px-10 py-12 font-black text-2xl tracking-tighter uppercase whitespace-nowrap">NET DÖNEM {netKar >= 0 ? 'KARI' : 'ZARARI'}</td>
+                        <td colSpan={2} className={`px-10 py-12 text-right font-black text-5xl tracking-tighter ${netKar >= 0 ? 'text-indigo-400' : 'text-rose-500'}`}>
+                          ₺{netKar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               )}
 
               {activeTab === 'mizan' && (
-                <div>
-                  <h2 className="text-xl font-bold text-slate-800 mb-6">Cari Mizan</h2>
+                <div className="premium-card overflow-hidden">
+                  <div className="p-10 border-b border-white/5 flex flex-col md:flex-row items-center justify-between bg-white/[0.01] gap-6">
+                    <div className="space-y-1">
+                      <h2 className="text-2xl font-black uppercase tracking-tight">Cari Mizan</h2>
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">CARİ HESAPLARIN BORÇ/ALACAK/BAKİYE DENGESİ</p>
+                    </div>
+                  </div>
 
                   {cariMizan.length === 0 ? (
-                    <div className="text-center py-12">
-                      <i className="ri-scales-line text-6xl text-slate-300 mb-4"></i>
-                      <p className="text-slate-500 text-lg">Seçilen tarih aralığında cari hareketi bulunamadı</p>
+                    <div className="p-24 text-center space-y-6">
+                      <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10 text-slate-700">
+                        <i className="ri-scales-line text-5xl"></i>
+                      </div>
+                      <h3 className="text-xl font-black uppercase tracking-tighter">Haraket Bulunamadı</h3>
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest max-w-sm mx-auto">SEÇİLEN DÖNEMDE HİÇBİR CARİ HAREKETİ KAYDEDİLMEMİŞTİR.</p>
                     </div>
                   ) : (
-                    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-                      <table className="w-full">
-                        <thead className="bg-slate-50">
-                          <tr>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Cari Adı</th>
-                            <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">Borç (₺)</th>
-                            <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">Alacak (₺)</th>
-                            <th className="px-6 py-4 text-right text-sm font-semibold text-slate-700">Bakiye (₺)</th>
-                            <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700">Durum</th>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left">
+                        <thead>
+                          <tr className="bg-white/5">
+                            <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">CARİ HESAP ÜNVANI</th>
+                            <th className="px-10 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">BORÇ (TL)</th>
+                            <th className="px-10 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ALACAK (TL)</th>
+                            <th className="px-10 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">BAKİYE (TL)</th>
+                            <th className="px-10 py-6 text-center text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">DURUM</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-200">
+                        <tbody className="divide-y divide-white/5">
                           {cariMizan.map((cari, index) => (
-                            <tr key={index} className="hover:bg-slate-50 transition-colors">
-                              <td className="px-6 py-4 text-sm font-medium text-slate-800">{cari.cari}</td>
-                              <td className="px-6 py-4 text-sm text-right text-red-600 font-semibold">
-                                {cari.borc.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                            <tr key={index} className="hover:bg-white/[0.01] transition-colors group">
+                              <td className="px-10 py-6 font-black text-slate-300 uppercase tracking-tight">{cari.cari}</td>
+                              <td className="px-10 py-6 text-right font-bold text-rose-500/80 group-hover:text-rose-500">₺{cari.borc.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                              <td className="px-10 py-6 text-right font-bold text-emerald-400/80 group-hover:text-emerald-400">₺{cari.alacak.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                              <td className={`px-10 py-6 text-right font-black text-lg tracking-tighter ${cari.bakiye >= 0 ? 'text-indigo-400' : 'text-rose-500'}`}>
+                                ₺{Math.abs(cari.bakiye).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                               </td>
-                              <td className="px-6 py-4 text-sm text-right text-green-600 font-semibold">
-                                {cari.alacak.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                              </td>
-                              <td className={`px-6 py-4 text-sm text-right font-bold ${cari.bakiye >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {Math.abs(cari.bakiye).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                              </td>
-                              <td className="px-6 py-4 text-center">
-                                <span className={`px-3 py-1 text-xs font-medium rounded-full ${cari.bakiyeTip === 'Alacak' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                              <td className="px-10 py-6 text-center">
+                                <span className={`inline-block px-4 py-2 rounded-lg text-[8px] font-black tracking-[0.2em] uppercase border ${cari.bakiyeTip === 'Alacak' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-rose-500/10 text-rose-500 border-rose-500/20'
                                   }`}>
                                   {cari.bakiyeTip}
                                 </span>
                               </td>
                             </tr>
                           ))}
-                          <tr className="bg-slate-100 font-bold">
-                            <td className="px-6 py-4 text-sm text-slate-900">TOPLAM</td>
-                            <td className="px-6 py-4 text-sm text-right text-red-700">
-                              {cariMizan.reduce((sum, c) => sum + c.borc, 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-right text-green-700">
-                              {cariMizan.reduce((sum, c) => sum + c.alacak, 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-right text-slate-900">
-                              {Math.abs(cariMizan.reduce((sum, c) => sum + c.bakiye, 0)).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                            </td>
-                            <td className="px-6 py-4"></td>
+                          <tr className="bg-white/[0.03] border-t border-white/10 font-black">
+                            <td className="px-10 py-10 text-lg uppercase tracking-widest">GENEL TOPLAM</td>
+                            <td className="px-10 py-10 text-right text-rose-500 text-xl tracking-tighter">₺{cariMizan.reduce((sum, c) => sum + c.borc, 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                            <td className="px-10 py-10 text-right text-emerald-400 text-xl tracking-tighter">₺{cariMizan.reduce((sum, c) => sum + c.alacak, 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                            <td className="px-10 py-10 text-right text-indigo-400 text-2xl tracking-tighter underline underline-offset-8">₺{Math.abs(cariMizan.reduce((sum, c) => sum + c.bakiye, 0)).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                            <td className="px-10 py-10 text-center">—</td>
                           </tr>
                         </tbody>
                       </table>
@@ -641,8 +600,8 @@ export default function Raporlar() {
                 </div>
               )}
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );

@@ -151,17 +151,22 @@ export default function CarilerPage() {
 
   if (!selectedProfile) {
     return (
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 flex items-center justify-center">
-            <div className="text-center max-w-md">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="ri-error-warning-line text-3xl text-orange-500"></i>
+      <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-hidden relative">
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-[-20%] left-[-10%] w-[700px] h-[700px] bg-indigo-600/20 rounded-full blur-[120px] animate-aurora-1"></div>
+          <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] animate-aurora-2"></div>
+        </div>
+
+        <Sidebar mbOpen={false} setMbOpen={() => { }} />
+        <div className="flex-1 flex flex-col relative z-10">
+          <Header onMenuClick={() => { }} />
+          <main className="flex-1 flex items-center justify-center p-6">
+            <div className="premium-card p-12 text-center max-w-md animate-slide-up">
+              <div className="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-blue-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-600/20">
+                <i className="ri-profile-line text-4xl text-white"></i>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Profil Seçin</h3>
-              <p className="text-gray-600 mb-4">İşlem yapabilmek için lütfen bir profil seçin.</p>
+              <h3 className="text-2xl font-black tracking-tight mb-2">Profil Seçimi Gerekli</h3>
+              <p className="text-slate-400 font-medium mb-8">İşlem yapabilmek için lütfen üst menüden bir profil seçin veya yeni bir profil oluşturun.</p>
             </div>
           </main>
         </div>
@@ -170,202 +175,196 @@ export default function CarilerPage() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-8">
-          <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-x-hidden relative">
+      {/* Background Aurora */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-indigo-600/15 rounded-full blur-[140px] animate-aurora-1"></div>
+        <div className="absolute bottom-[-20%] left-[-10%] w-[700px] h-[700px] bg-blue-600/10 rounded-full blur-[120px] animate-aurora-2"></div>
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
+      </div>
 
+      <div className="flex relative z-10">
+        <Sidebar mbOpen={false} setMbOpen={() => { }} />
+
+        <div className="flex-1 flex flex-col min-h-screen max-w-full overflow-hidden">
+          <Header onMenuClick={() => { }} />
+
+          <main className="flex-1 p-6 md:p-10 space-y-10 animate-fade-in">
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Cari Hesaplar</h1>
-                <p className="text-sm text-gray-500 mt-1">Müşteri ve tedarikçi hesaplarınızı yönetin</p>
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest">
+                  <i className="ri-group-line"></i>
+                  <span>YÖNETİM PANELİ</span>
+                </div>
+                <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-none">
+                  Cari <span className="text-gradient">Hesaplar.</span>
+                </h1>
+                <p className="text-slate-500 text-lg font-medium max-w-xl">Müşteri ve tedarikçi ağınızı yapay zeka destekli akıllı verilerle yönetin.</p>
               </div>
+
               <button
                 onClick={() => setShowModal(true)}
-                className="inline-flex items-center justify-center px-4 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 focus:ring-4 focus:ring-teal-100 transition-all font-medium shadow-sm gap-2 cursor-pointer"
+                className="premium-button px-8 h-16 text-sm uppercase tracking-widest group"
               >
-                <i className="ri-add-line text-xl"></i>
-                <span>Yeni Cari Ekle</span>
+                <span>YENİ CARİ EKLE</span>
+                <i className="ri-add-line text-xl group-hover:rotate-90 transition-transform"></i>
               </button>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Toplam Cari</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">{stats.total}</p>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { label: 'TOPLAM CARİ', val: stats.total, icon: 'ri-team-line', color: 'from-blue-600 to-indigo-600' },
+                { label: 'AKTİF İLİŞKİLER', val: stats.active, icon: 'ri-pulse-line', color: 'from-emerald-600 to-teal-600' },
+                { label: 'DİJİTAL İLETİŞİM', val: stats.withEmail, icon: 'ri-mail-check-line', color: 'from-purple-600 to-pink-600' }
+              ].map((s, idx) => (
+                <div key={idx} className="premium-card p-8 group hover:border-indigo-500/40 transition-all">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className={`w-14 h-14 bg-gradient-to-tr ${s.color} rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform`}>
+                      <i className={`${s.icon} text-2xl text-white`}></i>
+                    </div>
+                    <span className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">{s.label}</span>
                   </div>
-                  <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
-                    <i className="ri-user-star-line text-2xl"></i>
-                  </div>
+                  <div className="text-4xl font-black tracking-tighter">{s.val}</div>
                 </div>
-              </div>
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Aktif Cariler</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">{stats.active}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center text-green-600">
-                    <i className="ri-checkbox-circle-line text-2xl"></i>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Kayıtlı E-posta</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">{stats.withEmail}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600">
-                    <i className="ri-mail-check-line text-2xl"></i>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-                <i className="ri-error-warning-line text-xl text-red-500"></i>
-                <p className="text-red-700 text-sm font-medium">{error}</p>
-                <button onClick={() => setError(null)} className="ml-auto text-red-600 hover:text-red-700">
-                  <i className="ri-close-line"></i>
+              <div className="p-6 rounded-3xl bg-red-500/10 border border-red-500/20 text-red-200 text-sm font-bold flex items-center gap-4 animate-shake">
+                <i className="ri-error-warning-fill text-xl"></i>
+                <div className="flex-1">{error}</div>
+                <button onClick={() => setError(null)} className="hover:text-white transition-colors">
+                  <i className="ri-close-line text-xl font-black"></i>
                 </button>
               </div>
             )}
 
-            {/* Filter & Table Section */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white">
-                <div className="relative flex-1 max-w-md">
-                  <i className="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            {/* Table Section */}
+            <div className="premium-card overflow-hidden">
+              <div className="p-8 border-b border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="relative w-full md:max-w-md group">
+                  <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
                   <input
                     type="text"
                     placeholder="Ad, telefon, email veya vergi no ile ara..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-sm"
+                    className="premium-input pl-12 h-14"
                   />
                 </div>
-                <div className="flex items-center gap-2">
-                  <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer" title="Filtrele">
-                    <i className="ri-filter-3-line text-lg"></i>
+                <div className="flex items-center gap-4">
+                  <button className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all text-slate-400 hover:text-white">
+                    <i className="ri-filter-3-line text-xl"></i>
                   </button>
-                  <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer" title="Dışa Aktar">
-                    <i className="ri-download-2-line text-lg"></i>
+                  <button className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all text-slate-400 hover:text-white">
+                    <i className="ri-download-2-line text-xl"></i>
                   </button>
                 </div>
               </div>
 
               {loading ? (
-                <div className="p-12 text-center">
-                  <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="text-gray-500 text-sm">Veriler yükleniyor...</p>
+                <div className="p-24 text-center space-y-4">
+                  <div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto"></div>
+                  <p className="text-slate-500 font-black text-xs tracking-widest uppercase">Veriler İşleniyor...</p>
                 </div>
               ) : processedCariler.length === 0 ? (
-                <div className="p-12 text-center">
-                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i className="ri-user-search-line text-3xl text-gray-400"></i>
+                <div className="p-24 text-center space-y-6">
+                  <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
+                    <i className="ri-user-search-line text-5xl text-slate-700"></i>
                   </div>
-                  <h3 className="text-gray-900 font-medium mb-1">Cari Bulunamadı</h3>
-                  <p className="text-gray-500 text-sm mb-6">Arama kriterlerinize uygun kayıt yok veya henüz hiç cari eklemediniz.</p>
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-black tracking-tight text-slate-200 uppercase">Cari Bulunamadı</h3>
+                    <p className="text-slate-500 font-medium max-w-md mx-auto">Henüz hiç cari kaydı oluşturmamışsınız veya arama kriterlerinize uygun kayıt bulunamadı.</p>
+                  </div>
                   {!searchTerm && (
                     <button
                       onClick={() => setShowModal(true)}
-                      className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm font-medium cursor-pointer"
+                      className="px-8 py-4 bg-white text-black rounded-2xl font-black tracking-widest uppercase hover:bg-slate-200 transition-all"
                     >
-                      İlk Cariyi Ekle
+                      İLK CARİYİ EKLE
                     </button>
                   )}
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50/50">
-                      <tr>
+                <div className="overflow-x-auto overflow-y-hidden">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-white/[0.02]">
                         {[
-                          { key: 'ad', label: 'Cari Adı & Bilgisi' },
-                          { key: 'telefon', label: 'İletişim' },
-                          { key: 'vergi_no', label: 'Vergi No' },
-                          { key: 'adres', label: 'Adres' }
+                          { key: 'ad', label: 'CARİ BİLGİSİ' },
+                          { key: 'telefon', label: 'İLETİŞİM' },
+                          { key: 'vergi_no', label: 'VERGİ KİMLİK' },
+                          { key: 'adres', label: 'LOKASYON' }
                         ].map((col) => (
                           <th
                             key={col.key}
                             onClick={() => handleSort(col.key as keyof Cari)}
-                            className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700 transition-colors group select-none"
+                            className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] cursor-pointer hover:text-indigo-400 transition-colors group select-none"
                           >
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-2">
                               {col.label}
                               {sortConfig?.key === col.key && (
-                                <i className={`ri-arrow-${sortConfig.direction === 'asc' ? 'up' : 'down'}-s-line text-teal-600`}></i>
-                              )}
-                              {sortConfig?.key !== col.key && (
-                                <i className="ri-arrow-up-down-line text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                <i className={`ri-arrow-${sortConfig.direction === 'asc' ? 'up' : 'down'}-s-line text-indigo-500 text-sm`}></i>
                               )}
                             </div>
                           </th>
                         ))}
-                        <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">İşlemler</th>
+                        <th className="px-8 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">AKSİYON</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-white/5">
                       {processedCariler.map((cari) => (
                         <tr
                           key={cari.id}
                           onClick={() => navigate(`/cari-detay/${cari.id}`)}
-                          className="hover:bg-teal-50/30 transition-colors cursor-pointer group"
+                          className="hover:bg-indigo-500/[0.03] transition-all cursor-pointer group/row"
                         >
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-sm shrink-0">
+                          <td className="px-8 py-6">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500/20 to-blue-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-black text-sm shrink-0 group-hover/row:scale-110 transition-transform shadow-lg shadow-indigo-600/5">
                                 {cari.ad.substring(0, 2).toUpperCase()}
                               </div>
                               <div>
-                                <div className="font-medium text-gray-900 group-hover:text-teal-700 transition-colors">{cari.ad}</div>
-                                {cari.email && <div className="text-sm text-gray-500">{cari.email}</div>}
+                                <div className="font-black text-slate-200 tracking-tight group-hover/row:text-white transition-colors">{cari.ad}</div>
+                                {cari.email && <div className="text-xs font-bold text-slate-600 group-hover/row:text-slate-400 transition-colors mt-0.5">{cari.email}</div>}
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-gray-600 font-medium">
-                              {cari.telefon || '-'}
-                            </div>
+                          <td className="px-8 py-6 text-sm font-bold text-slate-400 group-hover/row:text-slate-200">
+                            {cari.telefon || 'Telefon belirtilmemiş'}
                           </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-gray-600">
+                          <td className="px-8 py-6">
+                            <div className="text-sm font-black text-slate-300">
                               {cari.vergi_no ? (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                <span className="inline-flex items-center px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-[10px] tracking-widest uppercase">
                                   {cari.vergi_no}
                                 </span>
-                              ) : '-'}
+                              ) : <span className="text-slate-700 italic text-xs">Belirtilmemiş</span>}
                             </div>
-                            {cari.vergi_dairesi && <div className="text-xs text-gray-400 mt-0.5">{cari.vergi_dairesi}</div>}
+                            {cari.vergi_dairesi && <div className="text-[10px] font-bold text-slate-600 mt-1 uppercase tracking-tighter">{cari.vergi_dairesi}</div>}
                           </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-gray-500 max-w-xs truncate" title={cari.adres}>
-                              {cari.adres || '-'}
+                          <td className="px-8 py-6">
+                            <div className="text-xs font-medium text-slate-500 max-w-[200px] truncate group-hover/row:text-slate-400 transition-colors" title={cari.adres}>
+                              {cari.adres || 'Adres bilgisi girilmemiş'}
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <td className="px-8 py-6 text-right">
+                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover/row:opacity-100 transition-all translate-x-4 group-hover/row:translate-x-0">
                               <button
                                 onClick={(e) => { e.stopPropagation(); navigate(`/cari-detay/${cari.id}`); }}
-                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all cursor-pointer"
+                                className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all shadow-lg shadow-indigo-600/10"
                                 title="Detayları Görüntüle"
                               >
-                                <i className="ri-eye-line text-lg"></i>
+                                <i className="ri-eye-line"></i>
                               </button>
                               <button
                                 onClick={(e) => handleDelete(cari.id, e)}
-                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
+                                className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-lg shadow-red-600/10"
                                 title="Sil"
                               >
-                                <i className="ri-delete-bin-line text-lg"></i>
+                                <i className="ri-delete-bin-line"></i>
                               </button>
                             </div>
                           </td>
@@ -376,163 +375,132 @@ export default function CarilerPage() {
                 </div>
               )}
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
 
       {/* Modern Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-slide-up">
-            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">Yeni Cari Kartı</h3>
-                <p className="text-sm text-gray-500 mt-1">Yeni bir müşteri veya tedarikçi ekleyin</p>
+        <div className="fixed inset-0 bg-[#020617]/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fade-in overflow-y-auto">
+          <div className="premium-card p-0 w-full max-w-2xl max-h-[90vh] flex flex-col animate-slide-up border-white/10 relative">
+            <div className="px-10 py-10 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.01]">
+              <div className="space-y-1">
+                <h3 className="text-3xl font-black tracking-tight text-white uppercase leading-none">Cari Kartı Oluştur</h3>
+                <p className="text-slate-500 font-bold text-sm">Sisteme yeni bir paydaş entegre edin.</p>
               </div>
               <button
                 onClick={() => {
                   setShowModal(false);
-                  setFormData({
-                    ad: '',
-                    telefon: '',
-                    email: '',
-                    adres: '',
-                    vergi_no: '',
-                    vergi_dairesi: '',
-                  });
+                  setFormData({ ad: '', telefon: '', email: '', adres: '', vergi_no: '', vergi_dairesi: '', });
                 }}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+                className="w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all font-black"
               >
                 <i className="ri-close-line text-2xl"></i>
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto">
-              <form id="cariForm" onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-2">
-                  <div className="bg-blue-50/50 p-4 rounded-lg flex gap-3 border border-blue-100">
-                    <i className="ri-information-line text-blue-500 mt-0.5"></i>
-                    <p className="text-sm text-blue-700">Zorunlu alanları (* işaretli) doldurduğunuzdan emin olun. Vergi bilgileri fatura işlemleri için gereklidir.</p>
+            <div className="p-10 overflow-y-auto custom-scrollbar">
+              <form id="cariForm" onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="md:col-span-2 space-y-4">
+                  <div className="p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl flex items-center gap-4">
+                    <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/30">
+                      <i className="ri-information-line text-white text-xl"></i>
+                    </div>
+                    <p className="text-xs font-black text-indigo-300 uppercase leading-tight tracking-wider">Lütfen fatura kesimi için vergi bilgilerini eksiksiz doldurunuz.</p>
                   </div>
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Cari Adı / Unvanı <span className="text-red-500">*</span>
-                  </label>
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">Cari Adı / Ticari Unvan *</label>
                   <input
                     type="text"
+                    required
                     value={formData.ad}
                     onChange={(e) => setFormData({ ...formData, ad: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none"
-                    placeholder="Örn: ABC Teknoloji Ltd. Şti."
-                    required
+                    className="premium-input text-lg font-black"
+                    placeholder="Örn: Net Teknoloji Ltd. Şti."
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Telefon <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                      <i className="ri-phone-line"></i>
-                    </span>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">İletişim Numarası *</label>
+                  <div className="relative group">
+                    <i className="ri-phone-line absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-indigo-400 transition-colors"></i>
                     <input
                       type="tel"
+                      required
                       value={formData.telefon}
                       onChange={(e) => setFormData({ ...formData, telefon: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none"
-                      placeholder="0555 123 45 67"
-                      required
+                      className="premium-input pl-14"
+                      placeholder="05xx ..."
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    E-posta <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                      <i className="ri-mail-line"></i>
-                    </span>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">Resmi E-Posta *</label>
+                  <div className="relative group">
+                    <i className="ri-mail-line absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-indigo-400 transition-colors"></i>
                     <input
                       type="email"
+                      required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none"
-                      placeholder="info@sirket.com"
-                      required
+                      className="premium-input pl-14"
+                      placeholder="muhasebe@sirket.com"
                     />
                   </div>
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Adres
-                  </label>
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">Ticaret Lokasyonu / Adres</label>
                   <textarea
                     value={formData.adres}
                     onChange={(e) => setFormData({ ...formData, adres: e.target.value })}
                     rows={3}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none resize-none"
-                    placeholder="Açık adres giriniz..."
+                    className="premium-input py-4 resize-none h-auto"
+                    placeholder="Mahalle, cadde, kapı no..."
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Vergi No
-                  </label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">Vergi Numarası / TCKN</label>
                   <input
                     type="text"
                     value={formData.vergi_no}
                     onChange={(e) => setFormData({ ...formData, vergi_no: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none"
-                    placeholder="10 haneli vergi numarası"
+                    className="premium-input"
+                    placeholder="10/11 Hane"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Vergi Dairesi
-                  </label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">Vergi Dairesi</label>
                   <input
                     type="text"
                     value={formData.vergi_dairesi}
                     onChange={(e) => setFormData({ ...formData, vergi_dairesi: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all outline-none"
-                    placeholder="Bağlı bulunulan vergi dairesi"
+                    className="premium-input"
+                    placeholder="Örn: Beşiktaş V.D."
                   />
                 </div>
               </form>
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3 shrink-0 bg-gray-50 rounded-b-2xl">
+            <div className="px-10 py-8 border-t border-white/5 flex items-center justify-end gap-6 shrink-0 bg-white/[0.01]">
               <button
                 type="button"
-                onClick={() => {
-                  setShowModal(false);
-                  setFormData({
-                    ad: '',
-                    telefon: '',
-                    email: '',
-                    adres: '',
-                    vergi_no: '',
-                    vergi_dairesi: '',
-                  });
-                }}
-                className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium cursor-pointer"
+                onClick={() => setShowModal(false)}
+                className="text-xs font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors"
               >
-                Vazgeç
+                İPTAL ET
               </button>
               <button
                 type="submit"
                 form="cariForm"
-                className="px-6 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium shadow-sm cursor-pointer"
+                className="premium-button px-10 h-16 text-xs uppercase tracking-widest"
               >
-                Cari Kaydet
+                KAYDI TAMAMLA
               </button>
             </div>
           </div>

@@ -2,10 +2,17 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useProfile } from '../../contexts/ProfileContext';
 
-export default function Sidebar() {
+interface SidebarProps {
+  mbOpen?: boolean;
+  setMbOpen?: (open: boolean) => void;
+}
+
+export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
   const location = useLocation();
   const { isAdmin } = useProfile();
   const [isOpen, setIsOpen] = useState(false);
+
+  const sidebarOpen = mbOpen !== undefined ? mbOpen : isOpen;
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'ri-dashboard-3-line', path: '/' },
@@ -21,7 +28,13 @@ export default function Sidebar() {
     { id: 'admin', label: 'Yönetici Paneli', icon: 'ri-settings-5-line', path: '/admin', adminOnly: true },
   ];
 
-  const toggleSidebar = () => setIsOpen(!isOpen);
+  const toggleSidebar = () => {
+    if (setMbOpen) {
+      setMbOpen(!mbOpen);
+    } else {
+      setIsOpen(!isOpen);
+    }
+  };
 
   return (
     <>
@@ -45,7 +58,7 @@ export default function Sidebar() {
       <aside className={`
         fixed lg:sticky top-0 left-0 h-screen w-72 bg-[#020617] border-r border-white/5 
         overflow-y-auto z-50 transition-all duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <div className="p-8">
           <div className="flex items-center gap-3">

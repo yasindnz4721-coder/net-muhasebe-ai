@@ -334,8 +334,11 @@ export interface Urun {
     id: string;
     ad: string;
     kategori_id: string;
+    kategori?: string;
     birim: string;
     stok_miktari: number;
+    satis_fiyati?: string | number;
+    alis_fiyati?: string | number;
     profile_id?: string;
     created_at?: string;
     updated_at?: string;

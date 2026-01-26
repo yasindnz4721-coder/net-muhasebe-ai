@@ -12,13 +12,11 @@ export default function ProfilAyarlariPage() {
 
   // Profil bilgileri
   const [profileName, setProfileName] = useState('');
-  const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Şifre değiştirme
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
@@ -36,7 +34,6 @@ export default function ProfilAyarlariPage() {
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setLogoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setLogoPreview(reader.result as string);
@@ -53,21 +50,14 @@ export default function ProfilAyarlariPage() {
     setMessage(null);
 
     try {
-      let logoUrl = selectedProfile.logo_url;
-
-      // Logo yükleme işlemi backend'de ele alınmalı veya base64 string olarak gönderilmeli
-      // Şimdilik sadece text alanı güncelliyoruz, logo için backend desteği eklenmeli
-
-      const { error } = await profiles.update(profileName, logoUrl);
-
+      const { error } = await profiles.update(profileName, logoPreview || undefined);
       if (error) throw new Error(error);
 
       await refreshProfiles();
-      setMessage({ type: 'success', text: t('profileUpdatedSuccess') });
-      setLogoFile(null);
+      setMessage({ type: 'success', text: t('profileUpdatedSuccess') || 'Profil başarıyla güncellendi' });
     } catch (error: any) {
       console.error('Profil güncellenirken hata:', error);
-      setMessage({ type: 'error', text: error.message || t('profileUpdateError') });
+      setMessage({ type: 'error', text: error.message || t('profileUpdateError') || 'Güncelleme hatası' });
     } finally {
       setLoading(false);
     }
@@ -91,11 +81,9 @@ export default function ProfilAyarlariPage() {
 
     try {
       const { error } = await auth.updatePassword(newPassword);
-
       if (error) throw new Error(error);
 
       setMessage({ type: 'success', text: 'Şifreniz başarıyla değiştirildi!' });
-      setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (error: any) {
@@ -109,266 +97,240 @@ export default function ProfilAyarlariPage() {
   const handleLanguageChange = (lang: string) => {
     setSelectedLanguage(lang);
     i18n.changeLanguage(lang);
-    setMessage({ type: 'success', text: 'Dil başarıyla değiştirildi!' });
+    setMessage({ type: 'success', text: 'Sistem dili güncellendi.' });
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-8">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('settings')}</h1>
+    <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-x-hidden relative text-xs">
+      {/* Background Effects */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px] animate-aurora-2"></div>
+        <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-[100px] animate-aurora-1"></div>
+      </div>
 
-            {/* Tabs */}
-            <div className="bg-white rounded-lg shadow-sm mb-6">
-              <div className="border-b border-gray-200">
-                <nav className="flex -mb-px">
-                  <button
-                    onClick={() => setActiveTab('profile')}
-                    className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === 'profile'
-                      ? 'border-teal-500 text-teal-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      }`}
-                  >
-                    <i className="ri-user-settings-line mr-2"></i>
-                    Profil Bilgileri
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('account')}
-                    className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === 'account'
-                      ? 'border-teal-500 text-teal-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      }`}
-                  >
-                    <i className="ri-account-circle-line mr-2"></i>
-                    Hesap Bilgileri
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('security')}
-                    className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === 'security'
-                      ? 'border-teal-500 text-teal-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      }`}
-                  >
-                    <i className="ri-lock-password-line mr-2"></i>
-                    Güvenlik
-                  </button>
-                </nav>
+      <div className="flex relative z-10">
+        <Sidebar mbOpen={false} setMbOpen={() => { }} />
+
+        <div className="flex-1 flex flex-col min-h-screen max-w-full overflow-hidden">
+          <Header onMenuClick={() => { }} />
+
+          <main className="flex-1 p-6 md:p-10 space-y-10 animate-fade-in">
+            {/* Header Section */}
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest">
+                <i className="ri-settings-4-line"></i>
+                <span>SİSTEM VE KULLANICI AYARLARI</span>
               </div>
+              <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-none">
+                Tercihler & <span className="text-gradient from-indigo-400 to-purple-500 italic">Profil.</span>
+              </h1>
+              <p className="text-slate-500 text-lg font-medium max-w-xl">Hesap ayarlarınızı, şirket bilgilerinizi ve güvenlik tercihlerini buradan yönetin.</p>
             </div>
 
-            {/* Mesaj */}
+            {/* Notification */}
             {message && (
-              <div
-                className={`mb-6 p-4 rounded-lg ${message.type === 'success'
-                  ? 'bg-green-50 text-green-800 border border-green-200'
-                  : 'bg-red-50 text-red-800 border border-red-200'
-                  }`}
-              >
-                <div className="flex items-center">
-                  <i className={`${message.type === 'success' ? 'ri-checkbox-circle-line' : 'ri-error-warning-line'} text-xl mr-2`}></i>
-                  <span>{message.text}</span>
+              <div className={`p-6 rounded-[2rem] border animate-slide-up flex items-center gap-6 ${message.type === 'success' ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/5 border-rose-500/20 text-rose-500'
+                }`}>
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${message.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-rose-500/10 border-rose-500/20'
+                  }`}>
+                  <i className={`${message.type === 'success' ? 'ri-checkbox-circle-line' : 'ri-error-warning-line'} text-2xl`}></i>
                 </div>
+                <span className="font-black uppercase tracking-widest">{message.text}</span>
+                <button onClick={() => setMessage(null)} className="ml-auto opacity-50 hover:opacity-100 transition-opacity">
+                  <i className="ri-close-line text-xl"></i>
+                </button>
               </div>
             )}
 
-            {/* Profil Bilgileri Tab */}
-            {activeTab === 'profile' && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Profil Bilgilerini Düzenle</h2>
-                <form onSubmit={handleProfileUpdate} className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Şirket Adı
-                    </label>
-                    <input
-                      type="text"
-                      value={profileName}
-                      onChange={(e) => setProfileName(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Logo
-                    </label>
-                    <div className="flex items-center space-x-4">
-                      {logoPreview && (
-                        <img
-                          src={logoPreview}
-                          alt="Logo"
-                          className="w-20 h-20 rounded-lg object-cover border border-gray-200"
-                        />
-                      )}
-                      <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
-                        <i className="ri-upload-2-line mr-2"></i>
-                        {logoPreview ? 'Logoyu Değiştir' : 'Logo Yükle'}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleLogoChange}
-                          className="hidden"
-                        />
-                      </label>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Dil Seçimi
-                    </label>
-                    <div className="flex space-x-4">
-                      <button
-                        type="button"
-                        onClick={() => handleLanguageChange('tr')}
-                        className={`px-6 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${selectedLanguage === 'tr'
-                          ? 'bg-teal-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                      >
-                        🇹🇷 Türkçe
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleLanguageChange('en')}
-                        className={`px-6 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${selectedLanguage === 'en'
-                          ? 'bg-teal-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                      >
-                        🇬🇧 English
-                      </button>
-                    </div>
-                  </div>
-
+            <div className="flex flex-col lg:flex-row gap-10">
+              {/* Tabs Sidebar */}
+              <div className="lg:w-80 shrink-0 space-y-2">
+                {[
+                  { id: 'profile', label: 'PROFİL BİLGİLERİ', icon: 'ri-user-settings-line' },
+                  { id: 'account', label: 'HESAP DETAYLARI', icon: 'ri-bank-card-line' },
+                  { id: 'security', label: 'GÜVENLİK', icon: 'ri-shield-keyhole-line' }
+                ].map((tab) => (
                   <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-teal-500 hover:bg-teal-600 text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`w-full flex items-center gap-4 px-8 py-6 rounded-3xl font-black text-[10px] tracking-widest uppercase transition-all border ${activeTab === tab.id
+                        ? 'bg-indigo-600 border-indigo-500 text-white shadow-xl shadow-indigo-600/20'
+                        : 'bg-white/5 border-white/5 text-slate-500 hover:bg-white/10 hover:text-white'
+                      }`}
                   >
-                    {loading ? (
-                      <>
-                        <i className="ri-loader-4-line animate-spin mr-2"></i>
-                        Kaydediliyor...
-                      </>
-                    ) : (
-                      <>
-                        <i className="ri-save-line mr-2"></i>
-                        Değişiklikleri Kaydet
-                      </>
-                    )}
+                    <i className={`${tab.icon} text-xl`}></i>
+                    <span>{tab.label}</span>
                   </button>
-                </form>
+                ))}
               </div>
-            )}
 
-            {/* Hesap Bilgileri Tab */}
-            {activeTab === 'account' && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Hesap Bilgileri</h2>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-500">E-posta Adresi</p>
-                      <p className="text-base font-medium text-gray-900">{currentUser?.email}</p>
+              {/* Content Area */}
+              <div className="flex-1 animate-slide-up">
+                {activeTab === 'profile' && (
+                  <div className="premium-card p-10 space-y-10">
+                    <div className="flex items-center gap-4 pb-6 border-b border-white/5">
+                      <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400 border border-indigo-500/20">
+                        <i className="ri-user-settings-line text-2xl"></i>
+                      </div>
+                      <h2 className="text-2xl font-black uppercase tracking-tight">Profil Bilgilerini Düzenle</h2>
                     </div>
-                    <i className="ri-mail-line text-2xl text-gray-400"></i>
+
+                    <form onSubmit={handleProfileUpdate} className="space-y-8">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">ŞİRKET VEYA PROFİL ADI</label>
+                          <input
+                            type="text"
+                            value={profileName}
+                            onChange={(e) => setProfileName(e.target.value)}
+                            className="premium-input h-14 px-6 text-[10px] font-black uppercase tracking-widest"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">PROFİL LOGOSU / İKONU</label>
+                          <div className="flex items-center gap-6">
+                            {logoPreview ? (
+                              <img src={logoPreview} alt="Logo" className="w-14 h-14 rounded-2xl object-cover border border-indigo-500/30 shadow-lg shadow-indigo-500/20" />
+                            ) : (
+                              <div className="w-14 h-14 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center text-slate-600">
+                                <i className="ri-image-add-line text-2xl"></i>
+                              </div>
+                            )}
+                            <label className="premium-button px-6 h-14 text-[8px] tracking-[0.2em] uppercase cursor-pointer hover:bg-indigo-600">
+                              <span>FOTOĞRAF YÜKLE</span>
+                              <input type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4 pt-6 border-t border-white/5">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">SİSTEM DİLİ</label>
+                        <div className="flex gap-4">
+                          <button
+                            type="button"
+                            onClick={() => handleLanguageChange('tr')}
+                            className={`flex-1 h-14 rounded-2xl font-black text-[10px] tracking-widest uppercase transition-all border ${selectedLanguage === 'tr' ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-white/5 border-white/5 text-slate-500'
+                              }`}
+                          >
+                            🇹🇷 TÜRKÇE
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleLanguageChange('en')}
+                            className={`flex-1 h-14 rounded-2xl font-black text-[10px] tracking-widest uppercase transition-all border ${selectedLanguage === 'en' ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-white/5 border-white/5 text-slate-500'
+                              }`}
+                          >
+                            🇬🇧 ENGLISH
+                          </button>
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="premium-button w-full h-16 bg-indigo-600 hover:bg-indigo-500 border-indigo-400/30 text-[10px] font-black tracking-[0.3em] uppercase"
+                      >
+                        {loading ? 'YÜKLENİYOR...' : 'DEĞİŞİKLİKLERİ SİSTEME İŞLE'}
+                      </button>
+                    </form>
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-500">Kullanıcı ID</p>
-                      <p className="text-base font-mono text-gray-900">{currentUser?.id}</p>
+                )}
+
+                {activeTab === 'account' && (
+                  <div className="premium-card p-10 space-y-8">
+                    <div className="flex items-center gap-4 pb-6 border-b border-white/5">
+                      <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 border border-purple-500/20">
+                        <i className="ri-bank-card-line text-2xl"></i>
+                      </div>
+                      <h2 className="text-2xl font-black uppercase tracking-tight">Hesap Detayları</h2>
                     </div>
-                    <i className="ri-fingerprint-line text-2xl text-gray-400"></i>
-                  </div>
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-500">Hesap Oluşturma Tarihi</p>
-                      <p className="text-base font-medium text-gray-900">
-                        {currentUser?.created_at ? new Date(currentUser.created_at).toLocaleDateString('tr-TR') : '-'}
-                      </p>
-                    </div>
-                    <i className="ri-calendar-line text-2xl text-gray-400"></i>
-                  </div>
-                </div>
-              </div>
-            )}
 
-            {/* Güvenlik Tab */}
-            {activeTab === 'security' && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Şifre Değiştir</h2>
-                <form onSubmit={handlePasswordChange} className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Yeni Şifre
-                    </label>
-                    <input
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                      placeholder="En az 6 karakter"
-                      required
-                      minLength={6}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Yeni Şifre (Tekrar)
-                    </label>
-                    <input
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                      placeholder="Şifrenizi tekrar girin"
-                      required
-                      minLength={6}
-                    />
-                  </div>
-
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div className="flex">
-                      <i className="ri-information-line text-blue-500 text-xl mr-3 flex-shrink-0"></i>
-                      <div className="text-sm text-blue-800">
-                        <p className="font-medium mb-1">Güvenli Şifre Önerileri:</p>
-                        <ul className="list-disc list-inside space-y-1">
-                          <li>En az 6 karakter kullanın</li>
-                          <li>Büyük ve küçük harf karışımı kullanın</li>
-                          <li>Rakam ve özel karakter ekleyin</li>
-                        </ul>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="p-8 bg-white/[0.02] border border-white/5 rounded-3xl space-y-2">
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">E-POSTA ADRESİ</p>
+                        <p className="text-xl font-black tracking-tighter text-indigo-400">{currentUser?.email}</p>
+                      </div>
+                      <div className="p-8 bg-white/[0.02] border border-white/5 rounded-3xl space-y-2">
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">ÜYELİK PLANI</p>
+                        <div className="flex items-center gap-3">
+                          <p className="text-xl font-black tracking-tighter text-emerald-400 uppercase">PREMIUM PRO AI</p>
+                          <span className="px-2 py-1 bg-emerald-500/10 text-emerald-500 rounded-lg text-[8px] font-black uppercase border border-emerald-500/20">AKTİF</span>
+                        </div>
+                      </div>
+                      <div className="p-8 bg-white/[0.02] border border-white/5 rounded-3xl space-y-2">
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">KULLANICI KİMLİĞİ</p>
+                        <p className="text-xs font-mono text-slate-400">{currentUser?.id}</p>
+                      </div>
+                      <div className="p-8 bg-white/[0.02] border border-white/5 rounded-3xl space-y-2">
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">KAYIT TARİHİ</p>
+                        <p className="text-xl font-black tracking-tighter text-slate-300">
+                          {currentUser?.created_at ? new Date(currentUser.created_at).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' }) : '-'}
+                        </p>
                       </div>
                     </div>
                   </div>
+                )}
 
-                  <button
-                    type="submit"
-                    disabled={passwordLoading}
-                    className="w-full bg-teal-500 hover:bg-teal-600 text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                  >
-                    {passwordLoading ? (
-                      <>
-                        <i className="ri-loader-4-line animate-spin mr-2"></i>
-                        Değiştiriliyor...
-                      </>
-                    ) : (
-                      <>
-                        <i className="ri-lock-password-line mr-2"></i>
-                        Şifreyi Değiştir
-                      </>
-                    )}
-                  </button>
-                </form>
+                {activeTab === 'security' && (
+                  <div className="premium-card p-10 space-y-10">
+                    <div className="flex items-center gap-4 pb-6 border-b border-white/5">
+                      <div className="w-12 h-12 bg-rose-500/10 rounded-2xl flex items-center justify-center text-rose-400 border border-rose-500/20">
+                        <i className="ri-shield-keyhole-line text-2xl"></i>
+                      </div>
+                      <h2 className="text-2xl font-black uppercase tracking-tight">Güvenlik Ayarları</h2>
+                    </div>
+
+                    <form onSubmit={handlePasswordChange} className="space-y-8">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">YENİ ŞİFRE</label>
+                          <input
+                            type="password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            className="premium-input h-14 px-6 font-mono text-lg"
+                            placeholder="••••••••"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">YENİ ŞİFRE (TEKRAR)</label>
+                          <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="premium-input h-14 px-6 font-mono text-lg"
+                            placeholder="••••••••"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="p-8 bg-blue-500/5 border border-blue-500/20 rounded-3xl flex items-start gap-4">
+                        <i className="ri-information-line text-2xl text-blue-400"></i>
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">ŞİFRE KRİTERLERİ</p>
+                          <p className="text-slate-400 text-xs font-medium">En az 6 karakter, büyük/küçük harf kombinasyonu ve en az bir özel karakter kullanmanız önerilir.</p>
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={passwordLoading}
+                        className="premium-button w-full h-16 bg-rose-600 hover:bg-rose-500 border-rose-400/30 text-[10px] font-black tracking-[0.3em] uppercase"
+                      >
+                        {passwordLoading ? 'DEĞİŞTİRİLİYOR...' : 'ŞİFREYİ GÜNCELLE'}
+                      </button>
+                    </form>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </main>
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   );
