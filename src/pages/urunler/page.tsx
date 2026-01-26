@@ -106,7 +106,7 @@ export default function Urunler() {
   const toplamUrunSayisi = urunler.length;
   const toplamStokDegeri = urunler.reduce((sum, u) => {
     const stok = u.stok_miktari || 0;
-    const fiyat = parseFloat(u.satis_fiyati) || 0;
+    const fiyat = parseFloat(u.satis_fiyati.toString()) || 0;
     return sum + (stok * fiyat);
   }, 0);
   const dusukStokUrunler = urunler.filter(u => {
@@ -148,10 +148,10 @@ export default function Urunler() {
       </div>
 
       <div className="flex relative z-10">
-        <Sidebar mbOpen={false} setMbOpen={() => { }} />
+        <Sidebar />
 
         <div className="flex-1 flex flex-col min-h-screen max-w-full overflow-hidden">
-          <Header onMenuClick={() => { }} />
+          <Header />
 
           <main className="flex-1 p-6 md:p-10 space-y-10 animate-fade-in">
             {/* Header Section */}

@@ -431,10 +431,10 @@ export default function AlisFaturasi() {
       </div>
 
       <div className="flex relative z-10">
-        <Sidebar mbOpen={false} setMbOpen={() => { }} />
+        <Sidebar />
 
         <div className="flex-1 flex flex-col min-h-screen max-w-full overflow-hidden">
-          <Header onMenuClick={() => { }} />
+          <Header />
 
           <main className="flex-1 p-6 md:p-10 space-y-10 animate-fade-in">
             {/* Header Section */}

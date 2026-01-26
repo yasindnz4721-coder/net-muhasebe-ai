@@ -138,10 +138,10 @@ export default function CariDetay() {
       </div>
 
       <div className="flex relative z-10">
-        <Sidebar mbOpen={false} setMbOpen={() => { }} />
+        <Sidebar />
 
         <div className="flex-1 flex flex-col min-h-screen max-w-full overflow-hidden">
-          <Header onMenuClick={() => { }} />
+          <Header />
 
           <main className="flex-1 p-6 md:p-10 space-y-10 animate-fade-in">
             {/* Header Section */}
@@ -281,9 +281,9 @@ export default function CariDetay() {
                           </td>
                           <td className="px-10 py-8">
                             <div className={`inline-flex px-4 py-2 rounded-xl text-[8px] font-black tracking-[0.2em] uppercase border ${islem.tip === 'Satış Faturası' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
-                                islem.tip === 'Alış Faturası' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
-                                  islem.tip === 'Tahsilat' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                    'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                              islem.tip === 'Alış Faturası' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
+                                islem.tip === 'Tahsilat' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                  'bg-rose-500/10 text-rose-500 border-rose-500/20'
                               }`}>
                               {islem.tip}
                             </div>

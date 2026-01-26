@@ -157,9 +157,9 @@ export default function CarilerPage() {
           <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] animate-aurora-2"></div>
         </div>
 
-        <Sidebar mbOpen={false} setMbOpen={() => { }} />
+        <Sidebar />
         <div className="flex-1 flex flex-col relative z-10">
-          <Header onMenuClick={() => { }} />
+          <Header />
           <main className="flex-1 flex items-center justify-center p-6">
             <div className="premium-card p-12 text-center max-w-md animate-slide-up">
               <div className="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-blue-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-600/20">
@@ -184,10 +184,10 @@ export default function CarilerPage() {
       </div>
 
       <div className="flex relative z-10">
-        <Sidebar mbOpen={false} setMbOpen={() => { }} />
+        <Sidebar />
 
         <div className="flex-1 flex flex-col min-h-screen max-w-full overflow-hidden">
-          <Header onMenuClick={() => { }} />
+          <Header />
 
           <main className="flex-1 p-6 md:p-10 space-y-10 animate-fade-in">
             {/* Header Section */}

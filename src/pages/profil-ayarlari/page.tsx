@@ -109,10 +109,10 @@ export default function ProfilAyarlariPage() {
       </div>
 
       <div className="flex relative z-10">
-        <Sidebar mbOpen={false} setMbOpen={() => { }} />
+        <Sidebar />
 
         <div className="flex-1 flex flex-col min-h-screen max-w-full overflow-hidden">
-          <Header onMenuClick={() => { }} />
+          <Header />
 
           <main className="flex-1 p-6 md:p-10 space-y-10 animate-fade-in">
             {/* Header Section */}
@@ -154,8 +154,8 @@ export default function ProfilAyarlariPage() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
                     className={`w-full flex items-center gap-4 px-8 py-6 rounded-3xl font-black text-[10px] tracking-widest uppercase transition-all border ${activeTab === tab.id
-                        ? 'bg-indigo-600 border-indigo-500 text-white shadow-xl shadow-indigo-600/20'
-                        : 'bg-white/5 border-white/5 text-slate-500 hover:bg-white/10 hover:text-white'
+                      ? 'bg-indigo-600 border-indigo-500 text-white shadow-xl shadow-indigo-600/20'
+                      : 'bg-white/5 border-white/5 text-slate-500 hover:bg-white/10 hover:text-white'
                       }`}
                   >
                     <i className={`${tab.icon} text-xl`}></i>

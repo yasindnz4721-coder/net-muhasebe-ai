@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useProfile } from '../../contexts/ProfileContext';
 
@@ -11,6 +11,12 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
   const location = useLocation();
   const { isAdmin } = useProfile();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Menü her sayfa değiştiğinde otomatik kapansın
+  useEffect(() => {
+    setIsOpen(false);
+    if (setMbOpen) setMbOpen(false);
+  }, [location.pathname]);
 
   const sidebarOpen = mbOpen !== undefined ? mbOpen : isOpen;
 
@@ -28,7 +34,7 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
     { id: 'admin', label: 'Yönetici Paneli', icon: 'ri-settings-5-line', path: '/admin', adminOnly: true },
   ];
 
-  const toggleSidebar = () => {
+  const handleToggle = () => {
     if (setMbOpen) {
       setMbOpen(!mbOpen);
     } else {
@@ -38,29 +44,29 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile Hamburger Button */}
+      {/* Mobile Hamburger Button - Global Trigger */}
       <button
-        onClick={toggleSidebar}
-        className="lg:hidden fixed top-5 left-5 z-[60] w-12 h-12 flex items-center justify-center bg-[#020617] text-white rounded-2xl shadow-2xl border border-white/10 hover:bg-slate-900 transition-all active:scale-90"
+        onClick={handleToggle}
+        className="lg:hidden fixed top-4 left-4 z-[70] w-12 h-12 flex items-center justify-center bg-indigo-600 text-white rounded-2xl shadow-xl shadow-indigo-600/20 active:scale-90 transition-all border border-indigo-400/30"
       >
-        <i className={isOpen ? "ri-close-line text-2xl" : "ri-menu-3-line text-2xl"}></i>
+        <i className={sidebarOpen ? "ri-close-line text-2xl" : "ri-menu-2-fill text-2xl"}></i>
       </button>
 
       {/* Backdrop for mobile */}
-      {isOpen && (
+      {sidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-[#020617]/80 backdrop-blur-md z-40 transition-opacity duration-300"
-          onClick={toggleSidebar}
+          className="lg:hidden fixed inset-0 bg-[#020617]/80 backdrop-blur-md z-[55] animate-fade-in"
+          onClick={handleToggle}
         ></div>
       )}
 
       {/* Sidebar Content */}
       <aside className={`
         fixed lg:sticky top-0 left-0 h-screen w-72 bg-[#020617] border-r border-white/5 
-        overflow-y-auto z-50 transition-all duration-300 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        overflow-y-auto z-[60] transition-all duration-300 ease-out
+        ${sidebarOpen ? 'translate-x-0 shadow-2xl shadow-indigo-600/10' : '-translate-x-full lg:translate-x-0'}
       `}>
-        <div className="p-8">
+        <div className="p-8 mt-12 lg:mt-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
               <i className="ri-file-list-3-line text-2xl text-white"></i>
@@ -83,7 +89,10 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
               <Link
                 key={item.id}
                 to={item.path}
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  setIsOpen(false);
+                  if (setMbOpen) setMbOpen(false);
+                }}
                 className={`
                   flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden
                   ${isActive
@@ -93,7 +102,7 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
                 `}
               >
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-indigo-500 rounded-r-full shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-indigo-500 rounded-r-full shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
                 )}
 
                 <i className={`${item.icon} text-xl ${isActive ? 'text-indigo-400' : 'group-hover:scale-110 group-hover:text-indigo-400 transition-all'}`}></i>
@@ -110,7 +119,7 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
         <div className="p-6 mt-8">
           <div className="p-5 rounded-3xl bg-indigo-600/5 border border-indigo-500/10 relative overflow-hidden group hover:bg-indigo-600/10 transition-colors">
             <div className="absolute -top-10 -right-10 w-24 h-24 bg-indigo-600/10 blur-[40px] rounded-full group-hover:bg-indigo-600/20 transition-all"></div>
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">7/24 Teknik Destek</p>
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Teknik Destek</p>
             <a
               href="tel:5347401256"
               className="flex items-center gap-3 text-white font-bold group-hover:translate-x-1 transition-transform"
@@ -126,4 +135,3 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
     </>
   );
 }
-
