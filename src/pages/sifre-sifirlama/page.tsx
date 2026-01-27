@@ -8,7 +8,7 @@ export default function SifreSifirlamaPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Backend API henüz şifre sıfırlama e-postası göndermeyi desteklemiyor.
-    alert('Bu özellik şu anda bakım aşamasındadır. Lütfen sistem yöneticisi ile iletişime geçin.');
+    console.log('Bu özellik şu anda bakım aşamasındadır.');
   };
 
   return (
