@@ -6,7 +6,10 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false
-  }
+  },
+  max: 20, // Maksimum bağlantı sayısı
+  idleTimeoutMillis: 30000, // Boştaki bağlantı süresi
+  connectionTimeoutMillis: 2000, // Bağlantı zaman aşımı
 });
 
 // Bağlantı testi ve Otomatik Yeniden Bağlanma

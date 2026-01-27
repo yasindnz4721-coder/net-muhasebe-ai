@@ -1,14 +1,30 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const compression = require('compression');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
+app.use(helmet({
+    contentSecurityPolicy: false, // React frontend ile çakışmaması için
+    crossOriginEmbedderPolicy: false
+}));
+app.use(compression()); // Gzip sıkıştırma
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+
+// Rate Limiting (Kötüye kullanımı önlemek için)
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 dakika
+    max: 1000, // IP başına limit (1000 isteğe çıkarıldı)
+    message: { error: 'Çok fazla istek gönderildi, lütfen daha sonra tekrar deneyin.' }
+});
+app.use('/api/', limiter);
 
 // Frontend dosyalarını sunmak için (Build sonrası)
 app.use(express.static(path.join(__dirname, '../out')));

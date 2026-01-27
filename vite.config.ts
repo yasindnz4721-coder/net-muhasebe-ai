@@ -47,11 +47,21 @@ export default defineConfig({
   // Kritik Değişiklik: ./ yaparak index.html'in yanındaki assets klasörünü doğru görmesini sağladık.
   base: base,
   build: {
-    sourcemap: true,
-    // Önceki ekran görüntülerinde Electron'un baktığı klasörle eşleşmesi için 'out' olarak bırakıyoruz.
+    target: "esnext",
+    sourcemap: false,
     outDir: "out",
-    // Asset isimlerinin sabit kalması bazen hata ayıklamayı kolaylaştırır.
     assetsDir: "assets",
+    minify: "esbuild",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-router': ['react-router-dom'],
+          'vendor-charts': ['recharts'],
+          'vendor-i18n': ['react-i18next', 'i18next']
+        }
+      }
+    }
   },
   resolve: {
     alias: {

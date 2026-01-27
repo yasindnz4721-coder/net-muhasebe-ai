@@ -3,7 +3,7 @@ export default {
   notifications: 'Notifications',
   settings: 'Settings',
   selectProfile: 'Select Profile',
-  
+
   // Sidebar
   dashboard: 'Dashboard',
   customers: 'Customers',
@@ -16,7 +16,7 @@ export default {
   allTransactions: 'All Transactions',
   stockManagement: 'Stock Management',
   profileSettings: 'Profile Settings',
-  
+
   // Dashboard
   totalReceivables: 'Total Receivables',
   totalPayables: 'Total Payables',
@@ -41,7 +41,7 @@ export default {
   recentTransactions: 'Recent Transactions',
   viewAll: 'View All',
   noTransactions: 'No transactions yet',
-  
+
   // Customers
   addNewCustomer: 'Add New Customer',
   search: 'Search...',
@@ -52,22 +52,22 @@ export default {
   noCustomers: 'No customers added yet',
   debt: 'Debt',
   credit: 'Credit',
-  
+
   // Products
   addNewProduct: 'Add New Product',
   productName: 'Product Name',
   category: 'Category',
-  stock: 'Stock',
+  stockLevel: 'Stock',
   price: 'Price',
   noProducts: 'No products added yet',
-  
+
   // Stock Management
   productCode: 'Product Code',
   currentStock: 'Current Stock',
   unit: 'Unit',
   lastUpdate: 'Last Update',
   noStockData: 'No stock data yet',
-  
+
   // Sales Invoice
   addNewSalesInvoice: 'Add New Sales Invoice',
   invoiceNo: 'Invoice No',
@@ -75,10 +75,10 @@ export default {
   date: 'Date',
   amount: 'Amount',
   noInvoices: 'No invoices added yet',
-  
+
   // Purchase Invoice
   addNewPurchaseInvoice: 'Add New Purchase Invoice',
-  
+
   // Payments
   addNewPayment: 'Add New Payment',
   type: 'Type',
@@ -86,17 +86,17 @@ export default {
   noPayments: 'No payments added yet',
   collection: 'Collection',
   payment: 'Payment',
-  
+
   // Reports
   salesReport: 'Sales Report',
   purchaseReport: 'Purchase Report',
   customerBalances: 'Customer Balances',
   stockReport: 'Stock Report',
-  
+
   // All Transactions
   allTransactionsTitle: 'All Transactions',
   transactionType: 'Transaction Type',
-  
+
   // Common
   save: 'Save',
   cancel: 'Cancel',
@@ -107,13 +107,13 @@ export default {
   update: 'Update',
   details: 'Details',
   total: 'Total',
-  
+
   // Customer Details
   customerDetails: 'Customer Details',
   transactions: 'Transactions',
   addTransaction: 'Add Transaction',
   currentBalance: 'Current Balance',
-  
+
   // Form Labels
   selectCustomer: 'Select Customer',
   selectProduct: 'Select Product',
@@ -124,13 +124,13 @@ export default {
   enterProductName: 'Enter Product Name',
   enterStock: 'Enter Stock Quantity',
   enterPrice: 'Enter Price',
-  
+
   // Messages
   pleaseSelectProfile: 'Please select a profile',
   successfullySaved: 'Successfully saved',
   successfullyDeleted: 'Successfully deleted',
   errorOccurred: 'An error occurred',
-  
+
   // Profile Settings
   profileLogo: 'Profile Logo',
   uploadLogo: 'Upload Logo',
