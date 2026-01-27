@@ -9,7 +9,7 @@ const pool = new Pool({
   },
   max: 20, // Maksimum bağlantı sayısı
   idleTimeoutMillis: 30000, // Boştaki bağlantı süresi
-  connectionTimeoutMillis: 2000, // Bağlantı zaman aşımı
+  connectionTimeoutMillis: 10000, // Bağlantı zaman aşımı
 });
 
 // Bağlantı testi ve Otomatik Yeniden Bağlanma
