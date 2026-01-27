@@ -44,14 +44,13 @@ export default function AdminPanel() {
         try {
             const { error } = await adminApi.approveUser(userId);
             if (error) {
-                alert(error);
+                console.error(error);
                 return;
             }
-            alert('Kullanıcı onaylandı!');
+            console.log('Kullanıcı onaylandı!');
             loadData();
         } catch (err) {
             console.error('Onay hatası:', err);
-            alert('İşlem yapılamadı.');
         }
     };
 
@@ -60,14 +59,13 @@ export default function AdminPanel() {
         try {
             const { error } = await adminApi.deleteUser(userId);
             if (error) {
-                alert(error);
+                console.error(error);
                 return;
             }
-            alert('Kullanıcı başarıyla silindi!');
+            console.log('Kullanıcı başarıyla silindi!');
             loadData();
         } catch (err) {
             console.error('Silme hatası:', err);
-            alert('İşlem yapılamadı.');
         }
     };
 
