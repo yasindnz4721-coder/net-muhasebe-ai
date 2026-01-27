@@ -3,23 +3,36 @@ import { Link } from 'react-router-dom';
 import { auth } from '../../lib/api';
 
 export default function KayitPage() {
-  const [step, setStep] = useState(1); // 1: Plans, 2: Register Form
+  const [step, setStep] = useState(1); // 1: Plans, 2: Register Form, 3: Payment
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     companyName: '',
   });
+  const [paymentData, setPaymentData] = useState({
+    cardNumber: '',
+    expiry: '',
+    cvc: '',
+    holderName: '',
+  });
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (step === 2) {
+      setStep(3);
+      return;
+    }
+
     setError('');
     setSuccess('');
     setLoading(true);
 
     try {
+      // paymentData simulasyonu (Normalde burada API'ye gider)
       const { data, error: registerError } = await auth.register(
         formData.email.trim(),
         formData.password,
@@ -32,7 +45,7 @@ export default function KayitPage() {
       }
 
       if (data?.user) {
-        setSuccess('✅ Hesabınız başarıyla oluşturuldu! Şimdi giriş yapabilirsiniz.');
+        setSuccess('✅ Ödeme başarılı ve hesabınız oluşturuldu!');
         setFormData({ email: '', password: '', companyName: '' });
         setTimeout(() => {
           window.location.href = '/login';
@@ -40,7 +53,7 @@ export default function KayitPage() {
       }
     } catch (err) {
       console.error('Kayıt hatası:', err);
-      setError('Kayıt şu an gerçekleştirilemiyor. Lütfen tekrar deneyin.');
+      setError('İşlem şu an gerçekleştirilemiyor. Lütfen tekrar deneyin.');
     } finally {
       setLoading(false);
     }
@@ -68,7 +81,7 @@ export default function KayitPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-hidden relative">
+    <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-x-hidden relative">
       {/* Background Aurora */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-indigo-600/15 rounded-full blur-[140px] animate-aurora-1"></div>
@@ -93,9 +106,12 @@ export default function KayitPage() {
         <main className="flex-1 flex flex-col items-center justify-center p-6 pb-24">
           <div className="text-center mb-16 space-y-4 animate-slide-up">
             <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none">
-              {step === 1 ? <>Geleceğe <span className="text-gradient">Adım Atın.</span></> : 'Bilgilerinizi Doldurun.'}
+              {step === 1 ? <>Geleceğe <span className="text-gradient">Adım Atın.</span></> :
+                step === 2 ? 'Bilgilerinizi Doldurun.' : 'Ödeme Bilgileri.'}
             </h1>
-            <p className="text-slate-500 text-lg font-medium">Net Muhasebe AI ile işletmenizi geleceğe taşıyın. Avantajlı lansman fiyatlarını kaçırmayın!</p>
+            <p className="text-slate-500 text-lg font-medium">
+              {step === 3 ? 'Kredi veya banka kartınız ile güvenli ödeme yapın.' : 'Net Muhasebe AI ile işletmenizi geleceğe taşıyın.'}
+            </p>
           </div>
 
           {step === 1 ? (
@@ -135,7 +151,7 @@ export default function KayitPage() {
                   </ul>
 
                   <button
-                    onClick={() => setStep(2)}
+                    onClick={() => { setSelectedPlan(plan); setStep(2); }}
                     className={`
                       w-full h-16 rounded-2xl font-black tracking-widest transition-all active:scale-95
                       ${plan.popular
@@ -149,7 +165,7 @@ export default function KayitPage() {
                 </div>
               ))}
             </div>
-          ) : (
+          ) : step === 2 ? (
             <div className="max-w-[540px] w-full animate-slide-up">
               <div className="premium-card p-12 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-12 bg-indigo-600/10 blur-3xl"></div>
@@ -164,27 +180,12 @@ export default function KayitPage() {
                     FARKLI BİR PLAN SEÇ
                   </button>
 
-                  {error && (
-                    <div className="p-5 rounded-3xl bg-red-500/10 border border-red-500/20 text-red-200 text-sm font-bold flex gap-3 animate-shake">
-                      <i className="ri-error-warning-fill text-lg"></i>
-                      {error}
-                    </div>
-                  )}
-
-                  {success && (
-                    <div className="p-5 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 text-sm font-bold flex gap-3 animate-bounce-subtle">
-                      <i className="ri-checkbox-circle-fill text-lg"></i>
-                      {success}
-                    </div>
-                  )}
-
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">İşletme / Şirket Adı</label>
                       <input
                         type="text"
                         required
-                        disabled={loading}
                         value={formData.companyName}
                         onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                         className="premium-input"
@@ -197,7 +198,6 @@ export default function KayitPage() {
                       <input
                         type="email"
                         required
-                        disabled={loading}
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className="premium-input"
@@ -210,7 +210,6 @@ export default function KayitPage() {
                       <input
                         type="password"
                         required
-                        disabled={loading}
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         className="premium-input"
@@ -220,28 +219,113 @@ export default function KayitPage() {
                     </div>
                   </div>
 
-                  <div className="p-6 bg-indigo-600/10 border border-indigo-500/20 rounded-3xl">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30 font-black">AI</div>
-                      <div>
-                        <p className="text-xs font-black tracking-tight text-white uppercase">SÜRESİZ ENTERPRISE AKTİVASYONU</p>
-                        <p className="text-[10px] font-bold text-slate-500">Tüm sistem özellikleri hesabınıza tanımlanacaktır.</p>
+                  <button type="submit" className="premium-button w-full h-[72px] text-lg uppercase tracking-widest">
+                    SONRAKİ ADIM: ÖDEME
+                    <i className="ri-arrow-right-line text-2xl"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          ) : (
+            <div className="max-w-[540px] w-full animate-slide-up">
+              <div className="premium-card p-12 relative overflow-hidden">
+                <form onSubmit={handleSubmit} className="relative z-10 space-y-8">
+                  <div className="flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => setStep(2)}
+                      className="text-indigo-400 font-black text-[10px] tracking-widest uppercase flex items-center gap-2 hover:text-white transition-colors"
+                    >
+                      <i className="ri-arrow-left-line"></i> GERİ DÖN
+                    </button>
+                    <div className="text-right">
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">ÖDENECEK TUTAR</p>
+                      <p className="text-2xl font-black text-indigo-400">₺{selectedPlan?.price}</p>
+                    </div>
+                  </div>
+
+                  {error && (
+                    <div className="p-5 rounded-3xl bg-red-500/10 border border-red-500/20 text-red-200 text-sm font-bold flex gap-3">
+                      <i className="ri-error-warning-fill text-lg"></i>{error}
+                    </div>
+                  )}
+
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">KART ÜZERİNDEKİ İSİM</label>
+                      <input
+                        type="text"
+                        required
+                        value={paymentData.holderName}
+                        onChange={(e) => setPaymentData({ ...paymentData, holderName: e.target.value })}
+                        className="premium-input"
+                        placeholder="AD SOYAD"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">KART NUMARASI</label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          required
+                          maxLength={19}
+                          value={paymentData.cardNumber}
+                          onChange={(e) => setPaymentData({ ...paymentData, cardNumber: e.target.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim() })}
+                          className="premium-input pr-16"
+                          placeholder="0000 0000 0000 0000"
+                        />
+                        <div className="absolute right-6 top-1/2 -translate-y-1/2 flex gap-1">
+                          <i className="ri-visa-line text-2xl text-slate-600"></i>
+                          <i className="ri-mastercard-line text-2xl text-slate-600"></i>
+                        </div>
                       </div>
                     </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">SKT (AA/YY)</label>
+                        <input
+                          type="text"
+                          required
+                          maxLength={5}
+                          value={paymentData.expiry}
+                          onChange={(e) => setPaymentData({ ...paymentData, expiry: e.target.value.replace(/\D/g, '').replace(/(.{2})/, '$1/').trim() })}
+                          className="premium-input text-center"
+                          placeholder="MM/YY"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">CVC / CVV</label>
+                        <input
+                          type="password"
+                          required
+                          maxLength={3}
+                          value={paymentData.cvc}
+                          onChange={(e) => setPaymentData({ ...paymentData, cvc: e.target.value.replace(/\D/g, '') })}
+                          className="premium-input text-center"
+                          placeholder="000"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl flex items-center gap-4">
+                    <i className="ri-shield-check-line text-3xl text-emerald-500"></i>
+                    <p className="text-[10px] font-bold text-slate-400 leading-relaxed uppercase tracking-widest">
+                      256-BIT SSL İLE GÜVENLİ ÖDEME. KART BİLGİLERİNİZ SİSTEMİMİZDE SAKLANMAZ.
+                    </p>
                   </div>
 
                   <button
                     type="submit"
                     disabled={loading}
-                    className="premium-button w-full h-[72px] text-lg uppercase tracking-widest"
+                    className="premium-button w-full h-[72px] text-lg bg-indigo-600 hover:bg-indigo-700"
                   >
                     {loading ? (
                       <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
                     ) : (
-                      <>
-                        HESABI OLUŞTUR
-                        <i className="ri-arrow-right-up-line text-2xl"></i>
-                      </>
+                      <>ÖDEMEYİ TAMAMLA VE AKTİVE ET</>
                     )}
                   </button>
                 </form>

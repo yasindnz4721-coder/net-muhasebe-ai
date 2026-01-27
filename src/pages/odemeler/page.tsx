@@ -126,11 +126,11 @@ export default function Odemeler() {
 
   const toplamAlınan = odemeler
     .filter(o => o.tip === 'Tahsilat')
-    .reduce((sum, o) => sum + parseFloat(o.tutar.toString()), 0);
+    .reduce((sum, o) => sum + parseFloat((o.tutar || 0).toString()), 0);
 
   const toplamVerilen = odemeler
     .filter(o => o.tip === 'Tediye')
-    .reduce((sum, o) => sum + parseFloat(o.tutar.toString()), 0);
+    .reduce((sum, o) => sum + parseFloat((o.tutar || 0).toString()), 0);
 
   if (loading) {
     return (
@@ -324,7 +324,7 @@ export default function Odemeler() {
                           </td>
                           <td className="px-8 py-6">
                             <div className={`text-lg font-black tracking-tighter ${odeme.tip === 'Tahsilat' ? 'text-emerald-400' : 'text-rose-500'}`}>
-                              {odeme.tip === 'Tahsilat' ? '+' : '-'} ₺{parseFloat(odeme.tutar).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                              {odeme.tip === 'Tahsilat' ? '+' : '-'} ₺{(parseFloat((odeme.tutar || 0).toString()) || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                             </div>
                           </td>
                           <td className="px-8 py-6 text-right">
@@ -429,8 +429,8 @@ export default function Odemeler() {
 
                 <div className="col-span-2 space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">ÖDEME YÖNTEMİ *</label>
-                  <div className="grid grid-cols-5 gap-2">
-                    {['Nakit', 'Banka Transferi', 'Kredi Kartı', 'Çek', 'Senet'].map((method) => (
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                    {['Nakit', 'Banka Kartı', 'Kredi Kartı', 'Banka Transferi'].map((method) => (
                       <button
                         key={method}
                         type="button"

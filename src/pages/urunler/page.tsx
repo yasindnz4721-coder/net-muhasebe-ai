@@ -106,7 +106,7 @@ export default function Urunler() {
   const toplamUrunSayisi = urunler.length;
   const toplamStokDegeri = urunler.reduce((sum, u) => {
     const stok = u.stok_miktari || 0;
-    const fiyat = parseFloat(u.satis_fiyati.toString()) || 0;
+    const fiyat = parseFloat((u.satis_fiyati || 0).toString()) || 0;
     return sum + (stok * fiyat);
   }, 0);
   const dusukStokUrunler = urunler.filter(u => {
@@ -312,10 +312,10 @@ export default function Urunler() {
                           </td>
                           <td className="px-8 py-6">
                             <div className="text-lg font-black tracking-tighter text-emerald-500">
-                              ₺{parseFloat(urun.satis_fiyati || 0).toLocaleString()}
+                              ₺{(parseFloat((urun.satis_fiyati || 0).toString()) || 0).toLocaleString()}
                             </div>
                             <div className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter mt-1">
-                              Alış: ₺{parseFloat(urun.alis_fiyati || 0).toLocaleString()}
+                              Alış: ₺{(parseFloat((urun.alis_fiyati || 0).toString()) || 0).toLocaleString()}
                             </div>
                           </td>
                           <td className="px-8 py-6 text-right">
