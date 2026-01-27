@@ -830,13 +830,20 @@ export default function SatisFaturasi() {
             <div className="flex-1 overflow-y-auto p-12 bg-white text-black custom-scrollbar print:p-0">
               <div className="flex justify-between items-start mb-12">
                 <div className="space-y-4">
-                  <img
-                    src="https://public.readdy.ai/ai/img_res/599009ac-e967-4692-9000-451db39762de.png"
-                    alt="Logo"
-                    className="h-12 w-auto grayscale"
-                  />
+                  {selectedProfile?.logo_url ? (
+                    <img
+                      src={selectedProfile.logo_url}
+                      alt="Logo"
+                      className="h-16 w-auto object-contain"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center border border-slate-200">
+                      <i className="ri-building-line text-3xl text-slate-400"></i>
+                    </div>
+                  )}
                   <div className="space-y-1">
-                    <h2 className="text-2xl font-black tracking-tighter uppercase whitespace-nowrap">SATIŞ FATURASI</h2>
+                    <h1 className="text-xl font-black tracking-tight text-slate-900 uppercase">{selectedProfile?.name}</h1>
+                    <h2 className="text-2xl font-black tracking-tighter uppercase whitespace-nowrap text-indigo-600">SATIŞ FATURASI</h2>
                     <div className="inline-block px-3 py-1 bg-black text-white text-[10px] font-black tracking-widest uppercase">{selectedFatura.fatura_no}</div>
                   </div>
                 </div>
@@ -846,20 +853,11 @@ export default function SatisFaturasi() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-12 mb-12 pb-12 border-b-2 border-slate-100">
+              <div className="mb-12 pb-12 border-b-2 border-slate-100">
                 <div className="space-y-4">
                   <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em]">MÜŞTERİ BİLGİLERİ</p>
                   <div className="space-y-1">
                     <p className="text-xl font-black tracking-tight">{selectedFatura.cari_ad.toUpperCase()}</p>
-                    <p className="text-sm font-medium text-slate-500 uppercase italic">Cari Hesap No: #{selectedFatura.cari_id.slice(0, 8).toUpperCase()}</p>
-                  </div>
-                </div>
-                <div className="space-y-4 text-right">
-                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em]">ÖDEME DURUMU</p>
-                  <div>
-                    <span className="inline-block px-4 py-2 bg-slate-100 rounded-lg text-xs font-black tracking-widest uppercase">
-                      {selectedFatura.durum}
-                    </span>
                   </div>
                 </div>
               </div>
