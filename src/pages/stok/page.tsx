@@ -55,7 +55,6 @@ export default function Stok() {
     if (!selectedProfile || !isPro || saving) return;
 
     if (!uretimData.urun_id) {
-      alert('Lütfen bir ürün seçin.');
       return;
     }
 
@@ -75,7 +74,7 @@ export default function Stok() {
       });
 
       if (error) {
-        alert('Hata: ' + error);
+        console.error('Hata:', error);
         return;
       }
 
@@ -86,11 +85,13 @@ export default function Stok() {
         aciklama: 'Günlük üretimden stok girişi',
         tarih: new Date().toISOString().split('T')[0]
       });
-      alert('Üretim kaydı başarıyla oluşturuldu.');
+      console.log('Üretim kaydı başarıyla oluşturuldu.');
+
       await loadData();
     } catch (error) {
       console.error('Üretim girişi hatası:', error);
-      alert('Sorgu sırasında bir hata oluştu. Lütfen bağlantınızı kontrol edip tekrar deneyin.');
+      console.error('Sorgu sırasında bir hata oluştu.');
+
     } finally {
       setSaving(false);
     }

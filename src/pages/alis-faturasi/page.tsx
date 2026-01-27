@@ -257,17 +257,15 @@ export default function AlisFaturasi() {
       if (isEditing && selectedFatura) {
         const { error } = await alisApi.update(selectedFatura.id, faturaData);
         if (error) {
-          alert('Fatura güncellenirken hata oluştu: ' + error);
+          console.error('Fatura güncellenirken hata oluştu:', error);
           return;
         }
-        alert('Fatura başarıyla güncellendi.');
       } else {
         const { error } = await alisApi.create(faturaData);
         if (error) {
-          alert('Fatura oluşturulurken hata oluştu: ' + error);
+          console.error('Fatura oluşturulurken hata oluştu:', error);
           return;
         }
-        alert('Fatura başarıyla oluşturuldu.');
       }
 
       await loadData();
@@ -275,7 +273,6 @@ export default function AlisFaturasi() {
       resetForm();
     } catch (error) {
       console.error('Fatura eklenirken hata:', error);
-      alert('Beklenmedik bir hata oluştu.');
     } finally {
       setSaving(false);
     }

@@ -269,17 +269,15 @@ export default function SatisFaturasi() {
       if (isEditing && selectedFatura) {
         const { error } = await satisApi.update(selectedFatura.id, faturaData);
         if (error) {
-          alert('Fatura güncellenirken hata oluştu: ' + error);
+          console.error('Fatura güncellenirken hata oluştu:', error);
           return;
         }
-        alert('Fatura başarıyla güncellendi.');
       } else {
         const { error } = await satisApi.create(faturaData);
         if (error) {
-          alert('Fatura oluşturulurken hata oluştu: ' + error);
+          console.error('Fatura oluşturulurken hata oluştu:', error);
           return;
         }
-        alert('Fatura başarıyla oluşturuldu.');
       }
 
       await loadData();
@@ -287,7 +285,6 @@ export default function SatisFaturasi() {
       resetForm();
     } catch (error) {
       console.error('Fatura eklenirken hata:', error);
-      alert('Beklenmedik bir hata oluştu.');
     } finally {
       setSaving(false);
     }

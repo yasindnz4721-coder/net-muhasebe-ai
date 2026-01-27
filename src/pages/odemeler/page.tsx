@@ -62,7 +62,9 @@ export default function Odemeler() {
     if (!selectedProfile) return;
 
     if (!formData.cari_id || !formData.tutar) {
-      alert('Lütfen tüm zorunlu alanları doldurun!');
+      // Silent return preserved
+      return;
+
       return;
     }
 
@@ -85,7 +87,8 @@ export default function Odemeler() {
       resetForm();
     } catch (error) {
       console.error('Ödeme eklenirken hata:', error);
-      alert('Ödeme eklenirken bir hata oluştu!');
+      console.error('Ödeme eklenirken bir hata oluştu!');
+
     }
   };
 
@@ -102,7 +105,8 @@ export default function Odemeler() {
       setSelectedOdeme(null);
     } catch (error) {
       console.error('Ödeme silinirken hata:', error);
-      alert('Ödeme silinirken bir hata oluştu!');
+      console.error('Ödeme silinirken bir hata oluştu!');
+
     }
   };
 
