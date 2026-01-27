@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { auth } from '../../lib/api';
 
 export default function KayitPage() {
-  const [step, setStep] = useState(1); // 1: Plans, 2: Register Form, 3: Payment
+  const [step, setStep] = useState(1); // 1: Plans, 2: Payment, 3: Register Form
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -20,19 +20,20 @@ export default function KayitPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleNextStep = (e: React.FormEvent) => {
     e.preventDefault();
     if (step === 2) {
       setStep(3);
-      return;
     }
+  };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError('');
     setSuccess('');
     setLoading(true);
 
     try {
-      // paymentData simulasyonu (Normalde burada API'ye gider)
       const { data, error: registerError } = await auth.register(
         formData.email.trim(),
         formData.password,
@@ -82,7 +83,6 @@ export default function KayitPage() {
 
   return (
     <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-x-hidden relative">
-      {/* Background Aurora */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-indigo-600/15 rounded-full blur-[140px] animate-aurora-1"></div>
         <div className="absolute bottom-[-20%] left-[-10%] w-[700px] h-[700px] bg-blue-600/10 rounded-full blur-[120px] animate-aurora-2"></div>
@@ -107,10 +107,10 @@ export default function KayitPage() {
           <div className="text-center mb-16 space-y-4 animate-slide-up">
             <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-none">
               {step === 1 ? <>Geleceğe <span className="text-gradient">Adım Atın.</span></> :
-                step === 2 ? 'Bilgilerinizi Doldurun.' : 'Ödeme Bilgileri.'}
+                step === 2 ? 'Ödeme Bilgileri.' : 'Bilgilerinizi Doldurun.'}
             </h1>
             <p className="text-slate-500 text-lg font-medium">
-              {step === 3 ? 'Kredi veya banka kartınız ile güvenli ödeme yapın.' : 'Net Muhasebe AI ile işletmenizi geleceğe taşıyın.'}
+              {step === 2 ? 'Kredi veya banka kartınız ile güvenli ödeme yapın.' : 'Net Muhasebe AI ile işletmenizi geleceğe taşıyın.'}
             </p>
           </div>
 
@@ -168,72 +168,11 @@ export default function KayitPage() {
           ) : step === 2 ? (
             <div className="max-w-[540px] w-full animate-slide-up">
               <div className="premium-card p-12 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-12 bg-indigo-600/10 blur-3xl"></div>
-
-                <form onSubmit={handleSubmit} className="relative z-10 space-y-8">
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="text-indigo-400 font-black text-[10px] tracking-widest uppercase flex items-center gap-2 hover:text-white transition-colors"
-                  >
-                    <i className="ri-arrow-left-line font-black"></i>
-                    FARKLI BİR PLAN SEÇ
-                  </button>
-
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">İşletme / Şirket Adı</label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.companyName}
-                        onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                        className="premium-input"
-                        placeholder="Örn: Net Teknoloji Ltd."
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">E-Posta Adresi</label>
-                      <input
-                        type="email"
-                        required
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="premium-input"
-                        placeholder="eposta@sirketiniz.com"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Şifre</label>
-                      <input
-                        type="password"
-                        required
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        className="premium-input"
-                        placeholder="••••••••"
-                        minLength={6}
-                      />
-                    </div>
-                  </div>
-
-                  <button type="submit" className="premium-button w-full h-[72px] text-lg uppercase tracking-widest">
-                    SONRAKİ ADIM: ÖDEME
-                    <i className="ri-arrow-right-line text-2xl"></i>
-                  </button>
-                </form>
-              </div>
-            </div>
-          ) : (
-            <div className="max-w-[540px] w-full animate-slide-up">
-              <div className="premium-card p-12 relative overflow-hidden">
-                <form onSubmit={handleSubmit} className="relative z-10 space-y-8">
+                <form onSubmit={handleNextStep} className="relative z-10 space-y-8">
                   <div className="flex items-center justify-between">
                     <button
                       type="button"
-                      onClick={() => setStep(2)}
+                      onClick={() => setStep(1)}
                       className="text-indigo-400 font-black text-[10px] tracking-widest uppercase flex items-center gap-2 hover:text-white transition-colors"
                     >
                       <i className="ri-arrow-left-line"></i> GERİ DÖN
@@ -243,12 +182,6 @@ export default function KayitPage() {
                       <p className="text-2xl font-black text-indigo-400">₺{selectedPlan?.price}</p>
                     </div>
                   </div>
-
-                  {error && (
-                    <div className="p-5 rounded-3xl bg-red-500/10 border border-red-500/20 text-red-200 text-sm font-bold flex gap-3">
-                      <i className="ri-error-warning-fill text-lg"></i>{error}
-                    </div>
-                  )}
 
                   <div className="space-y-6">
                     <div className="space-y-2">
@@ -317,6 +250,79 @@ export default function KayitPage() {
                     </p>
                   </div>
 
+                  <button type="submit" className="premium-button w-full h-[72px] text-lg uppercase tracking-widest">
+                    ÖDEME BİLGİLERİNİ ONAYLA
+                    <i className="ri-arrow-right-line text-2xl"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          ) : (
+            <div className="max-w-[540px] w-full animate-slide-up">
+              <div className="premium-card p-12 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-12 bg-indigo-600/10 blur-3xl"></div>
+
+                <form onSubmit={handleSubmit} className="relative z-10 space-y-8">
+                  <button
+                    type="button"
+                    onClick={() => setStep(2)}
+                    className="text-indigo-400 font-black text-[10px] tracking-widest uppercase flex items-center gap-2 hover:text-white transition-colors"
+                  >
+                    <i className="ri-arrow-left-line font-black"></i>
+                    ÖDEME BİLGİLERİNE DÖN
+                  </button>
+
+                  {error && (
+                    <div className="p-5 rounded-3xl bg-red-500/10 border border-red-500/20 text-red-200 text-sm font-bold flex gap-3">
+                      <i className="ri-error-warning-fill text-lg"></i>{error}
+                    </div>
+                  )}
+
+                  {success && (
+                    <div className="p-5 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-200 text-sm font-bold flex gap-3">
+                      <i className="ri-checkbox-circle-fill text-lg"></i>{success}
+                    </div>
+                  )}
+
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">İşletme / Şirket Adı</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.companyName}
+                        onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                        className="premium-input"
+                        placeholder="Örn: Net Teknoloji Ltd."
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">E-Posta Adresi</label>
+                      <input
+                        type="email"
+                        required
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="premium-input"
+                        placeholder="eposta@sirketiniz.com"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Şifre</label>
+                      <input
+                        type="password"
+                        required
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        className="premium-input"
+                        placeholder="••••••••"
+                        minLength={6}
+                      />
+                    </div>
+                  </div>
+
                   <button
                     type="submit"
                     disabled={loading}
@@ -325,7 +331,7 @@ export default function KayitPage() {
                     {loading ? (
                       <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
                     ) : (
-                      <>ÖDEMEYİ TAMAMLA VE AKTİVE ET</>
+                      <>KAYDI TAMAMLA VE BAŞLAT</>
                     )}
                   </button>
                 </form>
