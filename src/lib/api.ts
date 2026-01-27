@@ -52,10 +52,10 @@ export const auth = {
         return result;
     },
 
-    async register(email: string, password: string, companyName?: string) {
+    async register(email: string, password: string, companyName?: string, paymentMethod?: string) {
         const result = await fetchApi<{ user: User; token: string }>('/api/auth/register', {
             method: 'POST',
-            body: JSON.stringify({ email, password, companyName }),
+            body: JSON.stringify({ email, password, companyName, paymentMethod }),
         });
 
         if (result.data?.token) {
@@ -283,6 +283,12 @@ export const admin = {
     },
     async getUsers() {
         return fetchApi<any[]>('/api/admin/users');
+    },
+    async approveUser(userId: string) {
+        return fetchApi<{ message: string }>('/api/admin/approve-user', {
+            method: 'POST',
+            body: JSON.stringify({ userId }),
+        });
     }
 };
 
@@ -300,6 +306,8 @@ export interface User {
     email: string;
     role: string;
     subscription_tier?: string;
+    is_approved?: boolean;
+    payment_method?: string;
     created_at?: string;
 }
 

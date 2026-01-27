@@ -15,6 +15,7 @@ export default function KayitPage() {
     cvc: '',
     holderName: '',
   });
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'eft'>('card');
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -37,7 +38,8 @@ export default function KayitPage() {
       const { data, error: registerError } = await auth.register(
         formData.email.trim(),
         formData.password,
-        formData.companyName.trim()
+        formData.companyName.trim(),
+        paymentMethod
       );
 
       if (registerError) {
@@ -46,7 +48,11 @@ export default function KayitPage() {
       }
 
       if (data?.user) {
-        setSuccess('✅ Ödeme başarılı ve hesabınız oluşturuldu!');
+        if (paymentMethod === 'eft') {
+          setSuccess('✅ Kayıt talebiniz alındı! EFT ödemeniz onaylandıktan sonra hesabınız aktif edilecektir.');
+        } else {
+          setSuccess('✅ Ödeme başarılı ve hesabınız oluşturuldu!');
+        }
         setFormData({ email: '', password: '', companyName: '' });
         setTimeout(() => {
           window.location.href = '/login';
@@ -183,75 +189,120 @@ export default function KayitPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">KART ÜZERİNDEKİ İSİM</label>
-                      <input
-                        type="text"
-                        required
-                        value={paymentData.holderName}
-                        onChange={(e) => setPaymentData({ ...paymentData, holderName: e.target.value })}
-                        className="premium-input"
-                        placeholder="AD SOYAD"
-                      />
-                    </div>
+                  {/* Payment Method Tabs */}
+                  <div className="flex p-1 bg-white/[0.03] border border-white/5 rounded-2xl">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('card')}
+                      className={`flex-1 h-12 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${paymentMethod === 'card' ? 'bg-indigo-600 shadow-lg text-white' : 'text-slate-500 hover:text-white'}`}
+                    >
+                      Kredi / Banka Kartı
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('eft')}
+                      className={`flex-1 h-12 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${paymentMethod === 'eft' ? 'bg-indigo-600 shadow-lg text-white' : 'text-slate-500 hover:text-white'}`}
+                    >
+                      EFT / Havale
+                    </button>
+                  </div>
 
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">KART NUMARASI</label>
-                      <div className="relative">
+                  {paymentMethod === 'card' ? (
+                    <div className="space-y-6 animate-fade-in">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">KART ÜZERİNDEKİ İSİM</label>
                         <input
                           type="text"
                           required
-                          maxLength={19}
-                          value={paymentData.cardNumber}
-                          onChange={(e) => setPaymentData({ ...paymentData, cardNumber: e.target.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim() })}
-                          className="premium-input pr-16"
-                          placeholder="0000 0000 0000 0000"
+                          value={paymentData.holderName}
+                          onChange={(e) => setPaymentData({ ...paymentData, holderName: e.target.value })}
+                          className="premium-input"
+                          placeholder="AD SOYAD"
                         />
-                        <div className="absolute right-6 top-1/2 -translate-y-1/2 flex gap-1">
-                          <i className="ri-visa-line text-2xl text-slate-600"></i>
-                          <i className="ri-mastercard-line text-2xl text-slate-600"></i>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">KART NUMARASI</label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            required
+                            maxLength={19}
+                            value={paymentData.cardNumber}
+                            onChange={(e) => setPaymentData({ ...paymentData, cardNumber: e.target.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim() })}
+                            className="premium-input pr-16"
+                            placeholder="0000 0000 0000 0000"
+                          />
+                          <div className="absolute right-6 top-1/2 -translate-y-1/2 flex gap-1">
+                            <i className="ri-visa-line text-2xl text-slate-600"></i>
+                            <i className="ri-mastercard-line text-2xl text-slate-600"></i>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">SKT (AA/YY)</label>
+                          <input
+                            type="text"
+                            required
+                            maxLength={5}
+                            value={paymentData.expiry}
+                            onChange={(e) => setPaymentData({ ...paymentData, expiry: e.target.value.replace(/\D/g, '').replace(/(.{2})/, '$1/').trim() })}
+                            className="premium-input text-center"
+                            placeholder="MM/YY"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">CVC / CVV</label>
+                          <input
+                            type="password"
+                            required
+                            maxLength={3}
+                            value={paymentData.cvc}
+                            onChange={(e) => setPaymentData({ ...paymentData, cvc: e.target.value.replace(/\D/g, '') })}
+                            className="premium-input text-center"
+                            placeholder="000"
+                          />
                         </div>
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">SKT (AA/YY)</label>
-                        <input
-                          type="text"
-                          required
-                          maxLength={5}
-                          value={paymentData.expiry}
-                          onChange={(e) => setPaymentData({ ...paymentData, expiry: e.target.value.replace(/\D/g, '').replace(/(.{2})/, '$1/').trim() })}
-                          className="premium-input text-center"
-                          placeholder="MM/YY"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">CVC / CVV</label>
-                        <input
-                          type="password"
-                          required
-                          maxLength={3}
-                          value={paymentData.cvc}
-                          onChange={(e) => setPaymentData({ ...paymentData, cvc: e.target.value.replace(/\D/g, '') })}
-                          className="premium-input text-center"
-                          placeholder="000"
-                        />
+                  ) : (
+                    <div className="space-y-6 animate-fade-in">
+                      <div className="p-8 rounded-[32px] bg-indigo-600/5 border border-indigo-500/10 space-y-6">
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">BANKA ADI</p>
+                          <p className="text-sm font-black text-slate-200">KUVEYT TÜRK KATILIM BANKASI</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">ALICI ADI</p>
+                          <p className="text-sm font-black text-slate-200 uppercase">YASİN DENİZ</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center justify-between">
+                            IBAN ADRESİ
+                            <button onClick={() => { navigator.clipboard.writeText('TR12 0006 2000 0000 1234 5678 90'); }} className="text-indigo-400 hover:text-white transition-colors">KOPYALA</button>
+                          </p>
+                          <p className="text-sm font-black text-indigo-400 font-mono tracking-wider">TR12 0006 2000 0000 1234 5678 90</p>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-[10px] font-bold text-slate-400 leading-relaxed italic">
+                          * Açıklama kısmına kayıt olacağınız e-posta adresini yazmayı unutmayınız.
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl flex items-center gap-4">
-                    <i className="ri-shield-check-line text-3xl text-emerald-500"></i>
-                    <p className="text-[10px] font-bold text-slate-400 leading-relaxed uppercase tracking-widest">
-                      256-BIT SSL İLE GÜVENLİ ÖDEME. KART BİLGİLERİNİZ SİSTEMİMİZDE SAKLANMAZ.
-                    </p>
-                  </div>
+                  {paymentMethod === 'card' && (
+                    <div className="p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-3xl flex items-center gap-4">
+                      <i className="ri-shield-check-line text-3xl text-emerald-500"></i>
+                      <p className="text-[10px] font-bold text-slate-400 leading-relaxed uppercase tracking-widest">
+                        256-BIT SSL İLE GÜVENLİ ÖDEME. KART BİLGİLERİNİZ SİSTEMİMİZDE SAKLANMAZ.
+                      </p>
+                    </div>
+                  )}
 
                   <button type="submit" className="premium-button w-full h-[72px] text-lg uppercase tracking-widest">
-                    ÖDEME BİLGİLERİNİ ONAYLA
+                    {paymentMethod === 'card' ? 'ÖDEME BİLGİLERİNİ ONAYLA' : 'HAVALE YAPTIM, DEVAM ET'}
                     <i className="ri-arrow-right-line text-2xl"></i>
                   </button>
                 </form>

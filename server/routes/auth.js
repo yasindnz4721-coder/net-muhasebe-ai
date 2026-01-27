@@ -9,7 +9,7 @@ const router = express.Router();
 // Kullanıcı kaydı (Ortak Hesap Desteği)
 router.post('/register', async (req, res) => {
     try {
-        const { email, password, companyName } = req.body;
+        const { email, password, companyName, paymentMethod } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({ error: 'E-posta ve şifre gerekli' });
@@ -47,9 +47,10 @@ router.post('/register', async (req, res) => {
                 // Mevcut kullanıcının varsayılan profilini bu yeni profil yap (opsiyonel)
                 await query('UPDATE users SET current_profile_id = $1 WHERE id = $2', [profileId, userId]);
             } else {
+                const isApproved = paymentMethod !== 'eft';
                 const userResult = await query(
-                    'INSERT INTO users (email, password_hash, current_profile_id, subscription_tier) VALUES ($1, $2, $3, $4) RETURNING id',
-                    [userEmail, passwordHash, profileId, 'pro']
+                    'INSERT INTO users (email, password_hash, current_profile_id, subscription_tier, is_approved, payment_method) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+                    [userEmail, passwordHash, profileId, 'pro', isApproved, paymentMethod || 'card']
                 );
 
                 userId = userResult.rows[0].id;
@@ -110,6 +111,11 @@ router.post('/login', async (req, res) => {
         const validPassword = await bcrypt.compare(password, user.password_hash);
         if (!validPassword) {
             return res.status(401).json({ error: 'Geçersiz e-posta veya şifre' });
+        }
+
+        // Onay kontrolü
+        if (user.is_approved === false) {
+            return res.status(403).json({ error: 'Hesabınız henüz onaylanmamış. EFT ödemeniz kontrol edildikten sonra giriş yapabilirsiniz.' });
         }
 
         // JWT token oluştur

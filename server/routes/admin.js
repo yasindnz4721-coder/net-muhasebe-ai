@@ -22,6 +22,8 @@ router.get('/users', adminOnly, async (req, res) => {
                 u.email, 
                 u.role, 
                 u.subscription_tier, 
+                u.is_approved,
+                u.payment_method,
                 u.created_at,
                 p.name as company_name
             FROM users u
@@ -53,6 +55,20 @@ router.get('/stats', adminOnly, async (req, res) => {
     } catch (error) {
         console.error('Admin istatistik hatası:', error);
         res.status(500).json({ error: 'İstatistikler alınamadı' });
+    }
+});
+
+// Kullanıcı onayla
+router.post('/approve-user', adminOnly, async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json({ error: 'Kullanıcı ID gerekli' });
+
+        await query('UPDATE users SET is_approved = TRUE WHERE id = $1', [userId]);
+        res.json({ message: 'Kullanıcı başarıyla onaylandı' });
+    } catch (error) {
+        console.error('Kullanıcı onaylama hatası:', error);
+        res.status(500).json({ error: 'Kullanıcı onaylanamadı' });
     }
 });
 

@@ -39,6 +39,22 @@ export default function AdminPanel() {
         }
     };
 
+    const handleApprove = async (userId: string) => {
+        if (!confirm('Bu kullanıcıyı onaylamak istediğinize emin misiniz?')) return;
+        try {
+            const { error } = await adminApi.approveUser(userId);
+            if (error) {
+                alert(error);
+                return;
+            }
+            alert('Kullanıcı onaylandı!');
+            loadData();
+        } catch (err) {
+            console.error('Onay hatası:', err);
+            alert('İşlem yapılamadı.');
+        }
+    };
+
     const filteredUsers = users.filter(user =>
         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.company_name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -161,7 +177,8 @@ export default function AdminPanel() {
                                                 <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">AKTİF ŞİRKET</th>
                                                 <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ROL</th>
                                                 <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">KAYIT TARİHİ</th>
-                                                <th className="px-10 py-6 text-center text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">STATÜ</th>
+                                                <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ÖDEME YOLU</th>
+                                                <th className="px-10 py-6 text-center text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">İŞLEM</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-white/5">
@@ -185,11 +202,27 @@ export default function AdminPanel() {
                                                     <td className="px-10 py-8 text-[10px] font-black text-slate-500 uppercase tracking-widest italic">
                                                         {user.created_at ? new Date(user.created_at).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
                                                     </td>
+                                                    <td className="px-10 py-8">
+                                                        <div className="flex flex-col gap-2">
+                                                            <span className={`inline-block px-3 py-1 rounded-lg text-[8px] font-black tracking-widest uppercase border ${user.payment_method === 'eft' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
+                                                                {user.payment_method === 'eft' ? 'EFT / HAVALE' : 'KREDİ KARTI'}
+                                                            </span>
+                                                            <span className={`inline-block px-3 py-1 rounded-lg text-[8px] font-black tracking-widest uppercase border ${user.is_approved ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border-rose-500/20'}`}>
+                                                                {user.is_approved ? 'ONAYLI' : 'ONAY BEKLİYOR'}
+                                                            </span>
+                                                        </div>
+                                                    </td>
                                                     <td className="px-10 py-8 text-center">
-                                                        <span className={`inline-block px-4 py-2 rounded-lg text-[8px] font-black tracking-widest uppercase border ${user.subscription_tier === 'pro' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-white/5 text-slate-500 border-white/5'
-                                                            }`}>
-                                                            {user.subscription_tier === 'pro' ? 'PREMIUM PRO AI' : 'STANDARD'}
-                                                        </span>
+                                                        {!user.is_approved ? (
+                                                            <button
+                                                                onClick={() => handleApprove(user.id)}
+                                                                className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/20"
+                                                            >
+                                                                ONAYLA
+                                                            </button>
+                                                        ) : (
+                                                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">AKTİF</span>
+                                                        )}
                                                     </td>
                                                 </tr>
                                             ))}
