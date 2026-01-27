@@ -283,7 +283,7 @@ export default function KayitPage() {
                           <div className="space-y-1">
                             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center justify-between">
                               IBAN ADRESİ
-                              <button onClick={() => { navigator.clipboard.writeText('TR10 0006 2000 6760 0006 8829 00'); alert('Kopyalandı!'); }} className="text-indigo-400 hover:text-white transition-colors">KOPYALA</button>
+                              <button onClick={() => { navigator.clipboard.writeText('TR10 0006 2000 6760 0006 8829 00'); }} className="text-indigo-400 hover:text-white transition-colors">KOPYALA</button>
                             </p>
                             <p className="text-sm font-black text-indigo-400 font-mono tracking-wider break-all">TR10 0006 2000 6760 0006 8829 00</p>
                           </div>
@@ -302,7 +302,7 @@ export default function KayitPage() {
                           <div className="space-y-1">
                             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center justify-between">
                               IBAN ADRESİ
-                              <button onClick={() => { navigator.clipboard.writeText('TR07 0011 1000 0000 0152 0397 34'); alert('Kopyalandı!'); }} className="text-indigo-400 hover:text-white transition-colors">KOPYALA</button>
+                              <button onClick={() => { navigator.clipboard.writeText('TR07 0011 1000 0000 0152 0397 34'); }} className="text-indigo-400 hover:text-white transition-colors">KOPYALA</button>
                             </p>
                             <p className="text-sm font-black text-indigo-400 font-mono tracking-wider break-all">TR07 0011 1000 0000 0152 0397 34</p>
                           </div>
