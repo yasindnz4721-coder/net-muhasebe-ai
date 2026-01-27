@@ -4,6 +4,7 @@ import { stokHareketleri as stokApi, urunler as urunlerApi, cariler as carilerAp
 import { useProfile } from '../../contexts/ProfileContext';
 import Header from '../../components/feature/Header';
 import Sidebar from '../../components/feature/Sidebar';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 export default function Stok() {
   const navigate = useNavigate();
@@ -328,18 +329,14 @@ export default function Stok() {
 
             <form onSubmit={handleUretimSubmit} className="p-10 space-y-8">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">HEDEF ÜRÜN *</label>
-                <select
-                  required
+                <SearchableSelect
+                  label="HEDEF ÜRÜN *"
+                  options={urunler.map(u => ({ id: u.id, name: u.ad, subText: `STOK: ${u.stok_miktari}` }))}
                   value={uretimData.urun_id}
-                  onChange={(e) => setUretimData({ ...uretimData, urun_id: e.target.value })}
-                  className="premium-input h-14"
-                >
-                  <option value="">ÜRÜN SEÇİN...</option>
-                  {urunler.map(u => (
-                    <option key={u.id} value={u.id}>{u.ad.toUpperCase()}</option>
-                  ))}
-                </select>
+                  onChange={(value) => setUretimData({ ...uretimData, urun_id: value })}
+                  placeholder="ÜRÜN SEÇİN..."
+                  required
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-6">

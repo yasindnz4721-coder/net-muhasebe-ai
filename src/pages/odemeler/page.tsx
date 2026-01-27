@@ -4,6 +4,7 @@ import { odemeler as odemelerApi, cariler as carilerApi, Odeme, Cari } from '../
 import { useProfile } from '../../contexts/ProfileContext';
 import Header from '../../components/feature/Header';
 import Sidebar from '../../components/feature/Sidebar';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 export default function Odemeler() {
   const { selectedProfile } = useProfile();
@@ -370,18 +371,14 @@ export default function Odemeler() {
             <form onSubmit={handleSubmit} className="p-10 space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">CARİ HESAP SEÇİMİ *</label>
-                  <select
+                  <SearchableSelect
+                    label="CARİ HESAP SEÇİMİ *"
+                    options={cariler.map(c => ({ id: c.id, name: c.ad, subText: c.vergi_no }))}
                     value={formData.cari_id}
-                    onChange={(e) => handleCariChange(e.target.value)}
-                    className="premium-input h-14"
+                    onChange={(value) => handleCariChange(value)}
+                    placeholder="CARİ SEÇİN..."
                     required
-                  >
-                    <option value="">CARİ SEÇİN...</option>
-                    {cariler.map(cari => (
-                      <option key={cari.id} value={cari.id}>{cari.ad.toUpperCase()}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <div className="space-y-2">

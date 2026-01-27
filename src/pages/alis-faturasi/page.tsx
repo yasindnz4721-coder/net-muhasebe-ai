@@ -14,6 +14,7 @@ import {
 import { useProfile } from '../../contexts/ProfileContext';
 import Header from '../../components/feature/Header';
 import Sidebar from '../../components/feature/Sidebar';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 interface UrunItem {
   urun_id: string;
@@ -529,18 +530,14 @@ export default function AlisFaturasi() {
               {/* Üst Bilgiler */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">TEDARİKÇİ / SATICI SEÇİMİ *</label>
-                  <select
+                  <SearchableSelect
+                    label="TEDARİKÇİ / SATICI SEÇİMİ *"
+                    options={cariler.map(c => ({ id: c.id, name: c.ad, subText: c.vergi_no }))}
                     value={formData.cari_id}
-                    onChange={(e) => handleCariChange(e.target.value)}
-                    className="premium-input h-14 border-orange-500/10 focus:border-orange-500/50"
+                    onChange={(value) => handleCariChange(value)}
+                    placeholder="CARİ SEÇİN..."
                     required
-                  >
-                    <option value="">CARİ SEÇİN...</option>
-                    {cariler.map(cari => (
-                      <option key={cari.id} value={cari.id}>{cari.ad.toUpperCase()}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -584,18 +581,14 @@ export default function AlisFaturasi() {
                   {formData.urunler.map((urun, index) => (
                     <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-white/[0.02] p-6 rounded-3xl border border-white/5 relative group/row">
                       <div className="md:col-span-5 space-y-2">
-                        <label className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] ml-1">ÜRÜN / STOK ADI</label>
-                        <select
+                        <SearchableSelect
+                          label="ÜRÜN / STOK ADI"
+                          options={urunler.map(u => ({ id: u.id, name: u.ad, subText: `STOK: ${u.stok_miktari}` }))}
                           value={urun.urun_id}
-                          onChange={(e) => handleUrunChange(index, 'urun_id', e.target.value)}
-                          className="premium-input h-12 text-sm"
+                          onChange={(value) => handleUrunChange(index, 'urun_id', value)}
+                          placeholder="SEÇİN..."
                           required
-                        >
-                          <option value="">SEÇİN...</option>
-                          {urunler.map(u => (
-                            <option key={u.id} value={u.id}>{u.ad.toUpperCase()}</option>
-                          ))}
-                        </select>
+                        />
                       </div>
                       <div className="md:col-span-2 space-y-2">
                         <label className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] ml-1">MİKTAR</label>

@@ -14,6 +14,7 @@ import {
 import { useProfile } from '../../contexts/ProfileContext';
 import Header from '../../components/feature/Header';
 import Sidebar from '../../components/feature/Sidebar';
+import SearchableSelect from '../../components/ui/SearchableSelect';
 
 interface UrunItem {
   urun_id: string;
@@ -548,24 +549,18 @@ export default function SatisFaturasi() {
               {/* Üst Bilgiler */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">MÜŞTERİ / CARİ SEÇİMİ *</label>
-                  <select
+                  <SearchableSelect
+                    label="MÜŞTERİ / CARİ SEÇİMİ *"
+                    options={cariler.map(c => ({ id: c.id, name: c.ad, subText: c.vergi_no }))}
                     value={formData.cari_id}
-                    onChange={(e) => handleCariChange(e.target.value)}
-                    className="premium-input h-14"
-                    required
-                  >
-                    <option value="">CARİ SEÇİN...</option>
-                    {cariler.map(cari => (
-                      <option key={cari.id} value={cari.id}>{cari.ad.toUpperCase()}</option>
-                    ))}
-                  </select>
+                    onChange={handleCariChange}
+                    placeholder="CARİ SEÇİN..."
+                  />
                   {formData.cari_id && (
                     <div className={`mt-3 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase border ${cariBakiye >= 0 ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                       }`}>
                       <i className={`${cariBakiye >= 0 ? 'ri-arrow-up-line' : 'ri-arrow-down-line'} mr-2`}></i>
                       BAKİYE: ₺{Math.abs(cariBakiye).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                      <span className="ml-2">({cariBakiye >= 0 ? 'BORÇLU' : 'ALACAKLI'})</span>
                     </div>
                   )}
                 </div>
@@ -611,18 +606,14 @@ export default function SatisFaturasi() {
                   {formData.urunler.map((urun, index) => (
                     <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-white/[0.02] p-6 rounded-3xl border border-white/5 relative group/row">
                       <div className="md:col-span-5 space-y-2">
-                        <label className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] ml-1">ÜRÜN / HİZMET</label>
-                        <select
+                        <SearchableSelect
+                          label="ÜRÜN / HİZMET"
+                          options={urunler.map(u => ({ id: u.id, name: u.ad, subText: `STOK: ${u.stok_miktari}` }))}
                           value={urun.urun_id}
-                          onChange={(e) => handleUrunChange(index, 'urun_id', e.target.value)}
-                          className="premium-input h-12 text-sm"
+                          onChange={(value) => handleUrunChange(index, 'urun_id', value)}
+                          placeholder="ÜRÜN SEÇİN..."
                           required
-                        >
-                          <option value="">SEÇİN...</option>
-                          {urunler.map(u => (
-                            <option key={u.id} value={u.id}>{u.ad.toUpperCase()} (STOK: {u.stok_miktari})</option>
-                          ))}
-                        </select>
+                        />
                       </div>
                       <div className="md:col-span-2 space-y-2">
                         <label className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] ml-1">MİKTAR</label>
@@ -652,8 +643,8 @@ export default function SatisFaturasi() {
                         </div>
                       </div>
                       <div className="md:col-span-2 space-y-2">
-                        <label className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] ml-1">SATIR TOPLAMI</label>
-                        <div className="premium-input h-12 flex items-center justify-end px-4 font-black bg-white/[0.01] text-emerald-500 opacity-80">
+                        <label className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] ml-1">KALEM TUTARI</label>
+                        <div className="h-12 flex items-center justify-end px-4 bg-white/5 border border-white/10 rounded-2xl text-indigo-400 font-black">
                           ₺{urun.toplam.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                         </div>
                       </div>
@@ -674,17 +665,16 @@ export default function SatisFaturasi() {
               </div>
 
               {/* Alt Bilgiler ve Toplamlar */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">FATURA NOTU / AÇIKLAMA</label>
-                    <textarea
-                      value={formData.aciklama}
-                      onChange={(e) => setFormData({ ...formData, aciklama: e.target.value })}
-                      className="premium-input p-6 h-40 resize-none"
-                      placeholder="Fatura altına eklenecek özel notlar..."
-                    />
-                  </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 pt-10 border-t border-white/5">
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">FATURA NOTLARI / AÇIKLAMA</label>
+                  <textarea
+                    value={formData.aciklama}
+                    onChange={(e) => setFormData({ ...formData, aciklama: e.target.value })}
+                    rows={6}
+                    className="premium-input p-6 resize-none h-full"
+                    placeholder="Fatura ayrıntıları, ödeme vadeleri vb. özel notlar..."
+                  />
                 </div>
 
                 <div className="premium-card bg-white/[0.01] border-white/5 p-8 space-y-6">
@@ -768,161 +758,165 @@ export default function SatisFaturasi() {
       )}
 
       {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[110] p-4 animate-fade-in">
-          <div className="premium-card p-10 w-full max-w-md animate-slide-up border-rose-500/20 text-center">
-            <div className="w-20 h-20 bg-rose-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-rose-500/20">
-              <i className="ri-delete-bin-line text-4xl text-rose-500"></i>
-            </div>
-            <h3 className="text-2xl font-black uppercase tracking-tight mb-4">Faturayı İptal Et</h3>
-            <p className="text-slate-400 font-medium mb-10">
-              Bu faturayı sildiğinizde ilgili stok hareketleri geri alınacak ve envanteriniz güncellenecektir. Bu işlem geri alınamaz.
-            </p>
-            <div className="flex gap-4">
-              <button
-                onClick={() => { setShowDeleteModal(false); setSelectedFatura(null); }}
-                className="flex-1 h-14 text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors border border-white/5 rounded-2xl"
-              >
-                VAZGEÇ
-              </button>
-              <button
-                onClick={handleDelete}
-                className="flex-1 h-14 bg-rose-600 text-white rounded-2xl font-black text-[10px] tracking-widest uppercase hover:bg-rose-700 transition-all shadow-lg shadow-rose-600/20"
-              >
-                EVET, SİL
-              </button>
+      {
+        showDeleteModal && (
+          <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[110] p-4 animate-fade-in">
+            <div className="premium-card p-10 w-full max-w-md animate-slide-up border-rose-500/20 text-center">
+              <div className="w-20 h-20 bg-rose-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-rose-500/20">
+                <i className="ri-delete-bin-line text-4xl text-rose-500"></i>
+              </div>
+              <h3 className="text-2xl font-black uppercase tracking-tight mb-4">Faturayı İptal Et</h3>
+              <p className="text-slate-400 font-medium mb-10">
+                Bu faturayı sildiğinizde ilgili stok hareketleri geri alınacak ve envanteriniz güncellenecektir. Bu işlem geri alınamaz.
+              </p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => { setShowDeleteModal(false); setSelectedFatura(null); }}
+                  className="flex-1 h-14 text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors border border-white/5 rounded-2xl"
+                >
+                  VAZGEÇ
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex-1 h-14 bg-rose-600 text-white rounded-2xl font-black text-[10px] tracking-widest uppercase hover:bg-rose-700 transition-all shadow-lg shadow-rose-600/20"
+                >
+                  EVET, SİL
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Print Modal */}
-      {showPrintModal && selectedFatura && (
-        <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[110] p-4 animate-fade-in print:bg-white print:p-0">
-          <div className="premium-card p-0 w-full max-w-3xl max-h-[90vh] flex flex-col animate-slide-up border-white/10 relative overflow-hidden print:shadow-none print:border-0 print:max-w-none print:max-h-none print:bg-white print:text-black">
-            {/* Modal Header - Hidden in Print */}
-            <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.01] print:hidden">
-              <div className="space-y-1">
-                <h3 className="text-2xl font-black tracking-tight text-white uppercase leading-none">Fatura Önizleme</h3>
-                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">Dökümanı kontrol edin ve yazdırın.</p>
+      {
+        showPrintModal && selectedFatura && (
+          <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[110] p-4 animate-fade-in print:bg-white print:p-0">
+            <div className="premium-card p-0 w-full max-w-3xl max-h-[90vh] flex flex-col animate-slide-up border-white/10 relative overflow-hidden print:shadow-none print:border-0 print:max-w-none print:max-h-none print:bg-white print:text-black">
+              {/* Modal Header - Hidden in Print */}
+              <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.01] print:hidden">
+                <div className="space-y-1">
+                  <h3 className="text-2xl font-black tracking-tight text-white uppercase leading-none">Fatura Önizleme</h3>
+                  <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">Dökümanı kontrol edin ve yazdırın.</p>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handlePrint}
+                    className="px-6 h-12 bg-indigo-600 text-white rounded-xl font-black text-[10px] tracking-widest uppercase hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-2"
+                  >
+                    <i className="ri-printer-line text-lg"></i>
+                    <span>YAZDIR</span>
+                  </button>
+                  <button
+                    onClick={() => setShowPrintModal(false)}
+                    className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-slate-400 hover:text-white transition-all"
+                  >
+                    <i className="ri-close-line text-2xl"></i>
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={handlePrint}
-                  className="px-6 h-12 bg-indigo-600 text-white rounded-xl font-black text-[10px] tracking-widest uppercase hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-2"
-                >
-                  <i className="ri-printer-line text-lg"></i>
-                  <span>YAZDIR</span>
-                </button>
-                <button
-                  onClick={() => setShowPrintModal(false)}
-                  className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-slate-400 hover:text-white transition-all"
-                >
-                  <i className="ri-close-line text-2xl"></i>
-                </button>
-              </div>
-            </div>
 
-            {/* Fatura Content */}
-            <div className="flex-1 overflow-y-auto p-12 bg-white text-black custom-scrollbar print:p-0">
-              <div className="flex justify-between items-start mb-12">
-                <div className="space-y-4">
-                  {selectedProfile?.logo_url ? (
-                    <img
-                      src={selectedProfile.logo_url}
-                      alt="Logo"
-                      className="h-16 w-auto object-contain"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center border border-slate-200">
-                      <i className="ri-building-line text-3xl text-slate-400"></i>
+              {/* Fatura Content */}
+              <div className="flex-1 overflow-y-auto p-12 bg-white text-black custom-scrollbar print:p-0">
+                <div className="flex justify-between items-start mb-12">
+                  <div className="space-y-4">
+                    {selectedProfile?.logo_url ? (
+                      <img
+                        src={selectedProfile.logo_url}
+                        alt="Logo"
+                        className="h-16 w-auto object-contain"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center border border-slate-200">
+                        <i className="ri-building-line text-3xl text-slate-400"></i>
+                      </div>
+                    )}
+                    <div className="space-y-1">
+                      <h1 className="text-xl font-black tracking-tight text-slate-900 uppercase">{selectedProfile?.name}</h1>
+                      <h2 className="text-2xl font-black tracking-tighter uppercase whitespace-nowrap text-indigo-600">SATIŞ FATURASI</h2>
+                      <div className="inline-block px-3 py-1 bg-black text-white text-[10px] font-black tracking-widest uppercase">{selectedFatura.fatura_no}</div>
                     </div>
-                  )}
-                  <div className="space-y-1">
-                    <h1 className="text-xl font-black tracking-tight text-slate-900 uppercase">{selectedProfile?.name}</h1>
-                    <h2 className="text-2xl font-black tracking-tighter uppercase whitespace-nowrap text-indigo-600">SATIŞ FATURASI</h2>
-                    <div className="inline-block px-3 py-1 bg-black text-white text-[10px] font-black tracking-widest uppercase">{selectedFatura.fatura_no}</div>
+                  </div>
+                  <div className="text-right space-y-1">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">DÜZENLEME TARİHİ</p>
+                    <p className="text-lg font-black">{new Date(selectedFatura.tarih).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
                   </div>
                 </div>
-                <div className="text-right space-y-1">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">DÜZENLEME TARİHİ</p>
-                  <p className="text-lg font-black">{new Date(selectedFatura.tarih).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-                </div>
-              </div>
 
-              <div className="mb-12 pb-12 border-b-2 border-slate-100">
-                <div className="space-y-4">
-                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em]">MÜŞTERİ BİLGİLERİ</p>
-                  <div className="space-y-1">
-                    <p className="text-xl font-black tracking-tight">{selectedFatura.cari_ad.toUpperCase()}</p>
+                <div className="mb-12 pb-12 border-b-2 border-slate-100">
+                  <div className="space-y-4">
+                    <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em]">MÜŞTERİ BİLGİLERİ</p>
+                    <div className="space-y-1">
+                      <p className="text-xl font-black tracking-tight">{selectedFatura.cari_ad.toUpperCase()}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <table className="w-full mb-12">
-                <thead>
-                  <tr className="border-b-2 border-black">
-                    <th className="py-4 text-left text-[10px] font-black uppercase tracking-widest">ÜRÜN / HİZMET TANIMI</th>
-                    <th className="py-4 text-center text-[10px] font-black uppercase tracking-widest w-24">MİKTAR</th>
-                    <th className="py-4 text-right text-[10px] font-black uppercase tracking-widest w-32">BİRİM FİYAT</th>
-                    <th className="py-4 text-right text-[10px] font-black uppercase tracking-widest w-32">TOPLAM</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {selectedFatura.urunler?.map((urun, i) => (
-                    <tr key={i}>
-                      <td className="py-5 font-bold">{urun.urun_ad.toUpperCase()}</td>
-                      <td className="py-5 text-center font-black">{urun.miktar}</td>
-                      <td className="py-5 text-right font-bold">₺{Number(urun.birim_fiyat).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
-                      <td className="py-5 text-right font-black">₺{Number(urun.toplam).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                <table className="w-full mb-12">
+                  <thead>
+                    <tr className="border-b-2 border-black">
+                      <th className="py-4 text-left text-[10px] font-black uppercase tracking-widest">ÜRÜN / HİZMET TANIMI</th>
+                      <th className="py-4 text-center text-[10px] font-black uppercase tracking-widest w-24">MİKTAR</th>
+                      <th className="py-4 text-right text-[10px] font-black uppercase tracking-widest w-32">BİRİM FİYAT</th>
+                      <th className="py-4 text-right text-[10px] font-black uppercase tracking-widest w-32">TOPLAM</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {selectedFatura.urunler?.map((urun, i) => (
+                      <tr key={i}>
+                        <td className="py-5 font-bold">{urun.urun_ad.toUpperCase()}</td>
+                        <td className="py-5 text-center font-black">{urun.miktar}</td>
+                        <td className="py-5 text-right font-bold">₺{Number(urun.birim_fiyat).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                        <td className="py-5 text-right font-black">₺{Number(urun.toplam).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
 
-              <div className="flex justify-end pt-8">
-                <div className="w-80 space-y-3">
-                  <div className="flex justify-between items-center text-sm font-bold text-slate-500">
-                    <span>ARA TOPLAM</span>
-                    <span>₺{Number(selectedFatura.tutar).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm font-bold text-slate-500">
-                    <span>KDV TOPLAMI</span>
-                    <span>₺{Number(selectedFatura.kdv).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
-                  </div>
-                  <div className="flex justify-between items-center pt-4 border-t-2 border-black">
-                    <span className="text-[10px] font-black tracking-widest">GENEL TOPLAM</span>
-                    <span className="text-2xl font-black tracking-tighter text-indigo-600">
-                      ₺{Number(selectedFatura.toplam).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  {/* Bakiye Gösterimi */}
-                  <div className={`flex justify-between items-center p-3 rounded-xl mt-6 ${printCariBakiye >= 0 ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'
-                    } font-bold text-[10px] tracking-widest uppercase`}>
-                    <span>GÜNCEL BAKİYE</span>
-                    <span>
-                      ₺{Math.abs(printCariBakiye).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                      <span className="text-[8px] ml-1">({printCariBakiye >= 0 ? 'BORÇLU' : 'ALACAKLI'})</span>
-                    </span>
+                <div className="flex justify-end pt-8">
+                  <div className="w-80 space-y-3">
+                    <div className="flex justify-between items-center text-sm font-bold text-slate-500">
+                      <span>ARA TOPLAM</span>
+                      <span>₺{Number(selectedFatura.tutar).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm font-bold text-slate-500">
+                      <span>KDV TOPLAMI</span>
+                      <span>₺{Number(selectedFatura.kdv).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-4 border-t-2 border-black">
+                      <span className="text-[10px] font-black tracking-widest">GENEL TOPLAM</span>
+                      <span className="text-2xl font-black tracking-tighter text-indigo-600">
+                        ₺{Number(selectedFatura.toplam).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                    {/* Bakiye Gösterimi */}
+                    <div className={`flex justify-between items-center p-3 rounded-xl mt-6 ${printCariBakiye >= 0 ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'
+                      } font-bold text-[10px] tracking-widest uppercase`}>
+                      <span>GÜNCEL BAKİYE</span>
+                      <span>
+                        ₺{Math.abs(printCariBakiye).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                        <span className="text-[8px] ml-1">({printCariBakiye >= 0 ? 'BORÇLU' : 'ALACAKLI'})</span>
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {selectedFatura.aciklama && (
-                <div className="mt-12 pt-8 border-t border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">NOTLAR / AÇIKLAMALAR</p>
-                  <p className="text-sm font-medium text-slate-600 italic">"{selectedFatura.aciklama}"</p>
+                {selectedFatura.aciklama && (
+                  <div className="mt-12 pt-8 border-t border-slate-100">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">NOTLAR / AÇIKLAMALAR</p>
+                    <p className="text-sm font-medium text-slate-600 italic">"{selectedFatura.aciklama}"</p>
+                  </div>
+                )}
+
+                <div className="mt-24 pt-12 border-t border-slate-100 flex justify-between items-end text-[8px] font-black text-slate-300 uppercase tracking-[0.3em]">
+                  <div>BU BELGE ELEKTRONİK OLARAK OLUŞTURULMUŞTUR</div>
+                  <div>NET MUHASEBE AI v2.0-PRO</div>
                 </div>
-              )}
-
-              <div className="mt-24 pt-12 border-t border-slate-100 flex justify-between items-end text-[8px] font-black text-slate-300 uppercase tracking-[0.3em]">
-                <div>BU BELGE ELEKTRONİK OLARAK OLUŞTURULMUŞTUR</div>
-                <div>NET MUHASEBE AI v2.0-PRO</div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 }
