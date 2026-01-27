@@ -23,6 +23,7 @@ export default function Stok() {
     aciklama: 'Günlük üretimden stok girişi',
     tarih: new Date().toISOString().split('T')[0]
   });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (selectedProfile) {
@@ -51,12 +52,18 @@ export default function Stok() {
 
   const handleUretimSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedProfile || !isPro) return;
+    if (!selectedProfile || !isPro || saving) return;
+
+    if (!uretimData.urun_id) {
+      alert('Lütfen bir ürün seçin.');
+      return;
+    }
 
     const urun = urunler.find(u => u.id === uretimData.urun_id);
     if (!urun) return;
 
     try {
+      setSaving(true);
       const { error } = await stokApi.create({
         urun_id: uretimData.urun_id,
         urun_ad: urun.ad,
@@ -67,18 +74,25 @@ export default function Stok() {
         profile_id: selectedProfile.id
       });
 
-      if (!error) {
-        setShowUretimModal(false);
-        setUretimData({
-          urun_id: '',
-          miktar: 1,
-          aciklama: 'Günlük üretimden stok girişi',
-          tarih: new Date().toISOString().split('T')[0]
-        });
-        loadData();
+      if (error) {
+        alert('Hata: ' + error);
+        return;
       }
+
+      setShowUretimModal(false);
+      setUretimData({
+        urun_id: '',
+        miktar: 1,
+        aciklama: 'Günlük üretimden stok girişi',
+        tarih: new Date().toISOString().split('T')[0]
+      });
+      alert('Üretim kaydı başarıyla oluşturuldu.');
+      await loadData();
     } catch (error) {
       console.error('Üretim girişi hatası:', error);
+      alert('Sorgu sırasında bir hata oluştu. Lütfen bağlantınızı kontrol edip tekrar deneyin.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -371,9 +385,15 @@ export default function Stok() {
                 </button>
                 <button
                   type="submit"
-                  className="premium-button flex-1 h-16 text-xs uppercase tracking-widest font-black"
+                  disabled={saving}
+                  className={`premium-button flex-1 h-16 text-xs uppercase tracking-widest font-black ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  ÜRETİMİ KAYDET
+                  {saving ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>KAYDEDİLİYOR...</span>
+                    </div>
+                  ) : 'ÜRETİMİ KAYDET'}
                 </button>
               </div>
             </form>
