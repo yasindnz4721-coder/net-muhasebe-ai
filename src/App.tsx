@@ -1,10 +1,14 @@
-import MuhasebeDashboard from './muhasebeDashboard'; // Yeni oluşturduğunuz dosyayı içe aktarın
+import { BrowserRouter } from 'react-router-dom';
+import { AppRoutes } from './router';
+import { ProfileProvider } from './contexts/ProfileContext';
 
 function App() {
   return (
-    <div>
-      <MuhasebeDashboard />
-    </div>
+    <BrowserRouter basename="/">
+      <ProfileProvider>
+        <AppRoutes />
+      </ProfileProvider>
+    </BrowserRouter>
   );
 }
 
