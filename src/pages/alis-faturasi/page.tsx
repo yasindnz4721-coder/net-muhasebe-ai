@@ -253,34 +253,10 @@ export default function AlisFaturasi() {
       };
 
       if (isEditing && selectedFatura) {
-        // Eski faturanın stok üzerindeki etkisini geri al (Alış faturası ise stok azaltılır)
-        if (selectedFatura.urunler && Array.isArray(selectedFatura.urunler)) {
-          for (const urun of selectedFatura.urunler) {
-            if (urun.urun_id) {
-              const { data: urunData } = await urunlerApi.getById(urun.urun_id);
-              if (urunData) {
-                const yeniStok = Number(urunData.stok_miktari) - Number(urun.miktar);
-                await urunlerApi.update(urun.urun_id, { stok_miktari: yeniStok });
-              }
-            }
-          }
-        }
-
         const { error } = await alisApi.update(selectedFatura.id, faturaData);
         if (error) {
           console.error('API hatası:', error);
           return;
-        }
-
-        // Yeni faturanın stok üzerindeki etkisini uygula (Alış faturası ise stok artırılır)
-        for (const urun of faturaData.urunler) {
-          if (urun.urun_id) {
-            const { data: urunData } = await urunlerApi.getById(urun.urun_id);
-            if (urunData) {
-              const yeniStok = Number(urunData.stok_miktari) + Number(urun.miktar);
-              await urunlerApi.update(urun.urun_id, { stok_miktari: yeniStok });
-            }
-          }
         }
       } else {
         const { error } = await alisApi.create(faturaData);
@@ -303,32 +279,7 @@ export default function AlisFaturasi() {
 
     try {
       const { error } = await alisApi.delete(selectedFatura.id);
-
       if (error) throw new Error(error);
-
-      // Stok düşürme (Alış faturası silindiğinde stok azaltılır)
-      if (selectedFatura.urunler && Array.isArray(selectedFatura.urunler)) {
-        for (const urun of selectedFatura.urunler) {
-          if (urun.urun_id) {
-            const { data: urunData } = await urunlerApi.getById(urun.urun_id);
-
-            if (urunData) {
-              const yeniStok = Number(urunData.stok_miktari) - Number(urun.miktar);
-              await urunlerApi.update(urun.urun_id, { stok_miktari: yeniStok });
-
-              await stokApi.create({
-                urun_id: urun.urun_id,
-                urun_ad: urun.urun_ad,
-                hareket_tipi: 'Çıkış',
-                miktar: Number(urun.miktar),
-                aciklama: `Alış Faturası İptal: ${selectedFatura.fatura_no}`,
-                tarih: new Date().toISOString().split('T')[0],
-                profile_id: selectedProfile.id
-              });
-            }
-          }
-        }
-      }
 
       await loadData();
       setShowDeleteModal(false);
