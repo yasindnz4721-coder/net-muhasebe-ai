@@ -55,6 +55,22 @@ export default function AdminPanel() {
         }
     };
 
+    const handleDelete = async (userId: string) => {
+        if (!confirm('DİKKAT! Bu kullanıcıyı kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.')) return;
+        try {
+            const { error } = await adminApi.deleteUser(userId);
+            if (error) {
+                alert(error);
+                return;
+            }
+            alert('Kullanıcı başarıyla silindi!');
+            loadData();
+        } catch (err) {
+            console.error('Silme hatası:', err);
+            alert('İşlem yapılamadı.');
+        }
+    };
+
     const filteredUsers = users.filter(user =>
         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.company_name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -213,16 +229,25 @@ export default function AdminPanel() {
                                                         </div>
                                                     </td>
                                                     <td className="px-10 py-8 text-center">
-                                                        {!user.is_approved ? (
+                                                        <div className="flex items-center justify-center gap-3">
+                                                            {!user.is_approved ? (
+                                                                <button
+                                                                    onClick={() => handleApprove(user.id)}
+                                                                    className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/20"
+                                                                >
+                                                                    ONAYLA
+                                                                </button>
+                                                            ) : (
+                                                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">AKTİF</span>
+                                                            )}
                                                             <button
-                                                                onClick={() => handleApprove(user.id)}
-                                                                className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/20"
+                                                                onClick={() => handleDelete(user.id)}
+                                                                className="px-6 py-2 bg-rose-600/10 hover:bg-rose-600 text-rose-500 hover:text-white border border-rose-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                                                title="Kullanıcıyı Sil"
                                                             >
-                                                                ONAYLA
+                                                                SİL
                                                             </button>
-                                                        ) : (
-                                                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">AKTİF</span>
-                                                        )}
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             ))}

@@ -289,6 +289,11 @@ export const admin = {
             method: 'POST',
             body: JSON.stringify({ userId }),
         });
+    },
+    async deleteUser(userId: string) {
+        return fetchApi<{ message: string }>(`/api/admin/users/${userId}`, {
+            method: 'DELETE'
+        });
     }
 };
 

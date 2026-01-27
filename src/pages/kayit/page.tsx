@@ -308,25 +308,6 @@ export default function KayitPage() {
                           </div>
                         </div>
 
-                        {/* Kuveyt Türk */}
-                        <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/5 space-y-4">
-                          <div className="flex items-center justify-between">
-                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">KUVEYT TÜRK</p>
-                            <i className="ri-bank-line text-indigo-400"></i>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">ALICI ADI</p>
-                            <p className="text-sm font-black text-slate-200">YASİN DENİZ</p>
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center justify-between">
-                              IBAN ADRESİ
-                              <button onClick={() => { navigator.clipboard.writeText('TR12 0006 2000 0000 1234 5678 90'); alert('Kopyalandı!'); }} className="text-indigo-400 hover:text-white transition-colors">KOPYALA</button>
-                            </p>
-                            <p className="text-sm font-black text-indigo-400 font-mono tracking-wider break-all">TR12 0006 2000 0000 1234 5678 90</p>
-                          </div>
-                        </div>
-
                         <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-[10px] font-bold text-slate-400 leading-relaxed italic text-center">
                           * Açıklama kısmına kayıt olacağınız e-posta adresini yazmayı unutmayınız. Ödeme sonrası üyeliğiniz manuel olarak onaylanacaktır.
                         </div>

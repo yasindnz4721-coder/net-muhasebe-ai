@@ -72,4 +72,23 @@ router.post('/approve-user', adminOnly, async (req, res) => {
     }
 });
 
+// Kullanıcı sil
+router.delete('/users/:userId', adminOnly, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        if (!userId) return res.status(400).json({ error: 'Kullanıcı ID gerekli' });
+
+        // Admin kendisini silemesin
+        if (userId === req.user.id) {
+            return res.status(400).json({ error: 'Kendi hesabınızı silemezsiniz' });
+        }
+
+        await query('DELETE FROM users WHERE id = $1', [userId]);
+        res.json({ message: 'Kullanıcı başarıyla silindi' });
+    } catch (error) {
+        console.error('Kullanıcı silme hatası:', error);
+        res.status(500).json({ error: 'Kullanıcı silinemedi' });
+    }
+});
+
 module.exports = router;
