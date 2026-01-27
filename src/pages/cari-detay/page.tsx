@@ -44,14 +44,15 @@ export default function CariDetay() {
         if (satisFaturalari && Array.isArray(satisFaturalari)) {
           const cariSatislar = satisFaturalari.filter(f => f.cari_id === id);
           cariSatislar.forEach(fatura => {
+            const tutar = Number(fatura.toplam) || 0;
             tumIslemler.push({
               id: fatura.id,
               tip: 'Satış Faturası',
               tarih: fatura.tarih,
-              tutar: fatura.toplam,
+              tutar: tutar,
               aciklama: `Fatura No: ${fatura.fatura_no}`,
               durum: fatura.durum,
-              borc: fatura.toplam,
+              borc: tutar,
               alacak: 0
             });
           });
@@ -60,15 +61,16 @@ export default function CariDetay() {
         if (alisFaturalari && Array.isArray(alisFaturalari)) {
           const cariAlislar = alisFaturalari.filter(f => f.cari_id === id);
           cariAlislar.forEach(fatura => {
+            const tutar = Number(fatura.toplam) || 0;
             tumIslemler.push({
               id: fatura.id,
               tip: 'Alış Faturası',
               tarih: fatura.tarih,
-              tutar: fatura.toplam,
+              tutar: tutar,
               aciklama: `Fatura No: ${fatura.fatura_no}`,
               durum: fatura.durum,
               borc: 0,
-              alacak: fatura.toplam
+              alacak: tutar
             });
           });
         }
@@ -76,16 +78,20 @@ export default function CariDetay() {
         if (odemeler && Array.isArray(odemeler)) {
           const cariOdemeler = odemeler.filter(o => o.cari_id === id);
           cariOdemeler.forEach(odeme => {
-            const isAlindi = odeme.tip === 'Alınan Ödeme';
+            const tutar = Number(odeme.tutar) || 0;
+            // Tahsilat veya Alınan Ödeme: Cari bize ödüyor (Bizim için Alacak/Tahsilat)
+            // Ödeme Yapıldı veya Tediye: Biz cariye ödüyoruz (Bizim için Ödeme/Tediye)
+            const isTahsilat = odeme.tip === 'Tahsilat' || odeme.tip === 'Ödeme Alındı' || odeme.tip === 'Alınan Ödeme';
+
             tumIslemler.push({
               id: odeme.id,
-              tip: isAlindi ? 'Tahsilat' : 'Ödeme',
+              tip: isTahsilat ? 'Tahsilat' : 'Ödeme',
               tarih: odeme.tarih,
-              tutar: odeme.tutar,
+              tutar: tutar,
               aciklama: `${odeme.odeme_yontemi} - ${odeme.aciklama || ''}`,
               durum: 'Tamamlandı',
-              borc: isAlindi ? 0 : odeme.tutar,
-              alacak: isAlindi ? odeme.tutar : 0
+              borc: isTahsilat ? 0 : tutar, // Biz ona ödediysek o borçlu gibi (veya borcumuz azaldı) - Standart cari mantığında: Ödeme Yapıldı (Borç), Tahsilat (Alacak)
+              alacak: isTahsilat ? tutar : 0
             });
           });
         }
