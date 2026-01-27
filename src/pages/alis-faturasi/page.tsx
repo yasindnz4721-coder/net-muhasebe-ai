@@ -45,6 +45,7 @@ export default function AlisFaturasi() {
   const [cariler, setCariler] = useState<Cari[]>([]);
   const [urunler, setUrunler] = useState<Urun[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
@@ -229,6 +230,7 @@ export default function AlisFaturasi() {
     }
 
     try {
+      setSaving(true);
       const faturaNo = formData.fatura_no || await generateFaturaNo();
       const { araToplam, kdv, toplam } = calculateTotals(formData.urunler, formData.kdv_uygula, formData.kdv_orani);
 
@@ -255,15 +257,17 @@ export default function AlisFaturasi() {
       if (isEditing && selectedFatura) {
         const { error } = await alisApi.update(selectedFatura.id, faturaData);
         if (error) {
-          console.error('API hatası:', error);
+          alert('Fatura güncellenirken hata oluştu: ' + error);
           return;
         }
+        alert('Fatura başarıyla güncellendi.');
       } else {
         const { error } = await alisApi.create(faturaData);
         if (error) {
-          console.error('API hatası:', error);
+          alert('Fatura oluşturulurken hata oluştu: ' + error);
           return;
         }
+        alert('Fatura başarıyla oluşturuldu.');
       }
 
       await loadData();
@@ -271,6 +275,9 @@ export default function AlisFaturasi() {
       resetForm();
     } catch (error) {
       console.error('Fatura eklenirken hata:', error);
+      alert('Beklenmedik bir hata oluştu.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -718,9 +725,17 @@ export default function AlisFaturasi() {
                 </button>
                 <button
                   type="submit"
-                  className="premium-button flex-[2] h-16 text-sm uppercase tracking-widest font-black bg-orange-600 hover:bg-orange-700 border-orange-500/30 text-white"
+                  disabled={saving}
+                  className={`premium-button flex-[2] h-16 text-sm uppercase tracking-widest font-black flex items-center justify-center gap-3 bg-orange-600 hover:bg-orange-700 border-orange-500/30 text-white ${saving ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
-                  {isEditing ? 'MALİYETİ GÜNCELLE' : 'ALIŞ KAYDINI ONAYLA'}
+                  {saving ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>KAYDEDİLİYOR...</span>
+                    </>
+                  ) : (
+                    <span>{isEditing ? 'MALİYETİ GÜNCELLE' : 'ALIŞ KAYDINI ONAYLA'}</span>
+                  )}
                 </button>
               </div>
             </form>

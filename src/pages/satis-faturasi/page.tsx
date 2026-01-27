@@ -45,6 +45,7 @@ export default function SatisFaturasi() {
   const [cariler, setCariler] = useState<Cari[]>([]);
   const [urunler, setUrunler] = useState<Urun[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
@@ -241,6 +242,7 @@ export default function SatisFaturasi() {
     }
 
     try {
+      setSaving(true);
       const faturaNo = formData.fatura_no || await generateFaturaNo();
       const { araToplam, kdv, toplam } = calculateTotals(formData.urunler, formData.kdv_uygula, formData.kdv_orani);
 
@@ -267,15 +269,17 @@ export default function SatisFaturasi() {
       if (isEditing && selectedFatura) {
         const { error } = await satisApi.update(selectedFatura.id, faturaData);
         if (error) {
-          console.error('API hatası:', error);
+          alert('Fatura güncellenirken hata oluştu: ' + error);
           return;
         }
+        alert('Fatura başarıyla güncellendi.');
       } else {
         const { error } = await satisApi.create(faturaData);
         if (error) {
-          console.error('API hatası:', error);
+          alert('Fatura oluşturulurken hata oluştu: ' + error);
           return;
         }
+        alert('Fatura başarıyla oluşturuldu.');
       }
 
       await loadData();
@@ -283,6 +287,9 @@ export default function SatisFaturasi() {
       resetForm();
     } catch (error) {
       console.error('Fatura eklenirken hata:', error);
+      alert('Beklenmedik bir hata oluştu.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -745,9 +752,17 @@ export default function SatisFaturasi() {
                 </button>
                 <button
                   type="submit"
-                  className="premium-button flex-[2] h-16 text-sm uppercase tracking-widest font-black"
+                  disabled={saving}
+                  className={`premium-button flex-[2] h-16 text-sm uppercase tracking-widest font-black flex items-center justify-center gap-3 ${saving ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
-                  {isEditing ? 'DEĞİŞİKLİKLERİ KAYDET' : 'FATURAYI KES VE ONAYLA'}
+                  {saving ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>KAYDEDİLİYOR...</span>
+                    </>
+                  ) : (
+                    <span>{isEditing ? 'DEĞİŞİKLİKLERİ KAYDET' : 'FATURAYI KES VE ONAYLA'}</span>
+                  )}
                 </button>
               </div>
             </form>

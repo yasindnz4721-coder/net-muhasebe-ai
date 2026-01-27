@@ -38,6 +38,16 @@ router.post('/', async (req, res) => {
 
         await client.query('BEGIN');
 
+        // Faturayı kaydet
+        const result = await client.query(
+            `INSERT INTO alis_faturalari (cari_id, cari_ad, fatura_no, tarih, tutar, kdv, toplam, durum, aciklama, urunler, profile_id)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+             RETURNING *`,
+            [cari_id, cari_ad || '', fatura_no, tarih || new Date().toISOString(), tutar || 0, kdv || 0, toplam || 0, durum || 'Onaylandı', aciklama || '', JSON.stringify(urunler || []), profile_id]
+        );
+
+        const fatura = result.rows[0];
+
         // Stokları otomatik artır
         if (urunler && Array.isArray(urunler)) {
             for (const urun of urunler) {

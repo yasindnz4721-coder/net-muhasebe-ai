@@ -38,6 +38,16 @@ router.post('/', async (req, res) => {
 
         await client.query('BEGIN');
 
+        // Faturayı kaydet
+        const result = await client.query(
+            `INSERT INTO satis_faturalari (cari_id, cari_ad, fatura_no, tarih, tutar, kdv, toplam, durum, aciklama, urunler, profile_id)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+             RETURNING *`,
+            [cari_id, cari_ad || '', fatura_no, tarih || new Date().toISOString(), tutar || 0, kdv || 0, toplam || 0, durum || 'Onaylandı', aciklama || '', JSON.stringify(urunler || []), profile_id]
+        );
+
+        const fatura = result.rows[0];
+
         // Stokları otomatik düş
         if (urunler && Array.isArray(urunler)) {
             for (const urun of urunler) {
@@ -114,7 +124,7 @@ router.put('/:id', async (req, res) => {
         }
 
         // 2. Faturayı güncelle
-        const result = await client.query(Old - In - One
+        const result = await client.query(
             `UPDATE satis_faturalari 
              SET cari_id = $1, cari_ad = $2, fatura_no = $3, tarih = $4, tutar = $5, kdv = $6, toplam = $7, durum = $8, aciklama = $9, urunler = $10 
              WHERE id = $11 RETURNING *`,
