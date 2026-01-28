@@ -214,11 +214,18 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              {/* Yasal Uyarı Notu */}
+              {/* Aydınlatma Metni */}
               <div className="pt-6 border-t border-white/5">
-                <div className="p-4 rounded-2xl bg-orange-500/5 border border-orange-500/10 text-[10px] font-bold text-orange-400/80 leading-relaxed text-center">
-                  <i className="ri-information-line mr-1"></i>
-                  UYARI: Bu platform resmi muhasebe hizmeti sunmaz. Vergisel ve yasal süreçleriniz için mutlaka yetkili bir Mali Müşavir ile görüşün.
+                <div className="p-5 rounded-[2rem] bg-indigo-500/5 border border-indigo-500/10 text-[10px] font-bold text-slate-400 leading-relaxed text-justify">
+                  <div className="flex items-center gap-2 text-indigo-400 uppercase tracking-widest mb-2">
+                    <i className="ri-shield-check-line text-lg"></i>
+                    ÖNEMLİ AYDINLATMA
+                  </div>
+                  Net Muhasebe AI, bir yapay zeka destekli ön muhasebe takip ve karar destek yazılımıdır.
+                  Sistem tarafından sunulan AI analizleri ve öngörüler, istatistiksel verilere dayalı olup
+                  resmi bir mali tavsiye veya müşavirlik hizmeti niteliği taşımaz. Verileriniz Mardin merkezli
+                  yüksek güvenlikli bulut altyapımızda saklanmaktadır. Yasal ve vergisel süreçleriniz için
+                  mutlaka yetkili bir <span className="text-white">Serbest Muhasebeci Mali Müşavir (SMMM)</span> ile çalışmanız gerekmektedir.
                 </div>
               </div>
             </form>
