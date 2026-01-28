@@ -244,7 +244,7 @@ export default function Odemeler() {
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">NET DURUM</span>
                 </div>
                 <div className="space-y-1">
-                  <div className={`text-3xl font-black tracking-tighter ${toplamAlınan - toplamVerilen >= 0 ? 'text-indigo-400' : 'text-rose-500'}`}>
+                  <div className={`text-3xl font-black tracking-tighter ${toplamAlınan - toplamVerilen >= 0 ? 'text-emerald-400' : 'text-rose-500'}`}>
                     ₺{(toplamAlınan - toplamVerilen).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                   </div>
                   <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">KASA BAKİYESİ</div>
@@ -329,7 +329,7 @@ export default function Odemeler() {
                           </td>
                           <td className="px-8 py-6">
                             <div className={`text-lg font-black tracking-tighter ${odeme.tip === 'Tahsilat' ? 'text-emerald-400' : 'text-rose-500'}`}>
-                              {odeme.tip === 'Tahsilat' ? '+' : '-'} ₺{(parseFloat((odeme.tutar || 0).toString()) || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                              {odeme.tip === 'Tahsilat' ? '+ ₺' : '- ₺'}{(parseFloat((odeme.tutar || 0).toString()) || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                             </div>
                           </td>
                           <td className="px-8 py-6 text-right">

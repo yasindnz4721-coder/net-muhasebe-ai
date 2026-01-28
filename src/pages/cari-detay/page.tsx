@@ -194,45 +194,45 @@ export default function CariDetay() {
 
             {/* Financial Status Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="premium-card p-10 relative overflow-hidden group border-emerald-500/10">
+              <div className="premium-card p-10 relative overflow-hidden group border-rose-500/10">
                 <div className="flex items-center justify-between mb-8">
-                  <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                  <div className="w-14 h-14 bg-rose-500/10 rounded-2xl flex items-center justify-center border border-rose-500/20 text-rose-500 group-hover:bg-rose-500 group-hover:text-white transition-all">
                     <i className="ri-arrow-left-down-line text-2xl"></i>
                   </div>
                   <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">TOPLAM ALACAK</span>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-4xl font-black tracking-tighter">₺{toplamAlacak.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
-                  <p className="text-[10px] font-black text-emerald-400/60 uppercase tracking-widest">Cari Hesaba Yapılan Ödemeler</p>
+                  <div className="text-4xl font-black tracking-tighter text-rose-500">₺{toplamAlacak.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
+                  <p className="text-[10px] font-black text-rose-400/60 uppercase tracking-widest">Cari Hesaba Yapılan Ödemeler</p>
                 </div>
               </div>
 
-              <div className="premium-card p-10 relative overflow-hidden group border-rose-500/10">
+              <div className="premium-card p-10 relative overflow-hidden group border-emerald-500/10">
                 <div className="flex items-center justify-between mb-8">
-                  <div className="w-14 h-14 bg-rose-500/10 rounded-2xl flex items-center justify-center border border-rose-500/20 text-rose-500 group-hover:bg-rose-500 group-hover:text-white transition-all">
+                  <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all">
                     <i className="ri-arrow-right-up-line text-2xl"></i>
                   </div>
                   <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">TOPLAM BORÇ</span>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-4xl font-black tracking-tighter">₺{toplamBorc.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
-                  <p className="text-[10px] font-black text-rose-400/60 uppercase tracking-widest">Verilen Hizmet / Mal Karşılığı</p>
+                  <div className="text-4xl font-black tracking-tighter text-emerald-500">₺{toplamBorc.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
+                  <p className="text-[10px] font-black text-emerald-400/60 uppercase tracking-widest">Verilen Hizmet / Mal Karşılığı</p>
                 </div>
               </div>
 
-              <div className={`premium-card p-10 relative overflow-hidden group ${bakiye >= 0 ? 'border-indigo-500 bg-indigo-500/5' : 'border-emerald-500 bg-emerald-500/5'}`}>
+              <div className={`premium-card p-10 relative overflow-hidden group ${bakiye >= 0 ? 'border-emerald-500 bg-emerald-500/5' : 'border-rose-500 bg-rose-500/5'}`}>
                 <div className="flex items-center justify-between mb-8">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all ${bakiye >= 0 ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-500 group-hover:bg-indigo-500 group-hover:text-white' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white'
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all ${bakiye >= 0 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white' : 'bg-rose-500/10 border-rose-500/20 text-rose-500 group-hover:bg-rose-500 group-hover:text-white'
                     }`}>
                     <i className="ri-scales-fill text-2xl"></i>
                   </div>
                   <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">NET BAKİYE DENGESİ</span>
                 </div>
                 <div className="space-y-1">
-                  <div className={`text-5xl font-black tracking-tighter ${bakiye >= 0 ? 'text-indigo-400' : 'text-emerald-400'}`}>
+                  <div className={`text-5xl font-black tracking-tighter ${bakiye >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                     ₺{Math.abs(bakiye).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                   </div>
-                  <span className={`inline-block px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest mt-2 border ${bakiye >= 0 ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                  <span className={`inline-block px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest mt-2 border ${bakiye >= 0 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                     }`}>
                     {bakiye >= 0 ? 'CARİ BORÇLU' : 'CARİ ALACAKLI'}
                   </span>
@@ -286,8 +286,8 @@ export default function CariDetay() {
                             {new Date(islem.tarih).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' })}
                           </td>
                           <td className="px-10 py-8">
-                            <div className={`inline-flex px-4 py-2 rounded-xl text-[8px] font-black tracking-[0.2em] uppercase border ${islem.tip === 'Satış Faturası' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
-                              islem.tip === 'Alış Faturası' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
+                            <div className={`inline-flex px-4 py-2 rounded-xl text-[8px] font-black tracking-[0.2em] uppercase border ${islem.tip === 'Satış Faturası' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                              islem.tip === 'Alış Faturası' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
                                 islem.tip === 'Tahsilat' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
                                   'bg-rose-500/10 text-rose-500 border-rose-500/20'
                               }`}>
@@ -298,8 +298,8 @@ export default function CariDetay() {
                             {islem.aciklama}
                           </td>
                           <td className="px-10 py-8 text-right">
-                            <div className={`text-xl font-black tracking-tighter ${islem.borc > 0 ? 'text-rose-500' : 'text-emerald-400'}`}>
-                              {islem.borc > 0 ? `- ₺${islem.borc.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : `+ ₺${islem.alacak.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`}
+                            <div className={`text-xl font-black tracking-tighter ${islem.borc > 0 ? 'text-emerald-400' : 'text-rose-500'}`}>
+                              {islem.borc > 0 ? `+ ₺${islem.borc.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}` : `- ₺${islem.alacak.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`}
                             </div>
                           </td>
                           <td className="px-10 py-8 text-center">

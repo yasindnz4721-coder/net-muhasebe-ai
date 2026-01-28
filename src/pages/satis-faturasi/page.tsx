@@ -557,7 +557,7 @@ export default function SatisFaturasi() {
                     placeholder="CARİ SEÇİN..."
                   />
                   {formData.cari_id && (
-                    <div className={`mt-3 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase border ${cariBakiye >= 0 ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                    <div className={`mt-3 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase border ${cariBakiye >= 0 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                       }`}>
                       <i className={`${cariBakiye >= 0 ? 'ri-arrow-up-line' : 'ri-arrow-down-line'} mr-2`}></i>
                       BAKİYE: ₺{Math.abs(cariBakiye).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}

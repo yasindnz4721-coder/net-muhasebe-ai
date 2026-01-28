@@ -179,14 +179,14 @@ const MuhasebeDashboard = () => {
                       <td className="px-8 py-5">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xs group-hover:bg-blue-600 group-hover:text-white transition-all uppercase">
-                            {(cari.cari_unvan || cari.ad_soyad || '??').substring(0, 1).toUpperCase()}
+                            {(cari.ad || '??').substring(0, 1).toUpperCase()}
                           </div>
-                          <span className="font-bold text-slate-700 uppercase text-xs">{cari.cari_unvan || cari.ad_soyad}</span>
+                          <span className="font-bold text-slate-700 uppercase text-xs">{cari.ad}</span>
                         </div>
                       </td>
                       <td className="px-8 py-5 text-slate-400 font-medium text-xs tracking-widest tabular-nums uppercase">{cari.vergi_no || '---'}</td>
                       <td className="px-8 py-5 text-right">
-                        <span className="font-black text-blue-600 tabular-nums text-sm">
+                        <span className={`font-black tabular-nums text-sm ${(parseFloat((cari.bakiye || 0).toString()) || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                           ₺{parseFloat((cari.bakiye || 0).toString()).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                         </span>
                       </td>
