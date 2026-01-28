@@ -191,64 +191,81 @@ export default function AdminPanel() {
                                                 <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">AKTİF ŞİRKET</th>
                                                 <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ROL</th>
                                                 <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">KAYIT TARİHİ</th>
+                                                <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">KALAN GÜN</th>
                                                 <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ÖDEME YOLU</th>
                                                 <th className="px-10 py-6 text-center text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">İŞLEM</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-white/5">
-                                            {filteredUsers.map((user) => (
-                                                <tr key={user.id} className="hover:bg-white/[0.01] transition-colors group">
-                                                    <td className="px-10 py-8">
-                                                        <div className="font-black text-slate-200 uppercase tracking-tight italic">{user.email}</div>
-                                                        <div className="text-[8px] font-mono text-slate-500 mt-1 uppercase tracking-widest">ID: {user.id}</div>
-                                                    </td>
-                                                    <td className="px-10 py-8">
-                                                        <div className="font-bold text-slate-400 uppercase tracking-wider">
-                                                            {user.company_name || <span className="opacity-30 italic">Profil Oluşturulmamış</span>}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-10 py-8">
-                                                        <span className={`px-4 py-2 rounded-xl text-[8px] font-black tracking-[0.2em] uppercase border ${user.role === 'admin' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                                                            }`}>
-                                                            {user.role}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-10 py-8 text-[10px] font-black text-slate-500 uppercase tracking-widest italic">
-                                                        {user.created_at ? new Date(user.created_at).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
-                                                    </td>
-                                                    <td className="px-10 py-8">
-                                                        <div className="flex flex-col gap-2">
-                                                            <span className={`inline-block px-3 py-1 rounded-lg text-[8px] font-black tracking-widest uppercase border ${user.payment_method === 'eft' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
-                                                                {user.payment_method === 'eft' ? 'EFT / HAVALE' : 'KREDİ KARTI'}
+                                            {filteredUsers.map((user) => {
+                                                const createdAt = user.created_at ? new Date(user.created_at) : new Date();
+                                                const now = new Date();
+                                                const diffTime = now.getTime() - createdAt.getTime();
+                                                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                                                const remainingDays = Math.max(0, 14 - diffDays);
+
+                                                return (
+                                                    <tr key={user.id} className="hover:bg-white/[0.01] transition-colors group">
+                                                        <td className="px-10 py-8">
+                                                            <div className="font-black text-slate-200 uppercase tracking-tight italic">{user.email}</div>
+                                                            <div className="text-[8px] font-mono text-slate-500 mt-1 uppercase tracking-widest">ID: {user.id}</div>
+                                                        </td>
+                                                        <td className="px-10 py-8">
+                                                            <div className="font-bold text-slate-400 uppercase tracking-wider">
+                                                                {user.company_name || <span className="opacity-30 italic">Profil Oluşturulmamış</span>}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-10 py-8">
+                                                            <span className={`px-4 py-2 rounded-xl text-[8px] font-black tracking-[0.2em] uppercase border ${user.role === 'admin' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                                                }`}>
+                                                                {user.role}
                                                             </span>
-                                                            <span className={`inline-block px-3 py-1 rounded-lg text-[8px] font-black tracking-widest uppercase border ${user.is_approved ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border-rose-500/20'}`}>
-                                                                {user.is_approved ? 'ONAYLI' : 'ONAY BEKLİYOR'}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-10 py-8 text-center">
-                                                        <div className="flex items-center justify-center gap-3">
-                                                            {!user.is_approved ? (
+                                                        </td>
+                                                        <td className="px-10 py-8 text-[10px] font-black text-slate-500 uppercase tracking-widest italic">
+                                                            {user.created_at ? new Date(user.created_at).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' }) : '-'}
+                                                        </td>
+                                                        <td className="px-10 py-8">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-[10px] ${remainingDays > 5 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20 animate-pulse'}`}>
+                                                                    {remainingDays}
+                                                                </div>
+                                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">GÜN</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-10 py-8">
+                                                            <div className="flex flex-col gap-2">
+                                                                <span className={`inline-block px-3 py-1 rounded-lg text-[8px] font-black tracking-widest uppercase border ${user.payment_method === 'eft' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
+                                                                    {user.payment_method === 'eft' ? 'EFT / HAVALE' : 'KREDİ KARTI'}
+                                                                </span>
+                                                                <span className={`inline-block px-3 py-1 rounded-lg text-[8px] font-black tracking-widest uppercase border ${user.is_approved ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border-rose-500/20'}`}>
+                                                                    {user.is_approved ? 'ONAYLI' : 'ONAY BEKLİYOR'}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-10 py-8 text-center">
+                                                            <div className="flex items-center justify-center gap-3">
+                                                                {!user.is_approved ? (
+                                                                    <button
+                                                                        onClick={() => handleApprove(user.id)}
+                                                                        className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/20"
+                                                                    >
+                                                                        ONAYLA
+                                                                    </button>
+                                                                ) : (
+                                                                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">AKTİF</span>
+                                                                )}
                                                                 <button
-                                                                    onClick={() => handleApprove(user.id)}
-                                                                    className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/20"
+                                                                    onClick={() => handleDelete(user.id)}
+                                                                    className="px-6 py-2 bg-rose-600/10 hover:bg-rose-600 text-rose-500 hover:text-white border border-rose-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                                                    title="Kullanıcıyı Sil"
                                                                 >
-                                                                    ONAYLA
+                                                                    SİL
                                                                 </button>
-                                                            ) : (
-                                                                <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">AKTİF</span>
-                                                            )}
-                                                            <button
-                                                                onClick={() => handleDelete(user.id)}
-                                                                className="px-6 py-2 bg-rose-600/10 hover:bg-rose-600 text-rose-500 hover:text-white border border-rose-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
-                                                                title="Kullanıcıyı Sil"
-                                                            >
-                                                                SİL
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
                                         </tbody>
                                     </table>
                                 </div>

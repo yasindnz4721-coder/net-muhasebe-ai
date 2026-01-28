@@ -19,6 +19,7 @@ import SifreSifirlamaPage from '../pages/sifre-sifirlama/page';
 import YeniSifrePage from '../pages/yeni-sifre/page';
 import PremiumPage from '../pages/premium/page';
 import AIAnalizPage from '../pages/ai-analiz/page';
+import MuhasebeDashboard from '../muhasebeDashboard';
 import AdminPage from '../pages/admin/page';
 import GizlilikPolitikasiPage from '../pages/gizlilik-politikasi/page';
 import TanitimPage from '../pages/tanitim/page';
@@ -56,7 +57,7 @@ const routes: RouteObject[] = [
   },
   {
     path: '/dashboard',
-    element: <HomePage />,
+    element: <MuhasebeDashboard />,
   },
   {
     path: '/admin',
