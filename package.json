@@ -27,7 +27,8 @@
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
     "uuid": "^9.0.1",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "lucide-react": "^0.363.0"
   },
   "devDependencies": {
     "vite": "^5.1.4",
