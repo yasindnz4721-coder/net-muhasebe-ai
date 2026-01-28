@@ -66,10 +66,10 @@ export default function Raporlar() {
   });
 
   // Mali hesaplamalar
-  const toplamSatis = filteredSatisFaturalari.reduce((sum, f) => sum + f.toplam, 0);
-  const toplamAlis = filteredAlisFaturalari.reduce((sum, f) => sum + f.toplam, 0);
-  const toplamAlinanOdeme = filteredOdemeler.filter(o => o.tip === 'Alınan Ödeme').reduce((sum, o) => sum + o.tutar, 0);
-  const toplamVerilenOdeme = filteredOdemeler.filter(o => o.tip === 'Verilen Ödeme').reduce((sum, o) => sum + o.tutar, 0);
+  const toplamSatis = filteredSatisFaturalari.reduce((sum, f) => sum + Number(f.toplam || 0), 0);
+  const toplamAlis = filteredAlisFaturalari.reduce((sum, f) => sum + Number(f.toplam || 0), 0);
+  const toplamAlinanOdeme = filteredOdemeler.filter(o => o.tip === 'Tahsilat' || o.tip === 'Alınan Ödeme').reduce((sum, o) => sum + Number(o.tutar || 0), 0);
+  const toplamVerilenOdeme = filteredOdemeler.filter(o => o.tip === 'Tediye' || o.tip === 'Verilen Ödeme').reduce((sum, o) => sum + Number(o.tutar || 0), 0);
 
   // KDV Hesaplamaları (Varsayılan %20)
   const kdvOrani = 0.20;
@@ -92,7 +92,7 @@ export default function Raporlar() {
       cariMap.set(f.cari_ad, { borc: 0, alacak: 0 });
     }
     const cari = cariMap.get(f.cari_ad);
-    cari.alacak += f.toplam;
+    cari.alacak += Number(f.toplam || 0);
   });
 
   filteredAlisFaturalari.forEach(f => {
@@ -100,7 +100,7 @@ export default function Raporlar() {
       cariMap.set(f.cari_ad, { borc: 0, alacak: 0 });
     }
     const cari = cariMap.get(f.cari_ad);
-    cari.borc += f.toplam;
+    cari.borc += Number(f.toplam || 0);
   });
 
   filteredOdemeler.forEach(o => {
@@ -108,21 +108,21 @@ export default function Raporlar() {
       cariMap.set(o.cari_ad, { borc: 0, alacak: 0 });
     }
     const cari = cariMap.get(o.cari_ad);
-    if (o.tip === 'Alınan Ödeme') {
-      cari.borc += o.tutar;
+    if (o.tip === 'Tahsilat' || o.tip === 'Alınan Ödeme') {
+      cari.borc += Number(o.tutar || 0);
     } else {
-      cari.alacak += o.tutar;
+      cari.alacak += Number(o.tutar || 0);
     }
   });
 
   cariMap.forEach((value, key) => {
-    const bakiye = value.alacak - value.borc;
+    const bakiye = value.borc - value.alacak; // Borç (Yeşil) - Alacak (Kırmızı)
     cariMizan.push({
       cari: key,
       borc: value.borc,
       alacak: value.alacak,
       bakiye: bakiye,
-      bakiyeTip: bakiye >= 0 ? 'Alacak' : 'Borç'
+      bakiyeTip: bakiye >= 0 ? 'Borç' : 'Alacak'
     });
   });
 
@@ -134,7 +134,7 @@ export default function Raporlar() {
       id: `sf-${f.id}`,
       cari: f.cari_ad,
       type: 'Satış Faturası',
-      amount: parseFloat(f.toplam),
+      amount: Number(f.toplam || 0),
       date: f.tarih,
       status: f.durum,
       fatura_no: f.fatura_no
@@ -146,7 +146,7 @@ export default function Raporlar() {
       id: `af-${f.id}`,
       cari: f.cari_ad,
       type: 'Alış Faturası',
-      amount: -parseFloat(f.toplam),
+      amount: -Number(f.toplam || 0),
       date: f.tarih,
       status: f.durum,
       fatura_no: f.fatura_no
@@ -158,7 +158,7 @@ export default function Raporlar() {
       id: `od-${o.id}`,
       cari: o.cari_ad,
       type: o.tip,
-      amount: o.tip === 'Alınan Ödeme' ? o.tutar : -o.tutar,
+      amount: (o.tip === 'Tahsilat' || o.tip === 'Alınan Ödeme') ? Number(o.tutar || 0) : -Number(o.tutar || 0),
       date: o.tarih,
       status: 'Tamamlandı'
     });
@@ -579,9 +579,9 @@ export default function Raporlar() {
                                 ₺{Math.abs(cari.bakiye).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                               </td>
                               <td className="px-10 py-6 text-center">
-                                <span className={`inline-block px-4 py-2 rounded-lg text-[8px] font-black tracking-[0.2em] uppercase border ${cari.bakiyeTip === 'Alacak' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                                <span className={`inline-block px-4 py-2 rounded-lg text-[8px] font-black tracking-[0.2em] uppercase border ${cari.bakiyeTip === 'Borç' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border-rose-500/20'
                                   }`}>
-                                  {cari.bakiyeTip}
+                                  {cari.bakiyeTip === 'Borç' ? 'BORÇLU (VADELİ)' : 'ALACAKLI'}
                                 </span>
                               </td>
                             </tr>
