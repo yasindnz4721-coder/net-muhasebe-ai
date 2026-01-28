@@ -43,7 +43,7 @@ export default function LandingPage() {
                     </div>
 
                     <div className="hidden lg:flex items-center gap-10">
-                        {['Özellikler', 'AI Analiz', 'Fiyatlandırma', 'Sektörler'].map((item) => (
+                        {['Özellikler', 'AI-Analiz', 'Fiyatlandırma', 'İletişim'].map((item) => (
                             <a key={item} href={`#${item.toLowerCase()}`} className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors">
                                 {item}
                             </a>
@@ -64,7 +64,7 @@ export default function LandingPage() {
             </nav>
 
             {/* Hero Section */}
-            <header className="relative pt-48 pb-32 px-6">
+            <header id="hakkımızda" className="relative pt-48 pb-32 px-6">
                 <div className="max-w-5xl mx-auto text-center space-y-10">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest animate-fade-in">
                         <span className="relative flex h-2 w-2">
@@ -145,7 +145,7 @@ export default function LandingPage() {
             </section>
 
             {/* AI Advisor Showcase */}
-            <section id="ai analiz" className="py-32 relative group overflow-hidden">
+            <section id="ai-analiz" className="py-32 relative group overflow-hidden">
                 <div className="absolute inset-0 bg-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
                 <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
                     <div className="space-y-10">
@@ -197,6 +197,130 @@ export default function LandingPage() {
                 </div>
             </section>
 
+            {/* Pricing Section */}
+            <section id="fiyatlandırma" className="py-32 px-6">
+                <div className="max-w-7xl mx-auto space-y-20">
+                    <div className="text-center space-y-4">
+                        <h2 className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.4em]">FİYATLANDIRMA</h2>
+                        <h3 className="text-4xl md:text-5xl font-black tracking-tighter">Şeffaf ve <span className="text-indigo-400">Esnek Planlar.</span></h3>
+                        <p className="text-slate-400 max-w-2xl mx-auto">Size en uygun planı seçin, yapay zeka gücüyle işletmenizi büyütün.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
+                        {[
+                            {
+                                name: 'STANDART AI',
+                                price: '500',
+                                period: '/aylık',
+                                desc: 'Küçük işletmeler için tam kontrol.',
+                                features: ['Gelir-Gider Takibi', 'Sınırsız Fatura', 'Stok Yönetimi', 'PDF Raporlar'],
+                                popular: false,
+                            },
+                            {
+                                name: 'ENTERPRISE AI',
+                                price: '5000',
+                                period: '/yıllık',
+                                desc: 'Büyük ölçekli veriler için yapay zeka.',
+                                features: ['AI Analitik Tahminler', 'Gelişmiş Veri Görselleştirme', 'Ekip Yönetimi', '7/24 Teknik Destek', 'Öncelikli API Erişimi'],
+                                popular: true,
+                            }
+                        ].map((plan, i) => (
+                            <div key={i} className={`premium-card p-12 relative flex flex-col ${plan.popular ? 'border-indigo-500/40 bg-indigo-500/[0.03] scale-[1.05]' : ''}`}>
+                                {plan.popular && (
+                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-full text-[10px] font-black tracking-[0.2em] uppercase shadow-lg shadow-indigo-600/30">
+                                        EN ÇOK TERCİH EDİLEN
+                                    </div>
+                                )}
+                                <div className="mb-10 text-center">
+                                    <p className="text-[11px] font-black tracking-[0.3em] text-indigo-400 mb-4 uppercase">{plan.name}</p>
+                                    <div className="flex items-baseline justify-center gap-2">
+                                        <span className="text-6xl font-black">₺{plan.price}</span>
+                                        <span className="text-slate-500 font-bold uppercase text-xs">{plan.period}</span>
+                                    </div>
+                                    <p className="mt-6 text-slate-400 text-sm font-medium">{plan.desc}</p>
+                                </div>
+                                <ul className="space-y-6 mb-12 flex-1">
+                                    {plan.features.map((feature, idx) => (
+                                        <li key={idx} className="flex items-center gap-4 text-slate-300 font-bold text-xs uppercase tracking-tight">
+                                            <i className="ri-check-line text-emerald-500 text-xl"></i>
+                                            {feature}
+                                        </li>
+                                    ))}
+                                </ul>
+                                <button onClick={() => navigate('/kayit')} className={`w-full h-16 rounded-2xl font-black tracking-widest transition-all ${plan.popular ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/20 hover:bg-indigo-500' : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'}`}>
+                                    HEMEN BAŞLA
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* FAQ Section */}
+            <section id="sss" className="py-32 px-6 bg-white/[0.01]">
+                <div className="max-w-3xl mx-auto space-y-16">
+                    <div className="text-center space-y-4">
+                        <h2 className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.4em]">SSS</h2>
+                        <h3 className="text-4xl font-black tracking-tighter">Merak Edilenler</h3>
+                    </div>
+
+                    <div className="space-y-6">
+                        {[
+                            { q: 'Verilerim güvende mi?', a: 'Evet, tüm verileriniz endüstri standartlarında AES-256 şifreleme ve global bulut yedekleme sistemleri ile korunmaktadır.' },
+                            { q: 'Yapay zeka nasıl tahminleme yapıyor?', a: 'Sistemimiz geçmişteki gelir-gider verilerinizi, cari hareketlerinizi ve piyasa trendlerini analiz ederek nakit akış tahminleri oluşturur.' },
+                            { q: 'Platformu mobili cihazlarda kullanabilir miyim?', a: 'Evet, Net Muhasebe AI tamamen responsive bir yapıya sahiptir. Telefon, tablet ve bilgisayarlarınızdan sorunsuz erişebilirsiniz.' },
+                            { q: 'Hangi ödeme yöntemleri geçerli?', a: 'Kredi kartı ve havale/EFT ile ödeme kabul ediyoruz. Tüm kart işlemleriniz güvenli virtual POS altyapımız üzerinden gerçekleşir.' }
+                        ].map((faq, i) => (
+                            <div key={i} className="premium-card p-8 group cursor-pointer hover:border-white/20 transition-all">
+                                <h4 className="text-lg font-black mb-4 uppercase tracking-tighter flex items-center justify-between">
+                                    {faq.q}
+                                    <i className="ri-add-line text-slate-500 group-hover:rotate-90 transition-transform"></i>
+                                </h4>
+                                <p className="text-slate-500 font-medium text-sm leading-relaxed">{faq.a}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Contact Section */}
+            <section id="iletişim" className="py-32 px-6">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20">
+                    <div className="space-y-10">
+                        <h3 className="text-5xl font-black tracking-tighter leading-none">Bizimle <span className="text-indigo-400">İletişime</span> Geçin.</h3>
+                        <p className="text-slate-400 text-lg leading-relaxed">Sistem hakkında herhangi bir sorunuz veya özel bir talebiniz mi var? Ekibimiz her zaman yardıma hazır.</p>
+
+                        <div className="space-y-6">
+                            {[
+                                { icon: 'ri-phone-line', label: 'DESTEK HATTI', val: '534 740 12 56' },
+                                { icon: 'ri-mail-line', label: 'E-POSTA', val: 'destek@netmuhasebe.net.tr' },
+                                { icon: 'ri-map-pin-line', label: 'MERKEZ', val: 'İstanbul, Türkiye' }
+                            ].map((item, i) => (
+                                <div key={i} className="flex items-center gap-6 p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
+                                    <div className="w-12 h-12 bg-indigo-600/10 rounded-2xl flex items-center justify-center text-indigo-500 border border-indigo-500/20">
+                                        <i className={`${item.icon} text-2xl`}></i>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-slate-500 tracking-[0.2em] uppercase">{item.label}</p>
+                                        <p className="text-lg font-bold">{item.val}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="premium-card p-10 space-y-8 bg-slate-900/50">
+                        <div className="grid grid-cols-2 gap-6">
+                            <input type="text" placeholder="ADINIZ" className="premium-input bg-black/50" />
+                            <input type="email" placeholder="E-POSTA" className="premium-input bg-black/50" />
+                        </div>
+                        <input type="text" placeholder="KONU" className="premium-input bg-black/50" />
+                        <textarea placeholder="MESAJINIZ" rows={5} className="premium-input bg-black/50 resize-none pt-6"></textarea>
+                        <button className="premium-button w-full h-20 text-xs font-black tracking-[0.3em]">MESAJI GÖNDER</button>
+                    </div>
+                </div>
+            </section>
+
             {/* CTA Final */}
             <section className="py-48 px-6 text-center">
                 <div className="max-w-4xl mx-auto space-y-12">
@@ -234,25 +358,28 @@ export default function LandingPage() {
                     <div>
                         <h5 className="text-[10px] font-black text-white uppercase tracking-widest mb-6">ÜRÜN</h5>
                         <ul className="space-y-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                            {['Özellikler', 'AI Advisor', 'E-Fatura', 'Stok Takibi'].map((item) => (
-                                <li key={item} className="hover:text-indigo-400 transition-colors cursor-pointer">{item}</li>
-                            ))}
+                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#özellikler">ÖZELLİKLER</a></li>
+                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#ai-analiz">AI ANALİZ</a></li>
+                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#özellikler">E-FATURA</a></li>
+                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#özellikler">STOK TAKİBİ</a></li>
                         </ul>
                     </div>
                     <div>
                         <h5 className="text-[10px] font-black text-white uppercase tracking-widest mb-6">KURUMSAL</h5>
                         <ul className="space-y-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                            {['Hakkımızda', 'Fiyatlandırma', 'Sıkça Sorulan Sorular', 'İletişim'].map((item) => (
-                                <li key={item} className="hover:text-indigo-400 transition-colors cursor-pointer">{item}</li>
-                            ))}
+                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#hakkımızda">HAKKIMIZDA</a></li>
+                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#fiyatlandırma">FİYATLANDIRMA</a></li>
+                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#sss">SIKÇA SORULAN SORULAR</a></li>
+                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#iletişim">İLETİŞİM</a></li>
                         </ul>
                     </div>
                     <div>
                         <h5 className="text-[10px] font-black text-white uppercase tracking-widest mb-6">YASAL</h5>
                         <ul className="space-y-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                            {['Gizlilik Sözleşmesi', 'Kullanım Koşulları', 'KVKK Aydınlatma', 'Çerez Politikası'].map((item) => (
-                                <li key={item} className="hover:text-indigo-400 transition-colors cursor-pointer">{item}</li>
-                            ))}
+                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><Link to="/gizlilik-politikasi">Gizlilik Sözleşmesi</Link></li>
+                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><Link to="/gizlilik-politikasi">Kullanım Koşulları</Link></li>
+                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><Link to="/gizlilik-politikasi">KVKK Aydınlatma</Link></li>
+                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><Link to="/gizlilik-politikasi">Çerez Politikası</Link></li>
                         </ul>
                     </div>
                 </div>

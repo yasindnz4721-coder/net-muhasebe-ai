@@ -9,6 +9,7 @@
         --brand-primary: #6366f1;
         --brand-secondary: #0ea5e9;
         --brand-dark: #020617;
+        scroll-behavior: smooth;
     }
 
     body {

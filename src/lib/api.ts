@@ -334,6 +334,7 @@ export interface Cari {
     profile_id?: string;
     created_at?: string;
     updated_at?: string;
+    bakiye?: number;
 }
 
 export interface Kategori {
