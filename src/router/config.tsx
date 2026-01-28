@@ -22,6 +22,7 @@ import AIAnalizPage from '../pages/ai-analiz/page';
 import AdminPage from '../pages/admin/page';
 import GizlilikPolitikasiPage from '../pages/gizlilik-politikasi/page';
 import TanitimPage from '../pages/tanitim/page';
+import LandingPage from '../pages/landing/page';
 import NotFoundPage from '../pages/NotFound';
 
 const routes: RouteObject[] = [
@@ -51,6 +52,10 @@ const routes: RouteObject[] = [
   },
   {
     path: '/',
+    element: <LandingPage />,
+  },
+  {
+    path: '/dashboard',
     element: <HomePage />,
   },
   {

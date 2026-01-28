@@ -12,7 +12,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (auth.isAuthenticated()) {
-      window.location.href = '/';
+      window.location.href = '/dashboard';
     }
   }, []);
 
@@ -30,7 +30,7 @@ export default function LoginPage() {
       }
 
       if (data?.user) {
-        window.location.href = '/';
+        window.location.href = '/dashboard';
       }
     } catch (err) {
       console.error('Giriş hatası:', err);

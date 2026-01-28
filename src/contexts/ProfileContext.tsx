@@ -30,10 +30,12 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     const checkAuth = async () => {
       if (!auth.isAuthenticated()) {
         const currentPath = window.location.pathname;
-        const publicPaths = ['/login', '/kayit', '/sifre-sifirlama', '/yeni-sifre'];
+        const publicPaths = ['/', '/login', '/kayit', '/sifre-sifirlama', '/yeni-sifre', '/tanitim-filmi', '/tanitim_filmi', '/gizlilik-politikasi'];
 
-        if (!publicPaths.some(path => currentPath.startsWith(path))) {
-          window.location.href = '/login';
+        if (!publicPaths.some(path => currentPath === path || currentPath.startsWith(path + '/'))) {
+          if (currentPath !== '/') {
+            window.location.href = '/';
+          }
         }
         setLoading(false);
         return;
@@ -44,13 +46,18 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       if (userError || !data?.user) {
         await auth.logout();
         const currentPath = window.location.pathname;
-        const publicPaths = ['/login', '/kayit', '/sifre-sifirlama', '/yeni-sifre'];
+        const publicPaths = ['/', '/login', '/kayit', '/sifre-sifirlama', '/yeni-sifre', '/tanitim-filmi', '/tanitim_filmi', '/gizlilik-politikasi'];
 
-        if (!publicPaths.some(path => currentPath.startsWith(path))) {
-          window.location.href = '/login';
+        if (!publicPaths.some(path => currentPath === path || currentPath.startsWith(path + '/'))) {
+          window.location.href = '/';
         }
         setLoading(false);
         return;
+      }
+
+      // If logged in and at root, redirect to dashboard
+      if (window.location.pathname === '/') {
+        window.location.href = '/dashboard';
       }
 
       setCurrentUser(data.user);

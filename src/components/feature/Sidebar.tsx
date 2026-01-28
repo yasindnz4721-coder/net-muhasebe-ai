@@ -21,7 +21,7 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
   const sidebarOpen = mbOpen !== undefined ? mbOpen : isOpen;
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'ri-dashboard-3-line', path: '/' },
+    { id: 'dashboard', label: 'Dashboard', icon: 'ri-dashboard-3-line', path: '/dashboard' },
     { id: 'cariler', label: 'Cariler', icon: 'ri-team-line', path: '/cariler' },
     { id: 'urunler', label: 'Ürünlerimiz', icon: 'ri-box-3-line', path: '/urunler' },
     { id: 'satis', label: 'Satış Faturaları', icon: 'ri-file-text-line', path: '/satis-faturasi' },
