@@ -1,10 +1,11 @@
 /// <reference types="vite/client" />
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, FileText, CreditCard,
-  PlusCircle
+  PlusCircle, LogOut, Settings, BarChart2
 } from 'lucide-react';
-import { cariler as carilerApi, satisFaturalari as satisApi, Cari } from './lib/api';
+import { cariler as carilerApi, satisFaturalari as satisApi, Cari, auth } from './lib/api';
 import { useProfile } from './contexts/ProfileContext';
 
 interface Istatistikler {
@@ -14,6 +15,7 @@ interface Istatistikler {
 }
 
 const MuhasebeDashboard = () => {
+  const navigate = useNavigate();
   const { selectedProfile } = useProfile();
   const [cariler, setCariler] = useState<Cari[]>([]);
   const [istatistikler, setIstatistikler] = useState<Istatistikler>({
@@ -71,6 +73,11 @@ const MuhasebeDashboard = () => {
     veriGetir();
   }, [selectedProfile]);
 
+  const handleLogout = () => {
+    auth.logout();
+    window.location.href = '/login';
+  };
+
   if (yukleniyor) return (
     <div className="flex flex-col justify-center items-center h-screen bg-gray-50 gap-4 font-sans">
       <div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
@@ -104,12 +111,21 @@ const MuhasebeDashboard = () => {
     </div>
   );
 
+  const menuItems = [
+    { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard', active: true },
+    { label: 'Cari Hesaplar', icon: Users, path: '/cariler' },
+    { label: 'Faturalar', icon: FileText, path: '/satis-faturasi' },
+    { label: 'Ödemeler', icon: CreditCard, path: '/odemeler' },
+    { label: 'AI Analiz', icon: BarChart2, path: '/ai-analiz' },
+    { label: 'Ayarlar', icon: Settings, path: '/profil-ayarlari' },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50 flex font-sans antialiased text-slate-900">
       {/* Sidebar - Modern Design */}
       <div className="w-72 bg-slate-900 text-white p-8 shadow-2xl flex flex-col shrink-0">
         <div className="mb-12">
-          <h1 className="text-2xl font-black flex items-center gap-3 text-white tracking-tighter leading-none">
+          <h1 className="text-2xl font-black flex items-center gap-3 text-white tracking-tighter leading-none cursor-pointer" onClick={() => navigate('/')}>
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
               <LayoutDashboard size={24} />
             </div>
@@ -118,20 +134,27 @@ const MuhasebeDashboard = () => {
         </div>
 
         <nav className="flex-1 space-y-2">
-          {[
-            { label: 'Dashboard', icon: LayoutDashboard, active: true },
-            { label: 'Cari Hesaplar', icon: Users, active: false },
-            { label: 'Faturalar', icon: FileText, active: false },
-            { label: 'Ödemeler', icon: CreditCard, active: false },
-          ].map((item, idx) => (
-            <div key={idx} className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl cursor-pointer transition-all ${item.active ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
+          {menuItems.map((item, idx) => (
+            <div
+              key={idx}
+              onClick={() => navigate(item.path)}
+              className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl cursor-pointer transition-all ${item.active ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+            >
               <item.icon size={20} />
               <span className="font-bold text-sm">{item.label}</span>
             </div>
           ))}
         </nav>
 
-        <div className="mt-auto p-4 bg-white/5 rounded-2xl border border-white/5 uppercase">
+        <div
+          onClick={handleLogout}
+          className="mt-6 flex items-center gap-4 px-4 py-3.5 rounded-2xl cursor-pointer transition-all text-rose-400 hover:bg-rose-500/10 hover:text-rose-500"
+        >
+          <LogOut size={20} />
+          <span className="font-bold text-sm uppercase">Çıkış Yap</span>
+        </div>
+
+        <div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/5 uppercase">
           <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Hesap Türü</p>
           <p className="text-sm font-bold text-blue-400 uppercase">Premium Plan</p>
         </div>
@@ -143,7 +166,10 @@ const MuhasebeDashboard = () => {
             <h2 className="text-3xl font-black text-slate-800 tracking-tight leading-none mb-2 uppercase">Finansal Durum</h2>
             <p className="text-slate-500 font-medium tracking-tight">İşletmenizin anlık verilerine hoş geldiniz.</p>
           </div>
-          <button className="bg-slate-900 hover:bg-slate-800 text-white px-6 h-14 rounded-2xl flex items-center gap-3 transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-slate-900/10 font-bold text-sm uppercase">
+          <button
+            onClick={() => navigate('/satis-faturasi')}
+            className="bg-slate-900 hover:bg-slate-800 text-white px-6 h-14 rounded-2xl flex items-center gap-3 transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-slate-900/10 font-bold text-sm uppercase"
+          >
             <PlusCircle size={20} /> YENİ İŞLEM EKLE
           </button>
         </header>
@@ -159,7 +185,12 @@ const MuhasebeDashboard = () => {
         <div className="bg-white rounded-[32px] shadow-2xl shadow-slate-200/50 border border-gray-100 overflow-hidden">
           <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 text-slate-800">
             <h3 className="font-black uppercase tracking-widest text-xs">Son Eklenen Cariler</h3>
-            <button className="text-[10px] font-black text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider">Tümünü Gör</button>
+            <button
+              onClick={() => navigate('/cariler')}
+              className="text-[10px] font-black text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider"
+            >
+              Tümünü Gör
+            </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -175,7 +206,11 @@ const MuhasebeDashboard = () => {
                   <tr><td colSpan={3} className="px-8 py-10 text-center text-slate-400 italic">Henüz veri bulunmuyor.</td></tr>
                 ) : (
                   cariler.slice(0, 5).map((cari) => (
-                    <tr key={cari.id} className="hover:bg-blue-50/30 transition-all group cursor-pointer">
+                    <tr
+                      key={cari.id}
+                      onClick={() => navigate(`/cari-detay/${cari.id}`)}
+                      className="hover:bg-blue-50/30 transition-all group cursor-pointer"
+                    >
                       <td className="px-8 py-5">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xs group-hover:bg-blue-600 group-hover:text-white transition-all uppercase">
