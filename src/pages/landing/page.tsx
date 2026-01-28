@@ -126,7 +126,7 @@ export default function LandingPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {[
                             { title: 'Yapay Zeka Analizi', desc: 'Verilerinizi analiz eder, karlılık öngörüleri oluşturur ve stratejik tavsiyeler verir.', icon: 'ri-brain-line', color: 'indigo' },
-                            { title: 'Otomatik Fatura', desc: 'Saniyeler içinde e-fatura formatında satış ve alış faturaları oluşturun.', icon: 'ri-file-list-3-line', color: 'emerald' },
+                            { title: 'Dijital Fatura', desc: 'Saniyeler içinde profesyonel formatta satış ve alış faturaları oluşturun ve PDF olarak paylaşın.', icon: 'ri-file-list-3-line', color: 'emerald' },
                             { title: 'Gerçek Zamanlı Stok', desc: 'Faturalar ile senkronize otomatik stok takibi ve kritik seviye uyarıları.', icon: 'ri-box-3-line', color: 'orange' },
                             { title: 'Cari Risk Yönetimi', desc: 'Borç-alacak dengesini takip edin, geciken ödemeler için otomatik hatırlatmalar yapın.', icon: 'ri-user-shield-line', color: 'blue' },
                             { title: 'Akıllı Raporlama', desc: 'KDV beyannamelerinden gelir-gider tablolarına kadar her şey tek tıkla hazır.', icon: 'ri-bar-chart-box-line', color: 'purple' },
@@ -293,8 +293,8 @@ export default function LandingPage() {
                         <div className="space-y-6">
                             {[
                                 { icon: 'ri-phone-line', label: 'DESTEK HATTI', val: '534 740 12 56' },
-                                { icon: 'ri-mail-line', label: 'E-POSTA', val: 'destek@netmuhasebe.net.tr' },
-                                { icon: 'ri-map-pin-line', label: 'MERKEZ', val: 'İstanbul, Türkiye' }
+                                { icon: 'ri-mail-line', label: 'E-POSTA', val: 'netmuhasebe.al@gmail.com' },
+                                { icon: 'ri-map-pin-line', label: 'MERKEZ', val: 'Mardin, Türkiye' }
                             ].map((item, i) => (
                                 <div key={i} className="flex items-center gap-6 p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
                                     <div className="w-12 h-12 bg-indigo-600/10 rounded-2xl flex items-center justify-center text-indigo-500 border border-indigo-500/20">
@@ -360,7 +360,7 @@ export default function LandingPage() {
                         <ul className="space-y-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">
                             <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#özellikler">ÖZELLİKLER</a></li>
                             <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#ai-analiz">AI ANALİZ</a></li>
-                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#özellikler">E-FATURA</a></li>
+                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#özellikler">DİJİTAL FATURA</a></li>
                             <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#özellikler">STOK TAKİBİ</a></li>
                         </ul>
                     </div>
