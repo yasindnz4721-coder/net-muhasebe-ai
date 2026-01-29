@@ -93,7 +93,7 @@ export default function TumIslemler() {
     return matchesSearch && matchesType;
   });
 
-  const toplamTutar = filteredIslemler.reduce((sum, i) => sum + i.tutar, 0);
+  const toplamTutar = filteredIslemler.reduce((sum, i) => sum + (Number(i.tutar) || 0), 0);
 
   if (!selectedProfile) {
     return (
@@ -144,7 +144,7 @@ export default function TumIslemler() {
                   </div>
                   <div>
                     <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">TOPLAM HACİM</div>
-                    <div className="text-2xl font-black text-slate-200 tracking-tighter leading-none">₺{toplamTutar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
+                    <div className="text-2xl font-black text-slate-200 tracking-tighter leading-none">₺{Number(toplamTutar).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                   </div>
                 </div>
               </div>
@@ -204,43 +204,82 @@ export default function TumIslemler() {
                         <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">DETAYLAR</th>
                         <th className="px-10 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TUTAR (TL)</th>
                         <th className="px-10 py-6 text-center text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">DURUM</th>
+                        <th className="px-10 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">AKSİYON</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                      {filteredIslemler.map((islem, index) => (
-                        <tr key={`${islem.tip}-${islem.id}-${index}`} className="hover:bg-white/[0.01] transition-colors group">
-                          <td className="px-10 py-8 font-black text-slate-400 uppercase tracking-tighter italic">
-                            {new Date(islem.tarih).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' })}
-                          </td>
-                          <td className="px-10 py-8">
-                            <span className={`inline-flex px-4 py-2 rounded-xl text-[8px] font-black tracking-[0.2em] uppercase border ${islem.tip === 'Satış Faturası' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
-                              islem.tip === 'Alış Faturası' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
-                                islem.tip === 'Alınan Ödeme' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                  'bg-rose-500/10 text-rose-500 border-rose-500/20'
-                              }`}>
-                              {islem.tip}
-                            </span>
-                          </td>
-                          <td className="px-10 py-8 font-black text-slate-200 uppercase tracking-tight italic">
-                            {islem.cari_ad}
-                          </td>
-                          <td className="px-10 py-8 font-bold text-slate-400 uppercase tracking-tight text-[10px]">
-                            {islem.aciklama}
-                          </td>
-                          <td className="px-10 py-8 text-right">
-                            <div className={`text-xl font-black tracking-tighter ${islem.tip === 'Satış Faturası' || islem.tip === 'Alınan Ödeme' ? 'text-emerald-400' : 'text-rose-500'
-                              }`}>
-                              {islem.tip === 'Satış Faturası' || islem.tip === 'Alınan Ödeme' ? '+' : '-'}₺{islem.tutar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                            </div>
-                          </td>
-                          <td className="px-10 py-8 text-center">
-                            <span className={`inline-block px-4 py-2 bg-white/5 text-slate-500 rounded-lg text-[8px] font-black tracking-widest uppercase border border-white/5 ${islem.durum === 'Tamamlandı' ? 'text-emerald-500 border-emerald-500/20' : ''
-                              }`}>
-                              {islem.durum}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
+                      {filteredIslemler.map((islem, index) => {
+                        const getTargetPage = (tip: string) => {
+                          switch (tip) {
+                            case 'Satış Faturası': return '/satis-faturasi';
+                            case 'Alış Faturası': return '/alis-faturasi';
+                            default: return '/odemeler';
+                          }
+                        };
+
+                        const handleAction = (action: 'edit' | 'print') => {
+                          navigate(getTargetPage(islem.tip), {
+                            state: {
+                              action,
+                              id: islem.id,
+                              autoOpen: true
+                            }
+                          });
+                        };
+
+                        return (
+                          <tr key={`${islem.tip}-${islem.id}-${index}`} className="hover:bg-white/[0.01] transition-colors group">
+                            <td className="px-10 py-8 font-black text-slate-400 uppercase tracking-tighter italic">
+                              {new Date(islem.tarih).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                            </td>
+                            <td className="px-10 py-8">
+                              <span className={`inline-flex px-4 py-2 rounded-xl text-[8px] font-black tracking-[0.2em] uppercase border ${islem.tip === 'Satış Faturası' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
+                                islem.tip === 'Alış Faturası' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
+                                  islem.tip === 'Alınan Ödeme' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                    'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                                }`}>
+                                {islem.tip}
+                              </span>
+                            </td>
+                            <td className="px-10 py-8 font-black text-slate-200 uppercase tracking-tight italic">
+                              {islem.cari_ad}
+                            </td>
+                            <td className="px-10 py-8 font-bold text-slate-400 uppercase tracking-tight text-[10px]">
+                              {islem.aciklama}
+                            </td>
+                            <td className="px-10 py-8 text-right">
+                              <div className={`text-xl font-black tracking-tighter ${islem.tip === 'Satış Faturası' || islem.tip === 'Alınan Ödeme' ? 'text-emerald-400' : 'text-rose-500'
+                                }`}>
+                                {islem.tip === 'Satış Faturası' || islem.tip === 'Alınan Ödeme' ? '+' : '-'}₺{islem.tutar.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                              </div>
+                            </td>
+                            <td className="px-10 py-8 text-center">
+                              <span className={`inline-block px-4 py-2 bg-white/5 text-slate-500 rounded-lg text-[8px] font-black tracking-widest uppercase border border-white/5 ${islem.durum === 'Tamamlandı' ? 'text-emerald-500 border-emerald-500/20' : ''
+                                }`}>
+                                {islem.durum}
+                              </span>
+                            </td>
+                            <td className="px-10 py-8 text-right">
+                              <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+                                <button
+                                  onClick={() => handleAction('print')}
+                                  className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all"
+                                  title="Yazdır"
+                                >
+                                  <i className="ri-printer-line"></i>
+                                </button>
+                                <button
+                                  onClick={() => handleAction('edit')}
+                                  className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all"
+                                  title="Düzenle"
+                                >
+                                  <i className="ri-edit-line"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

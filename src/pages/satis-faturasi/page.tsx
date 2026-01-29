@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   satisFaturalari as satisApi,
   alisFaturalari as alisApi,
@@ -66,6 +66,8 @@ export default function SatisFaturasi() {
     kdv_uygula: true,
     durum: 'Onaylandı'
   });
+  const location = useLocation();
+  const [stateProcessed, setStateProcessed] = useState(false);
 
   useEffect(() => {
     if (selectedProfile) {
@@ -118,6 +120,23 @@ export default function SatisFaturasi() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!loading && faturalar.length > 0 && !stateProcessed && location.state) {
+      const state = location.state as any;
+      if (state.autoOpen && state.id) {
+        const fatura = faturalar.find(f => f.id === state.id);
+        if (fatura) {
+          if (state.action === 'edit') {
+            handleEdit(fatura);
+          } else if (state.action === 'print') {
+            openPrintModal(fatura);
+          }
+          setStateProcessed(true);
+        }
+      }
+    }
+  }, [loading, faturalar, location.state, stateProcessed]);
 
   const calculateTotals = (urunler: UrunItem[], kdvUygula: boolean, kdvOrani: number) => {
     const araToplam = urunler.reduce((sum, u) => sum + (u.miktar * u.birim_fiyat), 0);

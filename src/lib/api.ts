@@ -249,6 +249,13 @@ export const odemeler = {
         });
     },
 
+    async update(id: string, data: Partial<Odeme>) {
+        return fetchApi<Odeme>(`/api/odemeler/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    },
+
     async delete(id: string) {
         return fetchApi<{ message: string; id: string }>(`/api/odemeler/${id}`, {
             method: 'DELETE',

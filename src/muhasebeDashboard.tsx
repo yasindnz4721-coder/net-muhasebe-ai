@@ -5,7 +5,14 @@ import {
   LayoutDashboard, Users, FileText, CreditCard,
   PlusCircle, LogOut, Settings, BarChart2
 } from 'lucide-react';
-import { cariler as carilerApi, satisFaturalari as satisApi, Cari, auth } from './lib/api';
+import {
+  cariler as carilerApi,
+  satisFaturalari as satisApi,
+  alisFaturalari as alisApi,
+  odemeler as odemelerApi,
+  Cari,
+  auth
+} from './lib/api';
 import { useProfile } from './contexts/ProfileContext';
 
 interface Istatistikler {
@@ -23,6 +30,7 @@ const MuhasebeDashboard = () => {
     toplamSatis: 0,
     toplamAlis: 0
   });
+  const [todayIslemler, setTodayIslemler] = useState<any[]>([]);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [hata, setHata] = useState<string | null>(null);
 
@@ -38,30 +46,54 @@ const MuhasebeDashboard = () => {
         setHata(null);
 
         // API çağrılarını paralel yapalım (performans için)
-        const [cariRes, satisRes] = await Promise.all([
+        const [cariRes, satisRes, alisRes, odemeRes] = await Promise.all([
           carilerApi.getAll(selectedProfile.id),
-          satisApi.getAll(selectedProfile.id)
+          satisApi.getAll(selectedProfile.id),
+          alisApi.getAll(selectedProfile.id),
+          odemelerApi.getAll(selectedProfile.id)
         ]);
 
-        if (cariRes.error || satisRes.error) {
-          throw new Error(cariRes.error || satisRes.error || "Veriler alınamadı");
+        if (cariRes.error || satisRes.error || alisRes.error || odemeRes.error) {
+          throw new Error(cariRes.error || satisRes.error || alisRes.error || odemeRes.error || "Veriler alınamadı");
         }
 
         const cariData = cariRes.data || [];
         const satisData = satisRes.data || [];
+        const alisData = alisRes.data || [];
+        const odemeData = odemeRes.data || [];
 
         setCariler(cariData);
 
+        const bugun = new Date();
+        bugun.setHours(0, 0, 0, 0);
+
+        const tumIslemler: any[] = [
+          ...satisData.map((f: any) => ({ ...f, type: 'Satış Faturası', amount: f.toplam, iconColor: 'text-emerald-600', bgColor: 'bg-emerald-50' })),
+          ...alisData.map((f: any) => ({ ...f, type: 'Alış Faturası', amount: f.toplam, iconColor: 'text-orange-600', bgColor: 'bg-orange-50' })),
+          ...odemeData.map((o: any) => ({ ...o, type: o.tip, amount: o.tutar, iconColor: o.tip === 'Tahsilat' ? 'text-blue-600' : 'text-red-600', bgColor: o.tip === 'Tahsilat' ? 'bg-blue-50' : 'bg-red-50' }))
+        ].filter(item => {
+          const itemDate = new Date(item.tarih);
+          itemDate.setHours(0, 0, 0, 0);
+          return itemDate.getTime() === bugun.getTime();
+        }).sort((a, b) => new Date(b.tarih).getTime() - new Date(a.tarih).getTime());
+
         // Satış toplamını hesapla
         const toplamSatis = satisData.reduce((acc: number, curr: any) =>
-          acc + parseFloat(curr.toplam || curr.toplam_tutar || 0), 0
+          acc + (Number(curr.toplam || curr.toplam_tutar || 0)), 0
+        );
+
+        const toplamAlis = alisData.reduce((acc: number, curr: any) =>
+          acc + (Number(curr.toplam || curr.toplam_tutar || 0)), 0
         );
 
         setIstatistikler({
           toplamCari: cariData.length,
           toplamSatis: toplamSatis,
-          toplamAlis: 0
+          toplamAlis: toplamAlis
         });
+
+        // @ts-ignore
+        setTodayIslemler(tumIslemler);
       } catch (error: any) {
         console.error("Veri çekme hatası:", error);
         setHata(error.message || "Sistemle iletişim kurulurken bir sorun oluştu.");
@@ -181,52 +213,86 @@ const MuhasebeDashboard = () => {
           <StatCard title="Sistem Durumu" value="Aktif" sub="Veriler Güncel" color="indigo" isStatus />
         </div>
 
-        {/* Gerçek Cari Listesi */}
         <div className="bg-white rounded-[32px] shadow-2xl shadow-slate-200/50 border border-gray-100 overflow-hidden">
           <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 text-slate-800">
-            <h3 className="font-black uppercase tracking-widest text-xs">Son Eklenen Cariler</h3>
+            <h3 className="font-black uppercase tracking-widest text-xs">Bugünün İşlemleri</h3>
             <button
-              onClick={() => navigate('/cariler')}
+              onClick={() => navigate('/tum-islemler')}
               className="text-[10px] font-black text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider"
             >
-              Tümünü Gör
+              Tüm İşlemleri Gör
             </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="text-slate-400">
-                  <th className="px-8 py-5 font-black uppercase text-[10px] tracking-widest">Cari Unvan / Adı</th>
-                  <th className="px-8 py-5 font-black uppercase text-[10px] tracking-widest">Vergi No</th>
-                  <th className="px-8 py-5 font-black uppercase text-[10px] tracking-widest text-right">Bakiye</th>
+                  <th className="px-8 py-5 font-black uppercase text-[10px] tracking-widest">İşlem</th>
+                  <th className="px-8 py-5 font-black uppercase text-[10px] tracking-widest">Cari</th>
+                  <th className="px-8 py-5 font-black uppercase text-[10px] tracking-widest text-right">Tutar</th>
+                  <th className="px-8 py-5 font-black uppercase text-[10px] tracking-widest text-right">Aksiyon</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 uppercase">
-                {cariler.length === 0 ? (
-                  <tr><td colSpan={3} className="px-8 py-10 text-center text-slate-400 italic">Henüz veri bulunmuyor.</td></tr>
+                {todayIslemler.length === 0 ? (
+                  <tr><td colSpan={4} className="px-8 py-10 text-center text-slate-400 italic">Bugün henüz işlem yapılmadı.</td></tr>
                 ) : (
-                  cariler.slice(0, 5).map((cari) => (
-                    <tr
-                      key={cari.id}
-                      onClick={() => navigate(`/cari-detay/${cari.id}`)}
-                      className="hover:bg-blue-50/30 transition-all group cursor-pointer"
-                    >
-                      <td className="px-8 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xs group-hover:bg-blue-600 group-hover:text-white transition-all uppercase">
-                            {(cari.ad || '??').substring(0, 1).toUpperCase()}
+                  todayIslemler.map((islem, idx) => {
+                    const getTargetPage = (tip: string) => {
+                      switch (tip) {
+                        case 'Satış Faturası': return '/satis-faturasi';
+                        case 'Alış Faturası': return '/alis-faturasi';
+                        default: return '/odemeler';
+                      }
+                    };
+
+                    const handleAction = (action: 'edit' | 'print') => {
+                      navigate(getTargetPage(islem.type), {
+                        state: {
+                          action,
+                          id: islem.id,
+                          autoOpen: true
+                        }
+                      });
+                    };
+
+                    return (
+                      <tr key={`${islem.type}-${islem.id}-${idx}`} className="hover:bg-blue-50/30 transition-all group">
+                        <td className="px-8 py-5">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-lg ${islem.bgColor} ${islem.iconColor} flex items-center justify-center font-black text-xs transition-all uppercase`}>
+                              {islem.type.substring(0, 1).toUpperCase()}
+                            </div>
+                            <span className="font-bold text-slate-700 uppercase text-xs">{islem.type}</span>
                           </div>
-                          <span className="font-bold text-slate-700 uppercase text-xs">{cari.ad}</span>
-                        </div>
-                      </td>
-                      <td className="px-8 py-5 text-slate-400 font-medium text-xs tracking-widest tabular-nums uppercase">{cari.vergi_no || '---'}</td>
-                      <td className="px-8 py-5 text-right">
-                        <span className={`font-black tabular-nums text-sm ${(parseFloat((cari.bakiye || 0).toString()) || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                          ₺{parseFloat((cari.bakiye || 0).toString()).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        <td className="px-8 py-5 text-slate-400 font-medium text-xs tracking-widest uppercase">{islem.cari_ad}</td>
+                        <td className="px-8 py-5 text-right">
+                          <span className={`font-black tabular-nums text-sm ${islem.type === 'Satış Faturası' || islem.type === 'Tahsilat' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                            ₺{Number(islem.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                        </td>
+                        <td className="px-8 py-5 text-right">
+                          <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                            <button
+                              onClick={() => handleAction('print')}
+                              className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all"
+                              title="Yazdır"
+                            >
+                              <i className="ri-printer-line"></i>
+                            </button>
+                            <button
+                              onClick={() => handleAction('edit')}
+                              className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all"
+                              title="Düzenle"
+                            >
+                              <i className="ri-edit-line"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

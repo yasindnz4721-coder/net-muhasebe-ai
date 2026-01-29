@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { odemeler as odemelerApi, cariler as carilerApi, Odeme, Cari } from '../../lib/api';
 import { useProfile } from '../../contexts/ProfileContext';
 import Header from '../../components/feature/Header';
@@ -14,6 +14,9 @@ export default function Odemeler() {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedOdeme, setSelectedOdeme] = useState<Odeme | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const location = useLocation();
+  const [stateProcessed, setStateProcessed] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [formData, setFormData] = useState({
@@ -49,6 +52,21 @@ export default function Odemeler() {
     }
   };
 
+  useEffect(() => {
+    if (!loading && odemeler.length > 0 && !stateProcessed && location.state) {
+      const state = location.state as any;
+      if (state.autoOpen && state.id) {
+        const odeme = odemeler.find(o => o.id === state.id);
+        if (odeme) {
+          if (state.action === 'edit') {
+            handleEdit(odeme);
+          }
+          setStateProcessed(true);
+        }
+      }
+    }
+  }, [loading, odemeler, location.state, stateProcessed]);
+
   const handleCariChange = (cariId: string) => {
     const cari = cariler.find(c => c.id === cariId);
     setFormData({
@@ -70,27 +88,53 @@ export default function Odemeler() {
     }
 
     try {
-      const { error } = await odemelerApi.create({
-        cari_id: formData.cari_id,
-        cari_ad: formData.cari_ad,
-        tip: formData.tip,
-        tutar: parseFloat(formData.tutar),
-        tarih: formData.tarih,
-        odeme_yontemi: formData.odeme_yontemi,
-        aciklama: formData.aciklama,
-        profile_id: selectedProfile.id
-      });
-
-      if (error) throw new Error(error);
+      if (isEditing && selectedOdeme) {
+        const { error } = await odemelerApi.update(selectedOdeme.id, {
+          cari_id: formData.cari_id,
+          cari_ad: formData.cari_ad,
+          tip: formData.tip,
+          tutar: parseFloat(formData.tutar),
+          tarih: formData.tarih,
+          odeme_yontemi: formData.odeme_yontemi,
+          aciklama: formData.aciklama,
+          profile_id: selectedProfile.id
+        });
+        if (error) throw new Error(error);
+      } else {
+        const { error } = await odemelerApi.create({
+          cari_id: formData.cari_id,
+          cari_ad: formData.cari_ad,
+          tip: formData.tip,
+          tutar: parseFloat(formData.tutar),
+          tarih: formData.tarih,
+          odeme_yontemi: formData.odeme_yontemi,
+          aciklama: formData.aciklama,
+          profile_id: selectedProfile.id
+        });
+        if (error) throw new Error(error);
+      }
 
       await loadData();
       setShowModal(false);
       resetForm();
     } catch (error) {
-      console.error('Ödeme eklenirken hata:', error);
-      console.error('Ödeme eklenirken bir hata oluştu!');
-
+      console.error('Ödeme kaydedilirken hata:', error);
     }
+  };
+
+  const handleEdit = (odeme: Odeme) => {
+    setSelectedOdeme(odeme);
+    setFormData({
+      cari_id: odeme.cari_id,
+      cari_ad: odeme.cari_ad,
+      tip: odeme.tip,
+      tutar: odeme.tutar.toString(),
+      tarih: odeme.tarih,
+      odeme_yontemi: odeme.odeme_yontemi,
+      aciklama: odeme.aciklama || ''
+    });
+    setIsEditing(true);
+    setShowModal(true);
   };
 
   const handleDelete = async () => {
@@ -121,6 +165,8 @@ export default function Odemeler() {
       odeme_yontemi: 'Nakit',
       aciklama: ''
     });
+    setIsEditing(false);
+    setSelectedOdeme(null);
   };
 
   const filteredOdemeler = odemeler.filter(odeme => {
@@ -333,12 +379,20 @@ export default function Odemeler() {
                             </div>
                           </td>
                           <td className="px-8 py-6 text-right">
-                            <button
-                              onClick={() => { setSelectedOdeme(odeme); setShowDeleteModal(true); }}
-                              className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-white transition-all opacity-0 group-hover/row:opacity-100"
-                            >
-                              <i className="ri-delete-bin-line"></i>
-                            </button>
+                            <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all">
+                              <button
+                                onClick={() => handleEdit(odeme)}
+                                className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all"
+                              >
+                                <i className="ri-edit-line"></i>
+                              </button>
+                              <button
+                                onClick={() => { setSelectedOdeme(odeme); setShowDeleteModal(true); }}
+                                className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 hover:bg-red-600 hover:text-white transition-all"
+                              >
+                                <i className="ri-delete-bin-line"></i>
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -357,8 +411,8 @@ export default function Odemeler() {
           <div className="premium-card p-0 w-full max-w-2xl animate-slide-up border-white/10 relative overflow-hidden">
             <div className="px-10 py-10 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.01]">
               <div className="space-y-1">
-                <h3 className="text-3xl font-black tracking-tight text-white uppercase leading-none">Finansal İşlem Girişi</h3>
-                <p className="text-slate-500 font-bold text-sm uppercase tracking-widest text-indigo-400/80">Kasa hareketini veya cari ödemeyi kaydedin.</p>
+                <h3 className="text-3xl font-black tracking-tight text-white uppercase leading-none">{isEditing ? 'İşlemi Güncelle' : 'Finansal İşlem Girişi'}</h3>
+                <p className="text-slate-500 font-bold text-sm uppercase tracking-widest text-indigo-400/80">{isEditing ? 'Mevcut kaydı düzenleyin.' : 'Kasa hareketini veya cari ödemeyi kaydedin.'}</p>
               </div>
               <button
                 onClick={() => { setShowModal(false); resetForm(); }}
@@ -470,7 +524,7 @@ export default function Odemeler() {
                   type="submit"
                   className="premium-button flex-[2] h-14 text-[10px] tracking-widest uppercase font-black bg-indigo-600 hover:bg-indigo-700 border-indigo-500/30 text-white"
                 >
-                  İŞLEMİ KAYDET VE BİTİR
+                  <span>{isEditing ? 'DEĞİŞİKLİKLERİ KAYDET' : 'İŞLEMİ KAYDET VE BİTİR'}</span>
                 </button>
               </div>
             </form>
