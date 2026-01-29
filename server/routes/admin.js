@@ -1,5 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
@@ -88,6 +90,54 @@ router.delete('/users/:userId', adminOnly, async (req, res) => {
     } catch (error) {
         console.error('Kullanıcı silme hatası:', error);
         res.status(500).json({ error: 'Kullanıcı silinemedi' });
+    }
+});
+
+// Yeni kullanıcı oluştur (Admin Kontrollü)
+router.post('/create-user', adminOnly, async (req, res) => {
+    try {
+        const { email, password, companyName } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ error: 'E-posta ve şifre gerekli' });
+        }
+
+        const existingUser = await query('SELECT id FROM users WHERE email = $1', [email.toLowerCase()]);
+        if (existingUser.rows.length > 0) {
+            return res.status(400).json({ error: 'Bu e-posta adresi zaten kullanımda' });
+        }
+
+        const passwordHash = await bcrypt.hash(password, 10);
+        const profileId = crypto.randomUUID();
+        const profileName = companyName || email.split('@')[0];
+
+        // 1. Profil oluştur
+        await query(
+            'INSERT INTO profiles (id, name, logo_url) VALUES ($1, $2, $3)',
+            [profileId, profileName, '']
+        );
+
+        // 2. Kullanıcı oluştur
+        const userResult = await query(
+            'INSERT INTO users (email, password_hash, current_profile_id, subscription_tier, is_approved, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+            [email.toLowerCase(), passwordHash, profileId, 'pro', true, 'user']
+        );
+
+        const userId = userResult.rows[0].id;
+
+        // 3. Kullanıcı-Profil ilişkisi
+        await query(
+            'INSERT INTO user_profiles (user_id, profile_id) VALUES ($1, $2)',
+            [userId, profileId]
+        );
+
+        res.status(201).json({
+            message: 'Kullanıcı başarıyla oluşturuldu',
+            user: { id: userId, email: email.toLowerCase() }
+        });
+    } catch (error) {
+        console.error('Admin kullanıcı oluşturma hatası:', error);
+        res.status(500).json({ error: 'Kullanıcı oluşturulamadı' });
     }
 });
 

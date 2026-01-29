@@ -41,7 +41,7 @@ const routes: RouteObject[] = [
   },
   {
     path: '/kayit',
-    element: <KayitPage />,
+    element: <LoginPage />,
   },
   {
     path: '/sifre-sifirlama',
@@ -105,7 +105,7 @@ const routes: RouteObject[] = [
   },
   {
     path: '/premium',
-    element: <PremiumPage />,
+    element: <LoginPage />,
   },
   {
     path: '/ai-analiz',

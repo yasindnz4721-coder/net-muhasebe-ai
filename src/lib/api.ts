@@ -291,6 +291,12 @@ export const admin = {
     async getUsers() {
         return fetchApi<any[]>('/api/admin/users');
     },
+    async createUser(data: { email: string; password: string; companyName?: string }) {
+        return fetchApi<{ message: string; user: any }>('/api/admin/create-user', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
     async approveUser(userId: string) {
         return fetchApi<{ message: string }>('/api/admin/approve-user', {
             method: 'POST',

@@ -16,6 +16,14 @@ export default function AdminPanel() {
     const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [createFormData, setCreateFormData] = useState({
+        email: '',
+        password: '',
+        companyName: ''
+    });
+    const [createLoading, setCreateLoading] = useState(false);
+    const [createError, setCreateError] = useState('');
 
     useEffect(() => {
         if (isAdmin) {
@@ -69,6 +77,27 @@ export default function AdminPanel() {
         }
     };
 
+    const handleCreateUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setCreateError('');
+        setCreateLoading(true);
+
+        try {
+            const { error } = await adminApi.createUser(createFormData);
+            if (error) {
+                setCreateError(error);
+                return;
+            }
+            setShowCreateModal(false);
+            setCreateFormData({ email: '', password: '', companyName: '' });
+            loadData();
+        } catch (err: any) {
+            setCreateError('Beklenmeyen bir hata oluştu.');
+        } finally {
+            setCreateLoading(false);
+        }
+    };
+
     const filteredUsers = users.filter(user =>
         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.company_name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -118,6 +147,10 @@ export default function AdminPanel() {
                             </div>
 
                             <div className="flex gap-4">
+                                <button onClick={() => setShowCreateModal(true)} className="premium-button px-8 h-16 text-[10px] tracking-widest uppercase bg-indigo-600 shadow-xl shadow-indigo-600/20">
+                                    <i className="ri-user-add-line text-xl"></i>
+                                    <span>YENİ KULLANICI OLUŞTUR</span>
+                                </button>
                                 <button onClick={loadData} className="premium-button px-8 h-16 text-[10px] uppercase tracking-widest bg-white/5 border-white/10 hover:bg-white/10">
                                     <i className="ri-refresh-line text-xl"></i>
                                     <span>VERİLERİ TAZELE</span>
@@ -274,6 +307,83 @@ export default function AdminPanel() {
                     </main>
                 </div>
             </div>
+
+            {/* Yeni Kullanıcı Oluştur Modalı */}
+            {showCreateModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#020617]/90 backdrop-blur-md animate-fade-in">
+                    <div className="premium-card w-full max-w-lg p-10 relative overflow-hidden animate-slide-up">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/10 blur-3xl"></div>
+
+                        <div className="flex items-center justify-between mb-10">
+                            <div className="space-y-1">
+                                <h3 className="text-2xl font-black uppercase tracking-tight">Yeni Kullanıcı Hesabı</h3>
+                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">SİSTEME MANUEL KAYIT EKLE</p>
+                            </div>
+                            <button onClick={() => setShowCreateModal(false)} className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:text-white transition-all">
+                                <i className="ri-close-line text-2xl"></i>
+                            </button>
+                        </div>
+
+                        {createError && (
+                            <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-black uppercase mb-6 flex items-center gap-3">
+                                <i className="ri-error-warning-line text-lg"></i>
+                                {createError}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleCreateUser} className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">E-POSTA ADRESİ</label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={createFormData.email}
+                                    onChange={(e) => setCreateFormData({ ...createFormData, email: e.target.value })}
+                                    className="premium-input h-14"
+                                    placeholder="ornek@sirket.com"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">GİRİŞ ŞİFRESİ</label>
+                                <input
+                                    type="password"
+                                    required
+                                    value={createFormData.password}
+                                    onChange={(e) => setCreateFormData({ ...createFormData, password: e.target.value })}
+                                    className="premium-input h-14"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">ŞİRKET ADI (OPSİYONEL)</label>
+                                <input
+                                    type="text"
+                                    value={createFormData.companyName}
+                                    onChange={(e) => setCreateFormData({ ...createFormData, companyName: e.target.value })}
+                                    className="premium-input h-14"
+                                    placeholder="Global Bilişim Ltd."
+                                />
+                            </div>
+
+                            <div className="pt-4">
+                                <button
+                                    type="submit"
+                                    disabled={createLoading}
+                                    className="premium-button w-full h-16 bg-indigo-600 shadow-xl shadow-indigo-600/20 text-[10px] tracking-[0.2em]"
+                                >
+                                    {createLoading ? (
+                                        <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                    ) : (
+                                        <>HESABI OLUŞTUR VE ONAYLA</>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

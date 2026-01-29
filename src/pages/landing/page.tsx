@@ -17,11 +17,7 @@ export default function LandingPage() {
 
     // If logged in, maybe show a "Go to Dashboard" button in hero
     const handleAction = () => {
-        if (currentUser) {
-            navigate('/dashboard');
-        } else {
-            navigate('/kayit');
-        }
+        navigate('/login');
     };
 
     return (
@@ -43,7 +39,7 @@ export default function LandingPage() {
                     </div>
 
                     <div className="hidden lg:flex items-center gap-10">
-                        {['Özellikler', 'AI-Analiz', 'Fiyatlandırma', 'İletişim'].map((item) => (
+                        {['Özellikler', 'AI-Analiz', 'İletişim'].map((item) => (
                             <a key={item} href={`#${item.toLowerCase()}`} className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors">
                                 {item}
                             </a>
@@ -54,10 +50,7 @@ export default function LandingPage() {
                         {currentUser ? (
                             <Link to="/dashboard" className="premium-button px-8 h-12 text-[10px] tracking-widest bg-indigo-600 shadow-xl shadow-indigo-600/20">DASHBOARD'A GİT</Link>
                         ) : (
-                            <>
-                                <Link to="/login" className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white px-6 hidden sm:block">Giriş Yap</Link>
-                                <Link to="/kayit" className="premium-button px-8 h-12 text-[10px] tracking-widest bg-indigo-600 shadow-xl shadow-indigo-600/20">HEMEN BAŞLA</Link>
-                            </>
+                            <Link to="/login" className="premium-button px-8 h-12 text-[10px] tracking-widest bg-indigo-600 shadow-xl shadow-indigo-600/20">GİRİŞ YAP</Link>
                         )}
                     </div>
                 </div>
@@ -87,7 +80,7 @@ export default function LandingPage() {
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6 animate-slide-up delay-300">
                         <button onClick={handleAction} className="premium-button px-12 h-20 text-xs tracking-[0.2em] font-black bg-indigo-600 shadow-2xl shadow-indigo-600/40 w-full sm:w-auto">
-                            SİSTEME ÜCRETSİZ KATIL <i className="ri-arrow-right-line ml-2"></i>
+                            HEMEN GİRİŞ YAP <i className="ri-arrow-right-line ml-2"></i>
                         </button>
                         <Link to="/tanitim-filmi" className="px-12 h-20 border border-white/10 bg-white/5 rounded-3xl font-black text-xs tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-white/10 transition-all uppercase w-full sm:w-auto">
                             <i className="ri-play-circle-fill text-2xl text-indigo-500"></i>
@@ -197,64 +190,6 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* Pricing Section */}
-            <section id="fiyatlandırma" className="py-32 px-6">
-                <div className="max-w-7xl mx-auto space-y-20">
-                    <div className="text-center space-y-4">
-                        <h2 className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.4em]">FİYATLANDIRMA</h2>
-                        <h3 className="text-4xl md:text-5xl font-black tracking-tighter">Şeffaf ve <span className="text-indigo-400">Esnek Planlar.</span></h3>
-                        <p className="text-slate-400 max-w-2xl mx-auto">Size en uygun planı seçin, yapay zeka gücüyle işletmenizi büyütün.</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
-                        {[
-                            {
-                                name: 'STANDART AI',
-                                price: '500',
-                                period: '/aylık',
-                                desc: 'Küçük işletmeler için tam kontrol.',
-                                features: ['Gelir-Gider Takibi', 'Sınırsız Fatura', 'Stok Yönetimi', 'PDF Raporlar'],
-                                popular: false,
-                            },
-                            {
-                                name: 'ENTERPRISE AI',
-                                price: '5000',
-                                period: '/yıllık',
-                                desc: 'Büyük ölçekli veriler için yapay zeka.',
-                                features: ['AI Analitik Tahminler', 'Gelişmiş Veri Görselleştirme', 'Ekip Yönetimi', '7/24 Teknik Destek', 'Öncelikli API Erişimi'],
-                                popular: true,
-                            }
-                        ].map((plan, i) => (
-                            <div key={i} className={`premium-card p-12 relative flex flex-col ${plan.popular ? 'border-indigo-500/40 bg-indigo-500/[0.03] scale-[1.05]' : ''}`}>
-                                {plan.popular && (
-                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-full text-[10px] font-black tracking-[0.2em] uppercase shadow-lg shadow-indigo-600/30">
-                                        EN ÇOK TERCİH EDİLEN
-                                    </div>
-                                )}
-                                <div className="mb-10 text-center">
-                                    <p className="text-[11px] font-black tracking-[0.3em] text-indigo-400 mb-4 uppercase">{plan.name}</p>
-                                    <div className="flex items-baseline justify-center gap-2">
-                                        <span className="text-6xl font-black">₺{plan.price}</span>
-                                        <span className="text-slate-500 font-bold uppercase text-xs">{plan.period}</span>
-                                    </div>
-                                    <p className="mt-6 text-slate-400 text-sm font-medium">{plan.desc}</p>
-                                </div>
-                                <ul className="space-y-6 mb-12 flex-1">
-                                    {plan.features.map((feature, idx) => (
-                                        <li key={idx} className="flex items-center gap-4 text-slate-300 font-bold text-xs uppercase tracking-tight">
-                                            <i className="ri-check-line text-emerald-500 text-xl"></i>
-                                            {feature}
-                                        </li>
-                                    ))}
-                                </ul>
-                                <button onClick={() => navigate('/kayit')} className={`w-full h-16 rounded-2xl font-black tracking-widest transition-all ${plan.popular ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/20 hover:bg-indigo-500' : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'}`}>
-                                    HEMEN BAŞLA
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
 
             {/* FAQ Section */}
             <section id="sss" className="py-32 px-6 bg-white/[0.01]">
@@ -269,7 +204,7 @@ export default function LandingPage() {
                             { q: 'Verilerim güvende mi?', a: 'Evet, tüm verileriniz endüstri standartlarında AES-256 şifreleme ve global bulut yedekleme sistemleri ile korunmaktadır.' },
                             { q: 'Yapay zeka nasıl tahminleme yapıyor?', a: 'Sistemimiz geçmişteki gelir-gider verilerinizi, cari hareketlerinizi ve piyasa trendlerini analiz ederek nakit akış tahminleri oluşturur.' },
                             { q: 'Platformu mobili cihazlarda kullanabilir miyim?', a: 'Evet, Net Muhasebe AI tamamen responsive bir yapıya sahiptir. Telefon, tablet ve bilgisayarlarınızdan sorunsuz erişebilirsiniz.' },
-                            { q: 'Hangi ödeme yöntemleri geçerli?', a: 'Kredi kartı ve havale/EFT ile ödeme kabul ediyoruz. Tüm kart işlemleriniz güvenli virtual POS altyapımız üzerinden gerçekleşir.' }
+                            { q: 'Hangi ödeme yöntemleri geçerli?', a: 'Sistem yönetici tarafından açılan hesaplar üzerinden aktif edilmektedir. Detaylar için iletişime geçebilirsiniz.' }
                         ].map((faq, i) => (
                             <div key={i} className="premium-card p-8 group cursor-pointer hover:border-white/20 transition-all">
                                 <h4 className="text-lg font-black mb-4 uppercase tracking-tighter flex items-center justify-between">
@@ -333,10 +268,9 @@ export default function LandingPage() {
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-10">
                         <button onClick={handleAction} className="premium-button px-16 h-24 text-sm tracking-[0.3em] font-black bg-white text-indigo-900 w-full sm:w-auto">
-                            KRAL MUHASEBEYİ ÜCRETSİZ DENE
+                            DİKKAT: SADECE YETKİLİ GİRİŞİ YAPILABİLİR
                         </button>
                     </div>
-                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Kredi kartı gerekmez • 14 gün PRO deneme • İstediğin zaman iptal et</p>
                 </div>
             </section>
 

@@ -72,7 +72,6 @@ export default function LoginPage() {
 
         <div className="hidden md:flex items-center gap-8 bg-white/5 backdrop-blur-xl px-1 py-1 rounded-2xl border border-white/10">
           <Link to="/login" className="px-6 py-3 text-sm font-bold text-white hover:text-indigo-400 transition-colors">Giriş Yap</Link>
-          <Link to="/kayit" className="px-8 py-3 text-sm font-black bg-white text-black rounded-xl hover:bg-slate-200 transition-all">HEMEN BAŞLA</Link>
         </div>
       </nav>
 
@@ -209,8 +208,7 @@ export default function LoginPage() {
 
               <div className="text-center pt-4">
                 <p className="text-slate-500 font-bold text-sm">
-                  Henüz üye değil misiniz? <br />
-                  <Link to="/kayit" className="text-white hover:text-indigo-400 transition-colors underline decoration-indigo-500/30 decoration-4 underline-offset-8">Yeni Hesap Oluşturun</Link>
+                  Sisteme erişim için lütfen yönetici ile iletişime geçin.
                 </p>
               </div>
 
