@@ -96,7 +96,7 @@ router.delete('/users/:userId', adminOnly, async (req, res) => {
 // Yeni kullanıcı oluştur (Admin Kontrollü)
 router.post('/create-user', adminOnly, async (req, res) => {
     try {
-        const { email, password, companyName } = req.body;
+        const { email, password, companyName, subscription_tier } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({ error: 'E-posta ve şifre gerekli' });
@@ -120,7 +120,7 @@ router.post('/create-user', adminOnly, async (req, res) => {
         // 2. Kullanıcı oluştur
         const userResult = await query(
             'INSERT INTO users (email, password_hash, current_profile_id, subscription_tier, is_approved, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-            [email.toLowerCase(), passwordHash, profileId, 'pro', true, 'user']
+            [email.toLowerCase(), passwordHash, profileId, subscription_tier || 'temel', true, 'user']
         );
 
         const userId = userResult.rows[0].id;

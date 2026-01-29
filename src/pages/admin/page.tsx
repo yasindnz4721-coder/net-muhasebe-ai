@@ -20,7 +20,8 @@ export default function AdminPanel() {
     const [createFormData, setCreateFormData] = useState({
         email: '',
         password: '',
-        companyName: ''
+        companyName: '',
+        subscription_tier: 'temel'
     });
     const [createLoading, setCreateLoading] = useState(false);
     const [createError, setCreateError] = useState('');
@@ -89,7 +90,7 @@ export default function AdminPanel() {
                 return;
             }
             setShowCreateModal(false);
-            setCreateFormData({ email: '', password: '', companyName: '' });
+            setCreateFormData({ email: '', password: '', companyName: '', subscription_tier: 'temel' });
             loadData();
         } catch (err: any) {
             setCreateError('Beklenmeyen bir hata oluştu.');
@@ -365,6 +366,20 @@ export default function AdminPanel() {
                                     className="premium-input h-14"
                                     placeholder="Global Bilişim Ltd."
                                 />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">HİZMET KATMANI</label>
+                                <select
+                                    value={createFormData.subscription_tier}
+                                    onChange={(e) => setCreateFormData({ ...createFormData, subscription_tier: e.target.value })}
+                                    className="premium-input h-14 appearance-none cursor-pointer"
+                                    style={{ color: 'white' }}
+                                >
+                                    <option value="temel" className="bg-[#020617]">TEMEL AI</option>
+                                    <option value="tam" className="bg-[#020617]">TAM YÖNETİM AI</option>
+                                    <option value="vip" className="bg-[#020617]">VIP KURUMSAL AI</option>
+                                </select>
                             </div>
 
                             <div className="pt-4">

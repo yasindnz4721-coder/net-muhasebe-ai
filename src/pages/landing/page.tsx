@@ -39,7 +39,7 @@ export default function LandingPage() {
                     </div>
 
                     <div className="hidden lg:flex items-center gap-10">
-                        {['Özellikler', 'AI-Analiz', 'İletişim'].map((item) => (
+                        {['Özellikler', 'AI-Analiz', 'Hizmetler', 'İletişim'].map((item) => (
                             <a key={item} href={`#${item.toLowerCase()}`} className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors">
                                 {item}
                             </a>
@@ -191,6 +191,67 @@ export default function LandingPage() {
             </section>
 
 
+
+            {/* Hizmet Katmanları Section */}
+            <section id="hizmetler" className="py-32 px-6 bg-white/[0.01]">
+                <div className="max-w-7xl mx-auto space-y-20">
+                    <div className="text-center space-y-4">
+                        <h2 className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.4em]">HİZMET KATMANLARI</h2>
+                        <h3 className="text-4xl md:text-5xl font-black tracking-tighter">Size Uygun <span className="text-indigo-400">Sistem Çözümü.</span></h3>
+                        <p className="text-slate-400 max-w-2xl mx-auto">İşletmenizin ölçeğine göre optimize edilmiş profesyonel muhasebe sistemleri.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                        {[
+                            {
+                                name: 'TEMEL SİSTEM',
+                                desc: 'Küçük ölçekli işletmeler için ideal başlangıç.',
+                                features: ['Dijital Fatura Yönetimi', 'Stok Takibi', 'Cari Hesap Yönetimi', 'PDF Raporlama', 'Sistem Kurulumu'],
+                                color: 'blue',
+                                popular: false
+                            },
+                            {
+                                name: 'TAM YÖNETİM AI',
+                                desc: 'Büyüyen işletmeler için yapay zeka gücü.',
+                                features: ['Yapay Zeka Finans Analizi', 'Sınırsız İşlem Hacmi', 'Gelişmiş Raporlama', 'Yedekleme Desteği', 'VIP Teknik Destek'],
+                                color: 'indigo',
+                                popular: true
+                            },
+                            {
+                                name: 'VIP KURUMSAL AI',
+                                desc: 'Büyük ölçekli yapılar için tam özelleştirme.',
+                                features: ['Özel Alan Adı (Domain)', 'Sınırsız Alt Kullanıcı', 'Özel Server Kurulumu', 'AI Özelleştirme', '7/24 Öncelikli Danışman'],
+                                color: 'purple',
+                                popular: false
+                            }
+                        ].map((tier, i) => (
+                            <div key={i} className={`premium-card p-10 relative flex flex-col ${tier.popular ? 'border-indigo-500/40 bg-indigo-500/[0.03] scale-[1.05]' : ''}`}>
+                                {tier.popular && (
+                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-full text-[8px] font-black tracking-[0.2em] uppercase shadow-lg shadow-indigo-600/30">
+                                        EN ÇOK TERCİH EDİLEN
+                                    </div>
+                                )}
+                                <div className="mb-8">
+                                    <p className={`text-[10px] font-black tracking-[0.3em] text-${tier.color}-400 mb-4 uppercase`}>{tier.name}</p>
+                                    <p className="text-slate-400 text-sm font-medium leading-relaxed">{tier.desc}</p>
+                                </div>
+                                <ul className="space-y-4 mb-10 flex-1">
+                                    {tier.features.map((feature, idx) => (
+                                        <li key={idx} className="flex items-center gap-3 text-slate-300 font-bold text-[10px] uppercase tracking-tight">
+                                            <i className="ri-check-double-line text-indigo-500 text-lg"></i>
+                                            {feature}
+                                        </li>
+                                    ))}
+                                </ul>
+                                <button onClick={handleAction} className={`w-full h-14 rounded-2xl font-black text-[10px] tracking-widest transition-all ${tier.popular ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/20 hover:bg-indigo-500' : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'}`}>
+                                    BİLGİ AL VE BAŞLA
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             {/* FAQ Section */}
             <section id="sss" className="py-32 px-6 bg-white/[0.01]">
                 <div className="max-w-3xl mx-auto space-y-16">
@@ -302,7 +363,7 @@ export default function LandingPage() {
                         <h5 className="text-[10px] font-black text-white uppercase tracking-widest mb-6">KURUMSAL</h5>
                         <ul className="space-y-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">
                             <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#hakkımızda">HAKKIMIZDA</a></li>
-                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#fiyatlandırma">FİYATLANDIRMA</a></li>
+                            <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#hizmetler">HİZMETLER</a></li>
                             <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#sss">SIKÇA SORULAN SORULAR</a></li>
                             <li className="hover:text-indigo-400 transition-colors cursor-pointer"><a href="#iletişim">İLETİŞİM</a></li>
                         </ul>
