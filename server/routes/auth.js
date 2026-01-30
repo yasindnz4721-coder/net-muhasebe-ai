@@ -9,7 +9,7 @@ const router = express.Router();
 // Kullanıcı kaydı (Ortak Hesap Desteği)
 router.post('/register', async (req, res) => {
     try {
-        const { email, password, companyName, paymentMethod } = req.body;
+        const { email, password, companyName, paymentMethod, subscription_tier } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({ error: 'E-posta ve şifre gerekli' });
@@ -50,7 +50,7 @@ router.post('/register', async (req, res) => {
                 const isApproved = paymentMethod !== 'eft';
                 const userResult = await query(
                     'INSERT INTO users (email, password_hash, current_profile_id, subscription_tier, is_approved, payment_method) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-                    [userEmail, passwordHash, profileId, 'pro', isApproved, paymentMethod || 'card']
+                    [userEmail, passwordHash, profileId, subscription_tier || 'temel', isApproved, paymentMethod || 'card']
                 );
 
                 userId = userResult.rows[0].id;

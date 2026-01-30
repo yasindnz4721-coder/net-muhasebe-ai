@@ -436,7 +436,7 @@ export default function AlisFaturasi() {
                       ></div>
                     </div>
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                      AYLIK KULLANIM: {faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length} / {useProfile().currentUser?.subscription_tier === 'vip' ? '∞' : (useProfile().currentUser?.subscription_tier === 'tam' ? '100' : '50')}
+                      AYLIK KREDİ: {faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length} / {useProfile().currentUser?.subscription_tier === 'vip' ? '∞' : (useProfile().currentUser?.subscription_tier === 'tam' ? '100' : '50')}
                     </span>
                   </div>
                 )}
@@ -453,8 +453,8 @@ export default function AlisFaturasi() {
                   openModal();
                 }}
                 className={`premium-button px-8 h-16 text-sm uppercase tracking-widest group ${faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length >= (useProfile().currentUser?.subscription_tier === 'tam' ? 100 : useProfile().currentUser?.subscription_tier === 'vip' ? Infinity : 50)
-                    ? 'bg-rose-600/20 border-rose-500/30 text-rose-400'
-                    : 'bg-orange-600/20 border-orange-500/30 text-orange-400 hover:bg-orange-600 hover:text-white'
+                  ? 'bg-rose-600/20 border-rose-500/30 text-rose-400'
+                  : 'bg-orange-600/20 border-orange-500/30 text-orange-400 hover:bg-orange-600 hover:text-white'
                   }`}
               >
                 <span>{faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length >= (useProfile().currentUser?.subscription_tier === 'tam' ? 100 : useProfile().currentUser?.subscription_tier === 'vip' ? Infinity : 50) ? 'LİMİT DOLDU' : 'YENİ ALIŞ FATURASI'}</span>

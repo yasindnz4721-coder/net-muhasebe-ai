@@ -16,8 +16,12 @@ export default function LandingPage() {
     }, []);
 
     // If logged in, maybe show a "Go to Dashboard" button in hero
-    const handleAction = () => {
-        navigate('/login');
+    const handleAction = (tier?: string) => {
+        if (tier) {
+            navigate(`/kayit?plan=${tier}`);
+        } else {
+            navigate('/login');
+        }
     };
 
     return (
@@ -79,7 +83,7 @@ export default function LandingPage() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6 animate-slide-up delay-300">
-                        <button onClick={handleAction} className="premium-button px-12 h-20 text-xs tracking-[0.2em] font-black bg-indigo-600 shadow-2xl shadow-indigo-600/40 w-full sm:w-auto">
+                        <button onClick={() => handleAction()} className="premium-button px-12 h-20 text-xs tracking-[0.2em] font-black bg-indigo-600 shadow-2xl shadow-indigo-600/40 w-full sm:w-auto">
                             HEMEN GİRİŞ YAP <i className="ri-arrow-right-line ml-2"></i>
                         </button>
                         <Link to="/tanitim-filmi" className="px-12 h-20 border border-white/10 bg-white/5 rounded-3xl font-black text-xs tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-white/10 transition-all uppercase w-full sm:w-auto">
@@ -206,23 +210,26 @@ export default function LandingPage() {
                             {
                                 name: 'TEMEL SİSTEM',
                                 desc: 'Küçük ölçekli işletmeler için ideal başlangıç.',
-                                features: ['Dijital Fatura Yönetimi', 'Stok Takibi', 'Cari Hesap Yönetimi', 'PDF Raporlama', 'Sistem Kurulumu'],
+                                features: ['Aylık 50 İşlem / Kredi', 'Dijital Fatura Yönetimi', 'Stok Takibi', 'Cari Hesap Yönetimi', 'PDF Raporlama'],
                                 color: 'blue',
-                                popular: false
+                                popular: false,
+                                tier: 'temel'
                             },
                             {
                                 name: 'TAM YÖNETİM AI',
                                 desc: 'Büyüyen işletmeler için yapay zeka gücü.',
-                                features: ['Yapay Zeka Finans Analizi', 'Sınırsız İşlem Hacmi', 'Gelişmiş Raporlama', 'Yedekleme Desteği', 'VIP Teknik Destek'],
+                                features: ['Aylık 100 İşlem / Kredi', 'Yapay Zeka Finans Analizi', 'Gelişmiş Raporlama', 'Yedekleme Desteği', 'VIP Teknik Destek'],
                                 color: 'indigo',
-                                popular: true
+                                popular: true,
+                                tier: 'tam'
                             },
                             {
                                 name: 'VIP KURUMSAL AI',
                                 desc: 'Büyük ölçekli yapılar için tam profesyonellik.',
-                                features: ['Sınırsız Veri Depolama', 'Sınırsız Alt Kullanıcı', 'Gelişmiş AI Finans Öngörüleri', 'AI Özelleştirme Desteği', '7/24 Öncelikli Danışman'],
+                                features: ['Sınırsız Aylık İşlem', 'Sınırsız Veri Depolama', 'Sınırsız Alt Kullanıcı', 'AI Özelleştirme Desteği', '7/24 Öncelikli Danışman'],
                                 color: 'purple',
-                                popular: false
+                                popular: false,
+                                tier: 'vip'
                             }
                         ].map((tier, i) => (
                             <div key={i} className={`premium-card p-10 relative flex flex-col ${tier.popular ? 'border-indigo-500/40 bg-indigo-500/[0.03] scale-[1.05]' : ''}`}>
@@ -243,7 +250,7 @@ export default function LandingPage() {
                                         </li>
                                     ))}
                                 </ul>
-                                <button onClick={handleAction} className={`w-full h-14 rounded-2xl font-black text-[10px] tracking-widest transition-all ${tier.popular ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/20 hover:bg-indigo-500' : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'}`}>
+                                <button onClick={() => handleAction(tier.tier)} className={`w-full h-14 rounded-2xl font-black text-[10px] tracking-widest transition-all ${tier.popular ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/20 hover:bg-indigo-500' : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'}`}>
                                     BİLGİ AL VE BAŞLA
                                 </button>
                             </div>
@@ -328,7 +335,7 @@ export default function LandingPage() {
                         Karmaşıklığı geride bırakın. Basit, hızlı ve akıllı muhasebe ile tanışın.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-10">
-                        <button onClick={handleAction} className="premium-button px-16 h-24 text-sm tracking-[0.3em] font-black bg-white text-indigo-900 w-full sm:w-auto">
+                        <button onClick={() => handleAction()} className="premium-button px-16 h-24 text-sm tracking-[0.3em] font-black bg-white text-indigo-900 w-full sm:w-auto">
                             DİKKAT: SADECE YETKİLİ GİRİŞİ YAPILABİLİR
                         </button>
                     </div>

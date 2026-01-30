@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { auth } from '../../lib/api';
 
@@ -27,6 +27,17 @@ export default function KayitPage() {
       setStep(3);
     }
   };
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const plan = params.get('plan');
+    if (plan) {
+      const selected = plans.find(p => p.tier === plan);
+      if (selected) {
+        setSelectedPlan(selected);
+        setStep(2);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +50,8 @@ export default function KayitPage() {
         formData.email.trim(),
         formData.password,
         formData.companyName.trim(),
-        paymentMethod
+        paymentMethod,
+        selectedPlan?.tier
       );
 
       if (registerError) {
@@ -68,22 +80,34 @@ export default function KayitPage() {
 
   const plans = [
     {
-      name: 'STANDART AI',
+      name: 'TEMEL SİSTEM',
+      tier: 'temel',
       price: '500',
       period: '/aylik',
-      desc: 'Küçük işletmeler için tam kontrol.',
-      features: ['Gelir-Gider Takibi', 'Sınırsız Fatura', 'Stok Yönetimi', 'PDF Raporlar'],
+      desc: 'Küçük ölçekli işletmeler için ideal başlangıç.',
+      features: ['Aylık 50 İşlem / Kredi', 'Dijital Fatura Yönetimi', 'Stok Takibi', 'Cari Hesap Yönetimi', 'PDF Raporlama'],
       popular: false,
       buttonText: 'BU PLANI SEÇ',
     },
     {
-      name: 'ENTERPRISE AI',
-      price: '5000',
-      period: '/yillik',
-      desc: 'Büyük ölçekli veriler için yapay zeka.',
-      features: ['AI Analitik Tahminler', 'Gelişmiş Veri Görselleştirme', 'Ekip Yönetimi', '7/24 Teknik Destek', 'Öncelikli API Erişimi'],
+      name: 'TAM YÖNETİM AI',
+      tier: 'tam',
+      price: '1500',
+      period: '/aylik',
+      desc: 'Büyüyen işletmeler için yapay zeka gücü.',
+      features: ['Aylık 100 İşlem / Kredi', 'Yapay Zeka Finans Analizi', 'Gelişmiş Raporlama', 'Yedekleme Desteği', 'VIP Teknik Destek'],
       popular: true,
       buttonText: 'HEMEN PRO OL',
+    },
+    {
+      name: 'VIP KURUMSAL AI',
+      tier: 'vip',
+      price: '5000',
+      period: '/aylik',
+      desc: 'Büyük ölçekli yapılar için tam profesyonellik.',
+      features: ['Sınırsız Aylık İşlem', 'Sınırsız Veri Depolama', 'Sınırsız Alt Kullanıcı', 'AI Özelleştirme Desteği', '7/24 Öncelikli Danışman'],
+      popular: false,
+      buttonText: 'VIP SEÇ',
     }
   ];
 

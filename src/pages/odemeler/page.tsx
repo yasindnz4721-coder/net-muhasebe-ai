@@ -247,7 +247,7 @@ export default function Odemeler() {
                       ></div>
                     </div>
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                      AYLIK KULLANIM: {odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length} / {useProfile().currentUser?.subscription_tier === 'vip' ? '∞' : (useProfile().currentUser?.subscription_tier === 'tam' ? '100' : '50')}
+                      AYLIK KREDİ: {odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length} / {useProfile().currentUser?.subscription_tier === 'vip' ? '∞' : (useProfile().currentUser?.subscription_tier === 'tam' ? '100' : '50')}
                     </span>
                   </div>
                 )}
@@ -264,8 +264,8 @@ export default function Odemeler() {
                   setShowModal(true);
                 }}
                 className={`premium-button px-8 h-16 text-sm uppercase tracking-widest group ${odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length >= (useProfile().currentUser?.subscription_tier === 'tam' ? 100 : useProfile().currentUser?.subscription_tier === 'vip' ? Infinity : 50)
-                    ? 'bg-rose-600/20 border-rose-500/30 text-rose-400'
-                    : 'bg-indigo-600/20 border-indigo-500/30 text-indigo-400 hover:bg-indigo-600 hover:text-white'
+                  ? 'bg-rose-600/20 border-rose-500/30 text-rose-400'
+                  : 'bg-indigo-600/20 border-indigo-500/30 text-indigo-400 hover:bg-indigo-600 hover:text-white'
                   }`}
               >
                 <span>{odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length >= (useProfile().currentUser?.subscription_tier === 'tam' ? 100 : useProfile().currentUser?.subscription_tier === 'vip' ? Infinity : 50) ? 'LİMİT DOLDU' : 'YENİ İŞLEM EKLE'}</span>

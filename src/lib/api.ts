@@ -52,10 +52,10 @@ export const auth = {
         return result;
     },
 
-    async register(email: string, password: string, companyName?: string, paymentMethod?: string) {
+    async register(email: string, password: string, companyName?: string, paymentMethod?: string, subscription_tier?: string) {
         const result = await fetchApi<{ user: User; token: string }>('/api/auth/register', {
             method: 'POST',
-            body: JSON.stringify({ email, password, companyName, paymentMethod }),
+            body: JSON.stringify({ email, password, companyName, paymentMethod, subscription_tier }),
         });
 
         if (result.data?.token) {
