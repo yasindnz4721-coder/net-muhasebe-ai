@@ -219,8 +219,8 @@ export default function LandingPage() {
                             },
                             {
                                 name: 'VIP KURUMSAL AI',
-                                desc: 'Büyük ölçekli yapılar için tam özelleştirme.',
-                                features: ['Özel Alan Adı (Domain)', 'Sınırsız Alt Kullanıcı', 'Özel Server Kurulumu', 'AI Özelleştirme', '7/24 Öncelikli Danışman'],
+                                desc: 'Büyük ölçekli yapılar için tam profesyonellik.',
+                                features: ['Sınırsız Veri Depolama', 'Sınırsız Alt Kullanıcı', 'Gelişmiş AI Finans Öngörüleri', 'AI Özelleştirme Desteği', '7/24 Öncelikli Danışman'],
                                 color: 'purple',
                                 popular: false
                             }
