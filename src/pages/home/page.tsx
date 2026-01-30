@@ -322,7 +322,24 @@ export default function HomePage() {
 
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+            <button
+              onClick={() => {
+                const link = document.createElement('a');
+                link.href = '/NetMuhasebe_AI_Kurulum.exe';
+                link.download = 'NetMuhasebe_AI_Kurulum.exe';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+              className="flex flex-col items-center gap-3 p-4 bg-indigo-600 rounded-2xl border border-indigo-500 shadow-lg hover:bg-indigo-700 transition-all group cursor-pointer"
+            >
+              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <i className="ri-download-cloud-2-line text-2xl"></i>
+              </div>
+              <span className="text-[10px] font-black text-white uppercase tracking-tighter">Masaüstüne Kur</span>
+            </button>
+
             {[
               { label: 'Satış Faturası', path: '/satis-faturasi', icon: 'ri-add-line', color: 'teal' },
               { label: 'Alış Faturası', path: '/alis-faturasi', icon: 'ri-subtract-line', color: 'orange' },
@@ -335,7 +352,7 @@ export default function HomePage() {
                 <div className={`w-12 h-12 bg-${action.color}-50 rounded-xl flex items-center justify-center text-${action.color}-600 group-hover:bg-${action.color}-600 group-hover:text-white transition-colors`}>
                   <i className={`${action.icon} text-2xl`}></i>
                 </div>
-                <span className="text-xs font-semibold text-gray-600">{action.label}</span>
+                <span className="text-[10px] font-black text-gray-600 uppercase tracking-tighter">{action.label}</span>
               </button>
             ))}
           </div>

@@ -1,9 +1,8 @@
 {
   "appId": "com.muhasebe.app",
-  "productName": "Muhasebe Uygulaması",
+  "productName": "NetMuhasebe_AI",
   "directories": {
-    "output": "dist-electron",
-    "buildResources": "electron"
+    "output": "dist-electron"
   },
   "files": [
     "out/**/*",
@@ -11,30 +10,12 @@
     "package.json"
   ],
   "win": {
-    "target": [
-      {
-        "target": "nsis",
-        "arch": ["x64"]
-      }
-    ],
-    "icon": "electron/icon.png"
-  },
-  "mac": {
-    "target": ["dmg"],
-    "icon": "electron/icon.png",
-    "category": "public.app-category.finance"
-  },
-  "linux": {
-    "target": ["AppImage"],
-    "icon": "electron/icon.png",
-    "category": "Finance"
+    "target": "nsis"
   },
   "nsis": {
     "oneClick": false,
     "allowToChangeInstallationDirectory": true,
-    "allowElevation": true,
     "createDesktopShortcut": true,
-    "createStartMenuShortcut": true,
-    "shortcutName": "Muhasebe Uygulaması"
+    "shortcutName": "NetMuhasebe AI"
   }
 }

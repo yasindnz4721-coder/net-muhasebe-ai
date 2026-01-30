@@ -1,8 +1,11 @@
 {
   "name": "netmuhasebe-ai",
   "version": "1.0.0",
+  "description": "NetMuhasebe AI Akıllı Muhasebe Çözümü",
+  "author": "NetMuhasebe AI Team",
   "private": true,
   "type": "module",
+  "main": "electron/main.cjs",
   "engines": {
     "node": ">=18.0.0"
   },
@@ -10,7 +13,9 @@
     "build": "vite build && cd server && npm install",
     "dev": "vite --port 3000",
     "server": "cd server && node index.js",
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "electron:dev": "electron .",
+    "electron:build": "vite build && electron-builder"
   },
   "dependencies": {
     "react": "^18.2.0",
