@@ -36,6 +36,27 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Cari, fatura no ve profile_id gerekli' });
         }
 
+        // --- LİMİT KONTROLÜ ---
+        const tier = req.user.subscription_tier || 'temel';
+        if (tier !== 'vip') {
+            const limit = tier === 'tam' ? 100 : 50;
+
+            // Mevcut ay içindeki fatura sayısını say
+            const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+            const countResult = await query(
+                'SELECT COUNT(*) FROM satis_faturalari WHERE profile_id = $1 AND created_at >= $2',
+                [profile_id, firstDayOfMonth]
+            );
+
+            const currentCount = parseInt(countResult.rows[0].count);
+            if (currentCount >= limit) {
+                return res.status(403).json({
+                    error: `Aylık fatura limitinize ulaştınız (${limit}). Daha fazla işlem için paketinizi yükseltin.`
+                });
+            }
+        }
+        // ---------------------
+
         await client.query('BEGIN');
 
         // Faturayı kaydet

@@ -234,14 +234,42 @@ export default function Odemeler() {
                   Nakit <span className="text-gradient from-indigo-400 to-purple-500">Akışı.</span>
                 </h1>
                 <p className="text-slate-500 text-lg font-medium max-w-xl">Tahsilat ve tediye işlemlerinizi kaydedin, kasanızın anlık durumunu izleyin.</p>
+                {/* Limit Göstergesi */}
+                {selectedProfile && (
+                  <div className="flex items-center gap-4 mt-2">
+                    <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden max-w-[200px]">
+                      <div
+                        className={`h-full transition-all duration-1000 ${(odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length / (useProfile().currentUser?.subscription_tier === 'tam' ? 100 : 50)) >= 1 ? 'bg-rose-500' : 'bg-indigo-500'
+                          }`}
+                        style={{
+                          width: `${Math.min(100, (odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length / (useProfile().currentUser?.subscription_tier === 'tam' ? 100 : useProfile().currentUser?.subscription_tier === 'vip' ? 1 : 50)) * 100)}%`
+                        }}
+                      ></div>
+                    </div>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                      AYLIK KULLANIM: {odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length} / {useProfile().currentUser?.subscription_tier === 'vip' ? '∞' : (useProfile().currentUser?.subscription_tier === 'tam' ? '100' : '50')}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <button
-                onClick={() => setShowModal(true)}
-                className="premium-button px-8 h-16 text-sm uppercase tracking-widest group bg-indigo-600/20 border-indigo-500/30 text-indigo-400 hover:bg-indigo-600 hover:text-white"
+                onClick={() => {
+                  const currentMonthCount = odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length;
+                  const limit = useProfile().currentUser?.subscription_tier === 'tam' ? 100 : (useProfile().currentUser?.subscription_tier === 'vip' ? Infinity : 50);
+                  if (currentMonthCount >= limit) {
+                    alert(`Aylık ödeme limitinize ulaştınız (${limit}). Daha fazla işlem için paketinizi yükseltin.`);
+                    return;
+                  }
+                  setShowModal(true);
+                }}
+                className={`premium-button px-8 h-16 text-sm uppercase tracking-widest group ${odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length >= (useProfile().currentUser?.subscription_tier === 'tam' ? 100 : useProfile().currentUser?.subscription_tier === 'vip' ? Infinity : 50)
+                    ? 'bg-rose-600/20 border-rose-500/30 text-rose-400'
+                    : 'bg-indigo-600/20 border-indigo-500/30 text-indigo-400 hover:bg-indigo-600 hover:text-white'
+                  }`}
               >
-                <span>YENİ İŞLEM EKLE</span>
-                <i className="ri-add-line text-xl group-hover:rotate-90 transition-transform"></i>
+                <span>{odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length >= (useProfile().currentUser?.subscription_tier === 'tam' ? 100 : useProfile().currentUser?.subscription_tier === 'vip' ? Infinity : 50) ? 'LİMİT DOLDU' : 'YENİ İŞLEM EKLE'}</span>
+                <i className={`${odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length >= (useProfile().currentUser?.subscription_tier === 'tam' ? 100 : useProfile().currentUser?.subscription_tier === 'vip' ? Infinity : 50) ? 'ri-error-warning-line' : 'ri-add-line'} text-xl group-hover:rotate-90 transition-transform`}></i>
               </button>
             </div>
 

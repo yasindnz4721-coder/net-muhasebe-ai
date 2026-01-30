@@ -35,6 +35,27 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Cari, tutar ve profile_id gerekli' });
         }
 
+        // --- LİMİT KONTROLÜ ---
+        const tier = req.user.subscription_tier || 'temel';
+        if (tier !== 'vip') {
+            const limit = tier === 'tam' ? 100 : 50;
+
+            // Mevcut ay içindeki ödeme sayısını say
+            const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+            const countResult = await query(
+                'SELECT COUNT(*) FROM odemeler WHERE profile_id = $1 AND created_at >= $2',
+                [profile_id, firstDayOfMonth]
+            );
+
+            const currentCount = parseInt(countResult.rows[0].count);
+            if (currentCount >= limit) {
+                return res.status(403).json({
+                    error: `Aylık ödeme/tahsilat limitinize ulaştınız (${limit}). Daha fazla işlem için paketinizi yükseltin.`
+                });
+            }
+        }
+        // ---------------------
+
         const result = await query(
             `INSERT INTO odemeler (cari_id, cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, profile_id)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
