@@ -336,10 +336,10 @@ export default function Odemeler() {
                   <p className="text-slate-500 font-bold max-w-sm mx-auto uppercase tracking-widest text-[10px]">Herhangi bir ödeme veya tahsilat işlemi kaydı bulunamadı.</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="bg-white/[0.02]">
+                <div className="overflow-x-auto max-h-[calc(100vh-420px)] overflow-y-auto custom-scrollbar">
+                  <table className="w-full text-left relative border-separate border-spacing-0">
+                    <thead className="sticky top-0 z-10">
+                      <tr className="bg-[#0f172a] shadow-sm">
                         <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">CARİ HESAP</th>
                         <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">İŞLEM TİPİ</th>
                         <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ÖDEME YÖNTEMİ</th>
