@@ -23,6 +23,21 @@ export default function AIAnalizPage() {
         );
     }
 
+    if (!isPro) {
+        return (
+            <div className="min-h-screen bg-[#020617] text-white flex items-center justify-center p-6 text-center">
+                <div className="premium-card p-12 max-w-md animate-slide-up">
+                    <div className="w-20 h-20 bg-amber-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-amber-500/20">
+                        <i className="ri-award-line text-4xl text-amber-500"></i>
+                    </div>
+                    <h3 className="text-2xl font-black uppercase tracking-tight mb-4">Hizmetinizi Yükseltin</h3>
+                    <p className="text-slate-400 font-medium mb-8">AI Stratejik Analiz özellikleri "Tam Yönetim AI" ve "VIP" paketlerine özeldir. Hizmetinizi yükseltmek için yönetici ile iletişime geçin.</p>
+                    <button onClick={() => navigate('/dashboard')} className="premium-button px-10 h-14 text-xs tracking-widest uppercase bg-indigo-600 hover:bg-indigo-700 border-indigo-500/30">DASHBOARD'A DÖN</button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-x-hidden relative text-xs">
             {/* Background Effects */}
