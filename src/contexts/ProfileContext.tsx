@@ -23,7 +23,6 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [isPro] = useState<boolean>(true); // All users are PRO now
 
   // Kullanıcı oturum kontrolü
   useEffect(() => {
@@ -131,7 +130,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         error,
         refreshProfiles,
         currentUser,
-        isPro: true,
+        isPro: currentUser?.subscription_tier === 'tam' || currentUser?.subscription_tier === 'vip' || currentUser?.role === 'admin',
         isAdmin: currentUser?.role === 'admin',
         togglePro,
       }}

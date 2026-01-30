@@ -6,7 +6,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 
 export default function AIAnalizPage() {
     const navigate = useNavigate();
-    const { selectedProfile } = useProfile();
+    const { selectedProfile, isPro } = useProfile();
 
     if (!selectedProfile) {
         return (
