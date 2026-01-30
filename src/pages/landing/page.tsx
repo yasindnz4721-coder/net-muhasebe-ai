@@ -18,7 +18,9 @@ export default function LandingPage() {
     // If logged in, maybe show a "Go to Dashboard" button in hero
     const handleAction = (tier?: string) => {
         if (tier) {
-            navigate(`/kayit?plan=${tier}`);
+            const phone = "905347401256";
+            const message = encodeURIComponent(`Merhaba, Net Muhasebe AI ${tier} paketi hakkında bilgi almak istiyorum.`);
+            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
         } else {
             navigate('/login');
         }
