@@ -65,6 +65,9 @@ export default function AlisFaturasi() {
     kdv_uygula: true,
     durum: 'Onaylandı'
   });
+  const [satisFaturalari, setSatisFaturalari] = useState<any[]>([]);
+  const [odemeler, setOdemeler] = useState<any[]>([]);
+  const [cariBakiye, setCariBakiye] = useState<number>(0);
   const location = useLocation();
   const [stateProcessed, setStateProcessed] = useState(false);
 
@@ -74,28 +77,21 @@ export default function AlisFaturasi() {
     }
   }, [selectedProfile]);
 
-  const generateFaturaNo = async () => {
+  const generateFaturaNo = (faturalarList: any[]) => {
     if (!selectedProfile) return 'AF-0001';
 
-    try {
-      const { data } = await alisApi.getAll(selectedProfile.id);
-
-      if (data && data.length > 0) {
-        const sortedData = [...data].sort((a, b) =>
-          new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
-        );
-        const lastNo = sortedData[0].fatura_no;
-        const match = lastNo.match(/AF-(\d+)/);
-        if (match) {
-          const nextNo = parseInt(match[1]) + 1;
-          return `AF-${nextNo.toString().padStart(4, '0')}`;
-        }
+    if (faturalarList && faturalarList.length > 0) {
+      const sortedData = [...faturalarList].sort((a, b) =>
+        new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
+      );
+      const lastNo = sortedData[0].fatura_no;
+      const match = lastNo.match(/AF-(\d+)/);
+      if (match) {
+        const nextNo = parseInt(match[1]) + 1;
+        return `AF-${nextNo.toString().padStart(4, '0')}`;
       }
-      return 'AF-0001';
-    } catch (error) {
-      console.error('Fatura no oluşturulurken hata:', error);
-      return 'AF-0001';
     }
+    return 'AF-0001';
   };
 
   const loadData = async () => {
@@ -103,13 +99,26 @@ export default function AlisFaturasi() {
 
     try {
       setLoading(true);
-      const { data: faturalarData } = await alisApi.getAll(selectedProfile.id);
-      const { data: carilerData } = await carilerApi.getAll(selectedProfile.id);
-      const { data: urunlerData } = await urunlerApi.getAll(selectedProfile.id);
+
+      const [
+        { data: faturalarData },
+        { data: carilerData },
+        { data: urunlerData },
+        { data: satisFaturalariData },
+        { data: odemelerData }
+      ] = await Promise.all([
+        alisApi.getAll(selectedProfile.id),
+        carilerApi.getAll(selectedProfile.id),
+        urunlerApi.getAll(selectedProfile.id),
+        satisApi.getAll(selectedProfile.id),
+        odemelerApi.getAll(selectedProfile.id)
+      ]);
 
       setFaturalar((faturalarData as Fatura[]) || []);
       setCariler(carilerData || []);
       setUrunler(urunlerData || []);
+      setSatisFaturalari(satisFaturalariData || []);
+      setOdemeler(odemelerData || []);
     } catch (error) {
       console.error('Veriler yüklenirken hata:', error);
     } finally {
@@ -141,43 +150,35 @@ export default function AlisFaturasi() {
     return { araToplam, kdv, toplam };
   };
 
-  const calculateCariBakiye = async (cariId: string) => {
+  const calculateCariBakiye = (cariId: string) => {
     if (!selectedProfile || !cariId) return 0;
 
-    try {
-      let toplamBorc = 0;
-      let toplamAlacak = 0;
+    let toplamBorc = 0;
+    let toplamAlacak = 0;
 
-      const { data: satisFaturalari } = await satisApi.getAll(selectedProfile.id);
-      if (satisFaturalari) {
-        toplamBorc = satisFaturalari
-          .filter(f => f.cari_id === cariId)
-          .reduce((sum, f) => sum + parseFloat(f.toplam.toString()), 0);
-      }
-
-      const { data: alisFaturalari } = await alisApi.getAll(selectedProfile.id);
-      if (alisFaturalari) {
-        toplamAlacak = alisFaturalari
-          .filter(f => f.cari_id === cariId)
-          .reduce((sum, f) => sum + parseFloat(f.toplam.toString()), 0);
-      }
-
-      const { data: odemeler } = await odemelerApi.getAll(selectedProfile.id);
-      if (odemeler) {
-        odemeler.filter(o => o.cari_id === cariId).forEach(odeme => {
-          if (odeme.tip === 'Tahsilat') {
-            toplamAlacak += parseFloat(odeme.tutar.toString());
-          } else if (odeme.tip === 'Tediye') {
-            toplamBorc += parseFloat(odeme.tutar.toString());
-          }
-        });
-      }
-
-      return toplamBorc - toplamAlacak;
-    } catch (error) {
-      console.error('Bakiye hesaplanırken hata:', error);
-      return 0;
+    if (satisFaturalari) {
+      toplamBorc = satisFaturalari
+        .filter(f => f.cari_id === cariId)
+        .reduce((sum, f) => sum + parseFloat(f.toplam.toString()), 0);
     }
+
+    if (faturalar) {
+      toplamAlacak = faturalar
+        .filter(f => f.cari_id === cariId)
+        .reduce((sum, f) => sum + parseFloat(f.toplam.toString()), 0);
+    }
+
+    if (odemeler) {
+      odemeler.filter(o => o.cari_id === cariId).forEach(odeme => {
+        if (odeme.tip === 'Tahsilat' || odeme.tip === 'Ödeme Alındı') {
+          toplamAlacak += parseFloat(odeme.tutar.toString());
+        } else if (odeme.tip === 'Tediye' || odeme.tip === 'Ödeme Yapıldı') {
+          toplamBorc += parseFloat(odeme.tutar.toString());
+        }
+      });
+    }
+
+    return toplamBorc - toplamAlacak;
   };
 
   const handleCariChange = (cariId: string) => {
@@ -187,6 +188,9 @@ export default function AlisFaturasi() {
       cari_id: cariId,
       cari_ad: cari ? cari.ad : ''
     });
+
+    const bakiye = calculateCariBakiye(cariId);
+    setCariBakiye(bakiye);
   };
 
   const handleUrunChange = (index: number, field: string, value: any) => {
@@ -251,7 +255,7 @@ export default function AlisFaturasi() {
 
     try {
       setSaving(true);
-      const faturaNo = formData.fatura_no || await generateFaturaNo();
+      const faturaNo = formData.fatura_no || generateFaturaNo(faturalar);
       const { araToplam, kdv, toplam } = calculateTotals(formData.urunler, formData.kdv_uygula, formData.kdv_orani);
 
       const faturaData = {
@@ -313,8 +317,8 @@ export default function AlisFaturasi() {
     }
   };
 
-  const resetForm = async () => {
-    const newFaturaNo = await generateFaturaNo();
+  const resetForm = () => {
+    const newFaturaNo = generateFaturaNo(faturalar);
     setFormData({
       cari_id: '',
       cari_ad: '',
@@ -330,8 +334,8 @@ export default function AlisFaturasi() {
     setSelectedFatura(null);
   };
 
-  const openModal = async () => {
-    const newFaturaNo = await generateFaturaNo();
+  const openModal = () => {
+    const newFaturaNo = generateFaturaNo(faturalar);
     setFormData({
       ...formData,
       fatura_no: newFaturaNo
@@ -340,7 +344,7 @@ export default function AlisFaturasi() {
     setShowModal(true);
   };
 
-  const handleEdit = async (fatura: Fatura) => {
+  const handleEdit = (fatura: Fatura) => {
     setSelectedFatura(fatura);
     setFormData({
       cari_id: fatura.cari_id,
@@ -354,14 +358,15 @@ export default function AlisFaturasi() {
       durum: fatura.durum
     });
     setIsEditing(true);
+    const bakiye = calculateCariBakiye(fatura.cari_id);
+    setCariBakiye(bakiye);
     setShowModal(true);
   };
 
-  const openPrintModal = async (fatura: Fatura) => {
+  const openPrintModal = (fatura: Fatura) => {
     setSelectedFatura(fatura);
-    const oncekiBakiye = await calculateCariBakiye(fatura.cari_id);
-    const sonrakiBakiye = oncekiBakiye - parseFloat(fatura.toplam.toString());
-    setPrintCariBakiye(sonrakiBakiye);
+    const guncelBakiye = calculateCariBakiye(fatura.cari_id);
+    setPrintCariBakiye(guncelBakiye);
     setShowPrintModal(true);
   };
 

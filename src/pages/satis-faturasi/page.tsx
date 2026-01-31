@@ -66,6 +66,8 @@ export default function SatisFaturasi() {
     kdv_uygula: true,
     durum: 'Onaylandı'
   });
+  const [alisFaturalari, setAlisFaturalari] = useState<any[]>([]);
+  const [odemeler, setOdemeler] = useState<any[]>([]);
   const location = useLocation();
   const [stateProcessed, setStateProcessed] = useState(false);
 
@@ -77,29 +79,22 @@ export default function SatisFaturasi() {
     }
   }, [selectedProfile]);
 
-  const generateFaturaNo = async () => {
+  const generateFaturaNo = (faturalarList: any[]) => {
     if (!selectedProfile) return 'SF-0001';
 
-    try {
-      const { data } = await satisApi.getAll(selectedProfile.id);
-
-      if (data && data.length > 0) {
-        // En son fatura numarasını bul
-        const sortedData = [...data].sort((a, b) =>
-          new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
-        );
-        const lastNo = sortedData[0].fatura_no;
-        const match = lastNo.match(/SF-(\d+)/);
-        if (match) {
-          const nextNo = parseInt(match[1]) + 1;
-          return `SF-${nextNo.toString().padStart(4, '0')}`;
-        }
+    if (faturalarList && faturalarList.length > 0) {
+      // En son fatura numarasını bul (yaratılma tarihine göre değil, no'ya göre de bakılabilir ama mevcut mantığı koruyoruz)
+      const sortedData = [...faturalarList].sort((a, b) =>
+        new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
+      );
+      const lastNo = sortedData[0].fatura_no;
+      const match = lastNo.match(/SF-(\d+)/);
+      if (match) {
+        const nextNo = parseInt(match[1]) + 1;
+        return `SF-${nextNo.toString().padStart(4, '0')}`;
       }
-      return 'SF-0001';
-    } catch (error) {
-      console.error('Fatura no oluşturulurken hata:', error);
-      return 'SF-0001';
     }
+    return 'SF-0001';
   };
 
   const loadData = async () => {
@@ -107,13 +102,26 @@ export default function SatisFaturasi() {
 
     try {
       setLoading(true);
-      const { data: faturalarData } = await satisApi.getAll(selectedProfile.id);
-      const { data: carilerData } = await carilerApi.getAll(selectedProfile.id);
-      const { data: urunlerData } = await urunlerApi.getAll(selectedProfile.id);
+
+      const [
+        { data: faturalarData },
+        { data: carilerData },
+        { data: urunlerData },
+        { data: alisFaturalariData },
+        { data: odemelerData }
+      ] = await Promise.all([
+        satisApi.getAll(selectedProfile.id),
+        carilerApi.getAll(selectedProfile.id),
+        urunlerApi.getAll(selectedProfile.id),
+        alisApi.getAll(selectedProfile.id),
+        odemelerApi.getAll(selectedProfile.id)
+      ]);
 
       setFaturalar((faturalarData as Fatura[]) || []);
       setCariler(carilerData || []);
       setUrunler(urunlerData || []);
+      setAlisFaturalari(alisFaturalariData || []);
+      setOdemeler(odemelerData || []);
     } catch (error) {
       console.error('Veriler yüklenirken hata:', error);
     } finally {
@@ -145,49 +153,41 @@ export default function SatisFaturasi() {
     return { araToplam, kdv, toplam };
   };
 
-  const calculateCariBakiye = async (cariId: string) => {
+  const calculateCariBakiye = (cariId: string) => {
     if (!selectedProfile || !cariId) return 0;
 
-    try {
-      let toplamBorc = 0;
-      let toplamAlacak = 0;
+    let toplamBorc = 0;
+    let toplamAlacak = 0;
 
-      // Satış faturaları (Borç)
-      const { data: satisFaturalari } = await satisApi.getAll(selectedProfile.id);
-      if (satisFaturalari) {
-        toplamBorc = satisFaturalari
-          .filter(f => f.cari_id === cariId)
-          .reduce((sum, f) => sum + parseFloat(f.toplam.toString()), 0);
-      }
-
-      // Alış faturaları (Alacak)
-      const { data: alisFaturalari } = await alisApi.getAll(selectedProfile.id);
-      if (alisFaturalari) {
-        toplamAlacak = alisFaturalari
-          .filter(f => f.cari_id === cariId)
-          .reduce((sum, f) => sum + parseFloat(f.toplam.toString()), 0);
-      }
-
-      // Ödemeler
-      const { data: odemeler } = await odemelerApi.getAll(selectedProfile.id);
-      if (odemeler) {
-        odemeler.filter(o => o.cari_id === cariId).forEach(odeme => {
-          if (odeme.tip === 'Ödeme Alındı' || odeme.tip === 'Tahsilat') {
-            toplamAlacak += parseFloat(odeme.tutar.toString());
-          } else if (odeme.tip === 'Ödeme Yapıldı' || odeme.tip === 'Tediye') {
-            toplamBorc += parseFloat(odeme.tutar.toString());
-          }
-        });
-      }
-
-      return toplamBorc - toplamAlacak;
-    } catch (error) {
-      console.error('Bakiye hesaplanırken hata:', error);
-      return 0;
+    // Satış faturaları (Borç) - Hafızadaki veriyi kullan
+    if (faturalar) {
+      toplamBorc = faturalar
+        .filter(f => f.cari_id === cariId)
+        .reduce((sum, f) => sum + parseFloat(f.toplam.toString()), 0);
     }
+
+    // Alış faturaları (Alacak) - Hafızadaki veriyi kullan
+    if (alisFaturalari) {
+      toplamAlacak = alisFaturalari
+        .filter(f => f.cari_id === cariId)
+        .reduce((sum, f) => sum + parseFloat(f.toplam.toString()), 0);
+    }
+
+    // Ödemeler - Hafızadaki veriyi kullan
+    if (odemeler) {
+      odemeler.filter(o => o.cari_id === cariId).forEach(odeme => {
+        if (odeme.tip === 'Ödeme Alındı' || odeme.tip === 'Tahsilat') {
+          toplamAlacak += parseFloat(odeme.tutar.toString());
+        } else if (odeme.tip === 'Ödeme Yapıldı' || odeme.tip === 'Tediye') {
+          toplamBorc += parseFloat(odeme.tutar.toString());
+        }
+      });
+    }
+
+    return toplamBorc - toplamAlacak;
   };
 
-  const handleCariChange = async (cariId: string) => {
+  const handleCariChange = (cariId: string) => {
     const cari = cariler.find(c => c.id === cariId);
     setFormData({
       ...formData,
@@ -195,8 +195,8 @@ export default function SatisFaturasi() {
       cari_ad: cari ? cari.ad : ''
     });
 
-    // Bakiye hesapla
-    const bakiye = await calculateCariBakiye(cariId);
+    // Bakiye hesapla (Senkron)
+    const bakiye = calculateCariBakiye(cariId);
     setCariBakiye(bakiye);
   };
 
@@ -263,7 +263,7 @@ export default function SatisFaturasi() {
 
     try {
       setSaving(true);
-      const faturaNo = formData.fatura_no || await generateFaturaNo();
+      const faturaNo = formData.fatura_no || generateFaturaNo(faturalar);
       const { araToplam, kdv, toplam } = calculateTotals(formData.urunler, formData.kdv_uygula, formData.kdv_orani);
 
       const faturaData = {
@@ -329,8 +329,8 @@ export default function SatisFaturasi() {
     window.print();
   };
 
-  const resetForm = async () => {
-    const newFaturaNo = await generateFaturaNo();
+  const resetForm = () => {
+    const newFaturaNo = generateFaturaNo(faturalar);
     setFormData({
       cari_id: '',
       cari_ad: '',
@@ -346,8 +346,8 @@ export default function SatisFaturasi() {
     setSelectedFatura(null);
   };
 
-  const openModal = async () => {
-    const newFaturaNo = await generateFaturaNo();
+  const openModal = () => {
+    const newFaturaNo = generateFaturaNo(faturalar);
     setFormData({
       ...formData,
       fatura_no: newFaturaNo
@@ -357,7 +357,7 @@ export default function SatisFaturasi() {
     setShowModal(true);
   };
 
-  const handleEdit = async (fatura: Fatura) => {
+  const handleEdit = (fatura: Fatura) => {
     setSelectedFatura(fatura);
     setFormData({
       cari_id: fatura.cari_id,
@@ -371,15 +371,15 @@ export default function SatisFaturasi() {
       durum: fatura.durum
     });
     setIsEditing(true);
-    const bakiye = await calculateCariBakiye(fatura.cari_id);
+    const bakiye = calculateCariBakiye(fatura.cari_id);
     setCariBakiye(bakiye);
     setShowModal(true);
   };
 
-  const openPrintModal = async (fatura: Fatura) => {
+  const openPrintModal = (fatura: Fatura) => {
     setSelectedFatura(fatura);
     // Güncel bakiyeyi hesapla (Fatura zaten kayıtlı olduğu için bakiye içinde dahil)
-    const guncelBakiye = await calculateCariBakiye(fatura.cari_id);
+    const guncelBakiye = calculateCariBakiye(fatura.cari_id);
     setPrintCariBakiye(guncelBakiye);
     setShowPrintModal(true);
   };
