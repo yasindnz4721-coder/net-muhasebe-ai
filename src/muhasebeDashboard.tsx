@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, FileText, CreditCard,
-  PlusCircle, LogOut, Settings, BarChart2
+  PlusCircle, LogOut, Settings, BarChart2, Download
 } from 'lucide-react';
 import {
   cariler as carilerApi,
@@ -198,12 +198,27 @@ const MuhasebeDashboard = () => {
             <h2 className="text-3xl font-black text-slate-800 tracking-tight leading-none mb-2 uppercase">Finansal Durum</h2>
             <p className="text-slate-500 font-medium tracking-tight">İşletmenizin anlık verilerine hoş geldiniz.</p>
           </div>
-          <button
-            onClick={() => navigate('/satis-faturasi')}
-            className="bg-slate-900 hover:bg-slate-800 text-white px-6 h-14 rounded-2xl flex items-center gap-3 transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-slate-900/10 font-bold text-sm uppercase"
-          >
-            <PlusCircle size={20} /> YENİ İŞLEM EKLE
-          </button>
+          <div className="flex gap-4">
+            <button
+              onClick={() => {
+                const link = document.createElement('a');
+                link.href = '/NetMuhasebe_AI_Kurulum.exe';
+                link.download = 'NetMuhasebe_AI_Kurulum.exe';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 h-14 rounded-2xl flex items-center gap-3 transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-indigo-600/10 font-bold text-sm uppercase"
+            >
+              <Download size={20} /> MASAÜSTÜNE KUR
+            </button>
+            <button
+              onClick={() => navigate('/satis-faturasi')}
+              className="bg-slate-900 hover:bg-slate-800 text-white px-6 h-14 rounded-2xl flex items-center gap-3 transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-slate-900/10 font-bold text-sm uppercase"
+            >
+              <PlusCircle size={20} /> YENİ İŞLEM EKLE
+            </button>
+          </div>
         </header>
 
         {/* Dinamik İstatistik Kartları */}
