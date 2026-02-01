@@ -41,7 +41,7 @@ interface Fatura {
 }
 
 export default function SatisFaturasi() {
-  const { selectedProfile } = useProfile();
+  const { selectedProfile, currentUser } = useProfile();
   const [faturalar, setFaturalar] = useState<Fatura[]>([]);
   const [cariler, setCariler] = useState<Cari[]>([]);
   const [urunler, setUrunler] = useState<Urun[]>([]);
@@ -447,15 +447,15 @@ export default function SatisFaturasi() {
                   <div className="flex items-center gap-4 mt-2">
                     <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden max-w-[200px]">
                       <div
-                        className={`h-full transition-all duration-1000 ${(faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length / (useProfile().currentUser?.subscription_tier === 'tam' ? 100 : 50)) >= 1 ? 'bg-rose-500' : 'bg-indigo-500'
+                        className={`h-full transition-all duration-1000 ${(faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length / (currentUser?.subscription_tier === 'tam' ? 100 : 50)) >= 1 ? 'bg-rose-500' : 'bg-indigo-500'
                           }`}
                         style={{
-                          width: `${Math.min(100, (faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length / (useProfile().currentUser?.subscription_tier === 'tam' ? 100 : useProfile().currentUser?.subscription_tier === 'vip' ? 1 : 50)) * 100)}%`
+                          width: `${Math.min(100, (faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length / (currentUser?.subscription_tier === 'tam' ? 100 : currentUser?.subscription_tier === 'vip' ? 1 : 50)) * 100)}%`
                         }}
                       ></div>
                     </div>
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                      AYLIK KREDİ: {faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length} / {useProfile().currentUser?.subscription_tier === 'vip' ? '∞' : (useProfile().currentUser?.subscription_tier === 'tam' ? '100' : '50')}
+                      AYLIK KREDİ: {faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length} / {currentUser?.subscription_tier === 'vip' ? '∞' : (currentUser?.subscription_tier === 'tam' ? '100' : '50')}
                     </span>
                   </div>
                 )}
@@ -464,20 +464,20 @@ export default function SatisFaturasi() {
               <button
                 onClick={() => {
                   const currentMonthCount = faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length;
-                  const limit = useProfile().currentUser?.subscription_tier === 'tam' ? 100 : (useProfile().currentUser?.subscription_tier === 'vip' ? Infinity : 50);
+                  const limit = currentUser?.subscription_tier === 'tam' ? 100 : (currentUser?.subscription_tier === 'vip' ? Infinity : 50);
                   if (currentMonthCount >= limit) {
                     alert(`Aylık fatura limitinize ulaştınız (${limit}). Daha fazla işlem için paketinizi yükseltin.`);
                     return;
                   }
                   openModal();
                 }}
-                className={`premium-button px-8 h-16 text-sm uppercase tracking-widest group ${faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length >= (useProfile().currentUser?.subscription_tier === 'tam' ? 100 : useProfile().currentUser?.subscription_tier === 'vip' ? Infinity : 50)
+                className={`premium-button px-8 h-16 text-sm uppercase tracking-widest group ${faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length >= (currentUser?.subscription_tier === 'tam' ? 100 : currentUser?.subscription_tier === 'vip' ? Infinity : 50)
                   ? 'bg-rose-600/20 border-rose-500/30 text-rose-400'
                   : 'bg-green-600/20 border-green-500/30 text-green-400 hover:bg-green-600 hover:text-white'
                   }`}
               >
-                <span>{faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length >= (useProfile().currentUser?.subscription_tier === 'tam' ? 100 : useProfile().currentUser?.subscription_tier === 'vip' ? Infinity : 50) ? 'LİMİT DOLDU' : 'YENİ FATURA KES'}</span>
-                <i className={`${faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length >= (useProfile().currentUser?.subscription_tier === 'tam' ? 100 : useProfile().currentUser?.subscription_tier === 'vip' ? Infinity : 50) ? 'ri-error-warning-line' : 'ri-add-line'} text-xl group-hover:rotate-90 transition-transform`}></i>
+                <span>{faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length >= (currentUser?.subscription_tier === 'tam' ? 100 : currentUser?.subscription_tier === 'vip' ? Infinity : 50) ? 'LİMİT DOLDU' : 'YENİ FATURA KES'}</span>
+                <i className={`${faturalar.filter(f => new Date(f.created_at || '').getMonth() === new Date().getMonth()).length >= (currentUser?.subscription_tier === 'tam' ? 100 : currentUser?.subscription_tier === 'vip' ? Infinity : 50) ? 'ri-error-warning-line' : 'ri-add-line'} text-xl group-hover:rotate-90 transition-transform`}></i>
               </button>
             </div>
 
