@@ -231,6 +231,61 @@ export default function LoginPage() {
         </div>
       </main>
 
+      {/* About Us Section */}
+      <section className="relative z-10 max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
+        <div className="grid lg:grid-cols-2 gap-20 items-start">
+          <div className="space-y-8">
+            <h2 className="text-4xl font-black tracking-tight text-white uppercase italic underline decoration-indigo-500 decoration-4 underline-offset-8 mb-12">Hakkımızda</h2>
+            <div className="space-y-6 text-slate-400 text-lg leading-relaxed font-medium">
+              <p>
+                <span className="text-white font-bold">Net Muhasebe AI</span>, 2026 yılında <span className="text-indigo-400 font-bold italic">Yasin Deniz</span> tarafından kurulan, işletmelerin finansal süreçlerini dijital dünyada bir üst seviyeye taşımak amacıyla yola çıkmış bir teknoloji girişimidir.
+              </p>
+              <p>
+                Vizyonumuz, karmaşık muhasebe süreçlerini herkesin yönetebileceği kadar basit, hızlı ve akıllı hale getirerek işletme sahiplerinin asıl işlerine odaklanmalarını sağlamaktır. Bulut tabanlı yapımız sayesinde işletmenizin finansal nabzını dünyanın her yerinden, saniyeler içinde takip edebilirsiniz.
+              </p>
+              <p>
+                Geleneksel muhasebe yöntemlerini, yarının teknolojisi olan Yapay Zeka ile birleştirerek sadece bir kayıt sistemi değil, aynı zamanda işletmeniz için akıllı bir finansal danışman sunuyoruz.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-indigo-600/5 hover:border-indigo-500/20 transition-all group">
+              <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <i className="ri-brain-line text-2xl text-indigo-400"></i>
+              </div>
+              <h3 className="text-lg font-black text-white mb-2 uppercase tracking-wide">AI Destekli Analiz</h3>
+              <p className="text-sm text-slate-500 font-medium">Verilerinizi işlerken yapay zeka ile geleceğe dair finansal öngörüler sunar.</p>
+            </div>
+
+            <div className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-indigo-600/5 hover:border-indigo-500/20 transition-all group">
+              <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <i className="ri-smartphone-line text-2xl text-indigo-400"></i>
+              </div>
+              <h3 className="text-lg font-black text-white mb-2 uppercase tracking-wide">Her Yerden Erişim</h3>
+              <p className="text-sm text-slate-500 font-medium">Bulut mimarimiz sayesinde mobilden veya masaüstünden anında ulaşım.</p>
+            </div>
+
+            <div className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-indigo-600/5 hover:border-indigo-500/20 transition-all group">
+              <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <i className="ri-shield-check-line text-2xl text-indigo-400"></i>
+              </div>
+              <h3 className="text-lg font-black text-white mb-2 uppercase tracking-wide">Tam Güvenlik</h3>
+              <p className="text-sm text-slate-500 font-medium">Banka seviyesinde şifreleme ve güvenli altyapı ile verileriniz koruma altında.</p>
+            </div>
+
+            <div className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-indigo-600/5 hover:border-indigo-500/20 transition-all group">
+              <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <i className="ri-user-smile-line text-2xl text-indigo-400"></i>
+              </div>
+              <h3 className="text-lg font-black text-white mb-2 uppercase tracking-wide">Modern Arayüz</h3>
+              <p className="text-sm text-slate-500 font-medium">Karmaşadan uzak, herkesin saniyeler içinde öğrenebileceği şık tasarım.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
       <footer className="relative z-10 max-w-7xl mx-auto px-8 py-12 flex flex-col md:row items-center justify-between gap-8 border-t border-white/5">
         <div className="flex items-center gap-10">
           <p className="text-[10px] font-black tracking-widest text-slate-600 uppercase">© 2026 NET MUHASEBE AI</p>

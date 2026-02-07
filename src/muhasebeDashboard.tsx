@@ -158,10 +158,10 @@ const MuhasebeDashboard = () => {
       <div className="w-72 bg-slate-900 text-white p-8 shadow-2xl flex flex-col shrink-0">
         <div className="mb-12">
           <h1 className="text-2xl font-black flex items-center gap-3 text-white tracking-tighter leading-none cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-              <LayoutDashboard size={24} />
+            <div className="w-12 h-12 bg-white/5 backdrop-blur-2xl rounded-xl flex items-center justify-center border border-white/10 shadow-lg p-1.5 transition-transform hover:scale-110">
+              <img src="/logo.png" alt="Net Muhasebe AI" className="w-full h-full object-contain" />
             </div>
-            MUHASEBE<span className="text-blue-500 uppercase">Pro</span>
+            NET MUHASEBE<span className="text-blue-500 uppercase italic ml-1">AI</span>
           </h1>
         </div>
 
