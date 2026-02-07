@@ -110,11 +110,20 @@ const MuhasebeDashboard = () => {
     window.location.href = '/login';
   };
 
-  if (yukleniyor) return (
-    <div className="flex flex-col justify-center items-center h-screen bg-gray-50 gap-4 font-sans">
-      <div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
-      <div className="font-black text-slate-400 uppercase tracking-widest text-xs">Veriler Hazırlanıyor...</div>
+  const StatCardSkeleton = () => (
+    <div className="bg-white p-8 rounded-[28px] border border-gray-100 animate-skeleton overflow-hidden h-[160px]">
+      <div className="h-4 w-24 bg-white/10 rounded mb-4"></div>
+      <div className="h-10 w-32 bg-white/10 rounded"></div>
     </div>
+  );
+
+  const TableRowSkeleton = () => (
+    <tr className="animate-skeleton">
+      <td className="px-8 py-5 h-16"><div className="w-full h-4 bg-white/10 rounded"></div></td>
+      <td className="px-8 py-5 h-16"><div className="w-full h-4 bg-white/10 rounded"></div></td>
+      <td className="px-8 py-5 h-16"><div className="w-full h-4 bg-white/10 rounded"></div></td>
+      <td className="px-8 py-5 h-16"><div className="w-full h-4 bg-white/10 rounded"></div></td>
+    </tr>
   );
 
   if (hata) return (
@@ -223,9 +232,19 @@ const MuhasebeDashboard = () => {
 
         {/* Dinamik İstatistik Kartları */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-          <StatCard title="Toplam Cari" value={istatistikler.toplamCari.toString()} sub="Kayıtlı Paydaş" color="blue" />
-          <StatCard title="Toplam Satış" value={`₺${istatistikler.toplamSatis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`} sub="Bu Ayki Ciro" color="green" />
-          <StatCard title="Sistem Durumu" value="Aktif" sub="Veriler Güncel" color="indigo" isStatus />
+          {yukleniyor ? (
+            <>
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </>
+          ) : (
+            <>
+              <StatCard title="Toplam Cari" value={istatistikler.toplamCari.toString()} sub="Kayıtlı Paydaş" color="blue" />
+              <StatCard title="Toplam Satış" value={`₺${istatistikler.toplamSatis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`} sub="Bu Ayki Ciro" color="green" />
+              <StatCard title="Sistem Durumu" value="Aktif" sub="Veriler Güncel" color="indigo" isStatus />
+            </>
+          )}
         </div>
 
         <div className="bg-white rounded-[32px] shadow-2xl shadow-slate-200/50 border border-gray-100 overflow-hidden">
@@ -249,10 +268,17 @@ const MuhasebeDashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 uppercase">
-                {todayIslemler.length === 0 ? (
+                {yukleniyor ? (
+                  <>
+                    <TableRowSkeleton />
+                    <TableRowSkeleton />
+                    <TableRowSkeleton />
+                  </>
+                ) : todayIslemler.length === 0 ? (
                   <tr><td colSpan={4} className="px-8 py-10 text-center text-slate-400 italic">Bugün henüz işlem yapılmadı.</td></tr>
                 ) : (
                   todayIslemler.map((islem, idx) => {
+                    // ... existing mapping logic
                     const getTargetPage = (tip: string) => {
                       switch (tip) {
                         case 'Satış Faturası': return '/satis-faturasi';
@@ -319,7 +345,7 @@ const MuhasebeDashboard = () => {
 };
 
 const StatCard = ({ title, value, sub, color, isStatus }: { title: string, value: string, sub: string, color: string, isStatus?: boolean }) => (
-  <div className="bg-white p-8 rounded-[28px] shadow-sm border border-gray-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all group relative overflow-hidden text-slate-900">
+  <div className="bg-white p-8 rounded-[28px] border border-gray-100 transition-all group relative overflow-hidden text-slate-900 hover-glow">
     <div className={`absolute top-0 right-0 w-24 h-24 bg-${color}-50 rounded-full -mr-8 -mt-8 opacity-0 group-hover:opacity-100 transition-opacity`}></div>
     <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2 flex items-center gap-2">
       <span className={`w-1.5 h-1.5 rounded-full bg-${color}-500`}></span>

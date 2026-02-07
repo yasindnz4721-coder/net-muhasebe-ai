@@ -391,22 +391,11 @@ export default function SatisFaturasi() {
 
   const { araToplam, kdv, toplam } = calculateTotals(formData.urunler, formData.kdv_uygula, formData.kdv_orani);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto"></div>
-          <p className="text-slate-500 font-black text-xs tracking-widest uppercase">Finansal Veriler İşleniyor...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!selectedProfile) {
+  if (!selectedProfile && !loading) {
     return (
       <div className="min-h-screen bg-[#020617] text-white flex items-center justify-center p-6 text-center">
         <div className="premium-card p-12 max-w-md animate-slide-up">
-          <div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-indigo-500/20">
+          <div className="w-20 h-20 bg-indigo-50/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-indigo-500/20">
             <i className="ri-profile-line text-4xl text-indigo-500"></i>
           </div>
           <h3 className="text-2xl font-black uppercase tracking-tight mb-4">Profil Seçimi Gerekli</h3>
@@ -496,7 +485,25 @@ export default function SatisFaturasi() {
                 </div>
               </div>
 
-              {filteredFaturalar.length === 0 ? (
+              {loading && filteredFaturalar.length === 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <tbody className="divide-y divide-white/5">
+                      {[...Array(5)].map((_, i) => (
+                        <tr key={i} className="animate-skeleton h-20">
+                          <td colSpan={6} className="px-8 py-6 opacity-10">
+                            <div className="flex items-center gap-4">
+                              <div className="w-24 h-6 bg-white/20 rounded"></div>
+                              <div className="w-32 h-6 bg-white/20 rounded"></div>
+                              <div className="w-20 h-6 bg-white/20 rounded ml-auto"></div>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : filteredFaturalar.length === 0 ? (
                 <div className="p-24 text-center space-y-6">
                   <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
                     <i className="ri-file-text-line text-5xl text-slate-700"></i>

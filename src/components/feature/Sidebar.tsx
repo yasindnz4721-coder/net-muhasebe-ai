@@ -62,9 +62,9 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
 
       {/* Sidebar Content */}
       <aside className={`
-        fixed lg:sticky top-0 left-0 h-screen w-72 bg-[#020617] border-r border-white/5 
+        fixed lg:sticky top-0 left-0 h-screen w-72 glass-morphism border-r border-white/5 
         overflow-y-auto z-[60] transition-all duration-300 ease-out
-        ${sidebarOpen ? 'translate-x-0 shadow-2xl shadow-indigo-600/10' : '-translate-x-full lg:translate-x-0'}
+        ${sidebarOpen ? 'translate-x-0 shadow-2xl shadow-indigo-600/20' : '-translate-x-full lg:translate-x-0'}
       `}>
         <div className="p-8 mt-12 lg:mt-0">
           <div className="flex items-center gap-3">
@@ -72,8 +72,8 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
               <img src="/logo.png" alt="Net Muhasebe AI" className="w-full h-full object-contain" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white tracking-tight leading-none mb-1">Net Muhasebe <span className="text-indigo-400 italic">AI</span></h1>
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">FİNANSAL TEKNOLOJİ</span>
+              <h1 className="text-xl font-bold text-white tracking-tight leading-none mb-1">Net Muhasebe <span className="text-indigo-400 italic font-black">AI</span></h1>
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] opacity-80">FİNANSAL TEKNOLOJİ</span>
             </div>
           </div>
         </div>
@@ -94,10 +94,10 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
                   if (setMbOpen) setMbOpen(false);
                 }}
                 className={`
-                  flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden
+                  flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-500 group relative overflow-hidden
                   ${isActive
-                    ? 'bg-indigo-600/10 text-white border border-white/10'
-                    : 'text-slate-500 hover:text-white hover:bg-white/5'
+                    ? 'bg-indigo-600/20 text-white border border-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.15)]'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }
                 `}
               >
@@ -105,11 +105,11 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-indigo-500 rounded-r-full shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
                 )}
 
-                <i className={`${item.icon} text-xl ${isActive ? 'text-indigo-400' : 'group-hover:scale-110 group-hover:text-indigo-400 transition-all'}`}></i>
-                <span className={`font-bold text-sm tracking-tight ${isActive ? 'translate-x-1 transition-transform' : ''}`}>{item.label}</span>
+                <i className={`${item.icon} text-xl transition-all duration-300 ${isActive ? 'text-indigo-400 scale-110' : 'group-hover:scale-110 group-hover:text-indigo-400'}`}></i>
+                <span className={`font-bold text-sm tracking-tight transition-transform duration-300 ${isActive ? 'translate-x-1' : ''}`}>{item.label}</span>
 
                 {isActive && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.8)]"></div>
                 )}
               </Link>
             );
@@ -117,14 +117,14 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
         </nav>
 
         <div className="p-6 mt-8">
-          <div className="p-5 rounded-3xl bg-indigo-600/5 border border-indigo-500/10 relative overflow-hidden group hover:bg-indigo-600/10 transition-colors">
+          <div className="p-5 rounded-3xl bg-indigo-600/5 border border-indigo-500/10 relative overflow-hidden group hover:bg-indigo-600/10 transition-colors shadow-inner">
             <div className="absolute -top-10 -right-10 w-24 h-24 bg-indigo-600/10 blur-[40px] rounded-full group-hover:bg-indigo-600/20 transition-all"></div>
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Teknik Destek</p>
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 opacity-60">Teknik Destek</p>
             <a
               href="tel:5347401256"
               className="flex items-center gap-3 text-white font-bold group-hover:translate-x-1 transition-transform"
             >
-              <div className="w-8 h-8 rounded-xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <div className="w-8 h-8 rounded-xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:rotate-12 transition-transform">
                 <i className="ri-phone-fill text-sm"></i>
               </div>
               <span className="text-sm">534 740 12 56</span>
@@ -134,7 +134,7 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
           <div className="mt-6 px-2">
             <Link
               to="/gizlilik-politikasi"
-              className="text-[9px] font-black text-slate-600 hover:text-indigo-400 transition-colors uppercase tracking-[0.2em] block text-center"
+              className="text-[9px] font-black text-slate-600 hover:text-indigo-400 transition-colors uppercase tracking-[0.2em] block text-center opacity-70 hover:opacity-100"
             >
               Gizlilik Politikası & Yasal Uyarı
             </Link>

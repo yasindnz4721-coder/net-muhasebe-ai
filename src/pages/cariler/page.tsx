@@ -264,10 +264,25 @@ export default function CarilerPage() {
                 </div>
               </div>
 
-              {loading ? (
-                <div className="p-24 text-center space-y-4">
-                  <div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto"></div>
-                  <p className="text-slate-500 font-black text-xs tracking-widest uppercase">Veriler İşleniyor...</p>
+              {loading && processedCariler.length === 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <tbody className="divide-y divide-white/5">
+                      {[...Array(5)].map((_, i) => (
+                        <tr key={i} className="animate-skeleton h-20">
+                          <td colSpan={5} className="px-8 py-6 opacity-10">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-2xl bg-white/20"></div>
+                              <div className="space-y-2">
+                                <div className="h-4 w-32 bg-white/20 rounded"></div>
+                                <div className="h-3 w-24 bg-white/20 rounded"></div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               ) : processedCariler.length === 0 ? (
                 <div className="p-24 text-center space-y-6">
