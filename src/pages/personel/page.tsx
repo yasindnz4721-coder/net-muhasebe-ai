@@ -31,15 +31,17 @@ const PersonelPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState<Partial<Personel>>({
+    const [formData, setFormData] = useState<Partial<Personel & { absentDate?: string }>>({
         ad_soyad: '',
         unvan: '',
         tckn: '',
         telefon: '',
         email: '',
         maas: 0,
-        durum: 'Aktif'
+        durum: 'Aktif',
+        absentDate: ''
     });
+    const [maasOzetleri, setMaasOzetleri] = useState<Record<string, any>>({});
 
     useEffect(() => {
         if (selectedProfile) {
@@ -51,7 +53,21 @@ const PersonelPage = () => {
         try {
             setLoading(true);
             const res = await personelApi.getAll(selectedProfile!.id);
-            if (res.data) setPersonelList(res.data);
+            if (res.data) {
+                setPersonelList(res.data);
+
+                // Maaş özetlerini yükle
+                const now = new Date();
+                const yil = now.getFullYear();
+                const ay = now.getMonth() + 1;
+                const ozetler: Record<string, any> = {};
+
+                await Promise.all(res.data.map(async (p) => {
+                    const mRes = await personelApi.getMaasOzeti(p.id, yil, ay);
+                    if (mRes.data) ozetler[p.id] = mRes.data;
+                }));
+                setMaasOzetleri(ozetler);
+            }
         } catch (err) {
             console.error(err);
         } finally {
@@ -62,14 +78,26 @@ const PersonelPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            if (isEditing && formData.id) {
-                await personelApi.update(formData.id, formData);
+            let pid = formData.id;
+            if (isEditing && pid) {
+                await personelApi.update(pid, formData);
             } else {
-                await personelApi.create({ ...formData, profile_id: selectedProfile?.id });
+                const res = await personelApi.create({ ...formData, profile_id: selectedProfile?.id });
+                pid = res.data?.id;
             }
+
+            // Eğer devamsızlık tarihi girildiyse kaydet
+            if (pid && formData.absentDate) {
+                await personelApi.savePuantaj(pid, {
+                    tarih: formData.absentDate,
+                    durum: 'Gelmedi',
+                    profile_id: selectedProfile?.id
+                });
+            }
+
             setShowModal(false);
             loadPersonel();
-            setFormData({ ad_soyad: '', unvan: '', tckn: '', telefon: '', email: '', maas: 0, durum: 'Aktif' });
+            setFormData({ ad_soyad: '', unvan: '', tckn: '', telefon: '', email: '', maas: 0, durum: 'Aktif', absentDate: '' });
             setIsEditing(false);
         } catch (err) {
             console.error(err);
@@ -126,7 +154,7 @@ const PersonelPage = () => {
                             <div className="flex gap-4">
                                 <button
                                     onClick={() => {
-                                        setFormData({ ad_soyad: '', unvan: '', tckn: '', telefon: '', email: '', maas: 0, durum: 'Aktif' });
+                                        setFormData({ ad_soyad: '', unvan: '', tckn: '', telefon: '', email: '', maas: 0, durum: 'Aktif', absentDate: '' });
                                         setIsEditing(false);
                                         setShowModal(true);
                                     }}
@@ -231,8 +259,13 @@ const PersonelPage = () => {
                                                     </td>
                                                     <td className="px-8 py-6">
                                                         <div className="text-lg font-black text-emerald-400 tracking-tighter">
-                                                            ₺{Number(p.maas).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                                                            ₺{Number(maasOzetleri[p.id]?.odenecek_maas || p.maas).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                                                         </div>
+                                                        {maasOzetleri[p.id]?.eksik_gun > 0 && (
+                                                            <div className="text-[10px] font-black text-rose-500 uppercase tracking-widest leading-none mt-1 whitespace-nowrap">
+                                                                {maasOzetleri[p.id].eksik_gun} GÜN KESİNTİLİ
+                                                            </div>
+                                                        )}
                                                     </td>
                                                     <td className="px-8 py-6">
                                                         <span className={`inline-flex px-3 py-1 rounded-lg text-[10px] font-black tracking-widest uppercase ${p.durum === 'Aktif' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
@@ -241,10 +274,16 @@ const PersonelPage = () => {
                                                     </td>
                                                     <td className="px-8 py-6 text-right">
                                                         <div className="flex items-center justify-end gap-3 opacity-0 group-hover/row:opacity-100 transition-all">
-                                                            <button onClick={() => handleEdit(p)} className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white border border-indigo-500/20 transition-all flex items-center justify-center">
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); handleEdit(p); }}
+                                                                className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white border border-indigo-500/20 transition-all flex items-center justify-center"
+                                                            >
                                                                 <Edit2 size={18} />
                                                             </button>
-                                                            <button onClick={() => handleDelete(p.id)} className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/20 transition-all flex items-center justify-center">
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); handleDelete(p.id); }}
+                                                                className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/20 transition-all flex items-center justify-center"
+                                                            >
                                                                 <Trash2 size={18} />
                                                             </button>
                                                         </div>
@@ -308,8 +347,14 @@ const PersonelPage = () => {
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">TC KİMLİK NO</label>
-                                    <input type="text" value={formData.tckn} onChange={e => setFormData({ ...formData, tckn: e.target.value })} className="premium-input h-14" maxLength={11} />
+                                    <label className="text-[10px] font-black text-rose-500 uppercase tracking-widest ml-2 italic">DEVAMSIZLIK EKLE (HIZLI)</label>
+                                    <input
+                                        type="date"
+                                        value={formData.absentDate}
+                                        onChange={e => setFormData({ ...formData, absentDate: e.target.value })}
+                                        className="premium-input h-14 border-rose-500/20 focus:border-rose-500/50"
+                                    />
+                                    <p className="text-[9px] font-bold text-slate-500 ml-2 uppercase italic leading-none">Bu tarihe "GELMEDİ" kaydı eklenir ve maaştan düşülür.</p>
                                 </div>
                             </div>
 

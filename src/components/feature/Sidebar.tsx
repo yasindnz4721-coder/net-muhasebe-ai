@@ -154,7 +154,7 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
               <img src="/logo.png" alt="Net Muhasebe AI" className="w-full h-full object-contain" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white tracking-tight leading-none mb-1">Cari <span className="text-indigo-400 italic font-black">AI</span></h1>
+              <h1 className="text-xl font-bold text-white tracking-tight leading-none mb-1">Net Muhasebe <span className="text-indigo-400 italic font-black">AI</span></h1>
               <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] opacity-80">AKILLI YÖNETİM</span>
             </div>
           </div>
