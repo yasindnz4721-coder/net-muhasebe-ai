@@ -41,9 +41,9 @@ export default function LoginPage() {
   };
 
   const featureHighlights = [
-    { icon: 'ri-command-fill', text: 'Tam Otomasyon' },
+    { icon: 'ri-calendar-check-line', text: 'Taksit Takibi' },
+    { icon: 'ri-user-follow-line', text: 'Maaş Yönetimi' },
     { icon: 'ri-brain-line', text: 'AI Finansal Analiz' },
-    { icon: 'ri-shield-star-line', text: 'Bulut Güvenliği' },
   ];
 
   return (
@@ -241,7 +241,7 @@ export default function LoginPage() {
                 <span className="text-white font-bold">Net Muhasebe AI</span>, 2026 yılında <span className="text-indigo-400 font-bold italic">Yasin Deniz</span> tarafından kurulan, işletmelerin finansal süreçlerini dijital dünyada bir üst seviyeye taşımak amacıyla yola çıkmış bir teknoloji girişimidir.
               </p>
               <p>
-                Vizyonumuz, karmaşık muhasebe süreçlerini herkesin yönetebileceği kadar basit, hızlı ve akıllı hale getirerek işletme sahiplerinin asıl işlerine odaklanmalarını sağlamaktır. Bulut tabanlı yapımız sayesinde işletmenizin finansal nabzını dünyanın her yerinden, saniyeler içinde takip edebilirsiniz.
+                Vizyonumuz, karmaşık muhasebe süreçlerini herkesin yönetebileceği kadar basit, hızlı ve akıllı hale getirerek işletme sahiplerinin asıl işlerine odaklanmalarını sağlamaktır. <span className="text-white font-bold">Gelişmiş Taksit Takibi</span> ve <span className="text-white font-bold">Otomatik Personel Maaş Yönetimi</span> gibi modern modüllerimizle işletmenizin finansal nabzını dünyanın her yerinden, saniyeler içinde takip edebilirsiniz.
               </p>
               <p>
                 Geleneksel muhasebe yöntemlerini, yarının teknolojisi olan Yapay Zeka ile birleştirerek sadece bir kayıt sistemi değil, aynı zamanda işletmeniz için akıllı bir finansal danışman sunuyoruz.

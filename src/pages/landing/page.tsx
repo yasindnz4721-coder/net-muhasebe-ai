@@ -131,9 +131,11 @@ export default function LandingPage() {
                             { title: 'Yapay Zeka Analizi', desc: 'Verilerinizi analiz eder, karlılık öngörüleri oluşturur ve stratejik tavsiyeler verir.', icon: 'ri-brain-line', color: 'indigo' },
                             { title: 'Dijital Fatura', desc: 'Saniyeler içinde profesyonel formatta satış ve alış faturaları oluşturun ve PDF olarak paylaşın.', icon: 'ri-file-list-3-line', color: 'emerald' },
                             { title: 'Gerçek Zamanlı Stok', desc: 'Faturalar ile senkronize otomatik stok takibi ve kritik seviye uyarıları.', icon: 'ri-box-3-line', color: 'orange' },
+                            { title: 'Taksit Yönetimi', desc: 'Ödeme planları oluşturun, vade tarihlerini takip edin ve kasadan otomatik düşüm yapın.', icon: 'ri-calendar-todo-line', color: 'teal' },
+                            { title: 'Personel Otomasyonu', desc: 'Maaş, avans ve devamsızlık takibini yapay zeka destekli hesaplamalarla yönetin.', icon: 'ri-user-star-line', color: 'rose' },
                             { title: 'Cari Risk Yönetimi', desc: 'Borç-alacak dengesini takip edin, geciken ödemeler için otomatik hatırlatmalar yapın.', icon: 'ri-user-shield-line', color: 'blue' },
                             { title: 'Akıllı Raporlama', desc: 'KDV beyannamelerinden gelir-gider tablolarına kadar her şey tek tıkla hazır.', icon: 'ri-bar-chart-box-line', color: 'purple' },
-                            { title: 'Bulut Güvencesi', desc: 'Verileriniz en üst düzey şifreleme ve yedekleme sistemleri ile korunur.', icon: 'ri-shield-check-line', color: 'rose' },
+                            { title: 'Bulut Güvencesi', desc: 'Verileriniz en üst düzey şifreleme ve yedekleme sistemleri ile korunur.', icon: 'ri-shield-check-line', color: 'slate' },
                         ].map((feature, i) => (
                             <div key={i} className="premium-card p-10 group hover:border-indigo-500/30 transition-all">
                                 <div className={`w-16 h-16 bg-${feature.color}-500/10 rounded-2xl flex items-center justify-center border border-${feature.color}-500/20 text-${feature.color}-500 mb-8 group-hover:bg-${feature.color}-500 group-hover:text-white transition-all`}>
@@ -224,7 +226,7 @@ export default function LandingPage() {
                             {
                                 name: 'TAM YÖNETİM AI',
                                 desc: 'Büyüyen işletmeler için yapay zeka gücü.',
-                                features: ['Aylık 100 İşlem / Kredi', 'Yapay Zeka Finans Analizi', 'Gelişmiş Raporlama', 'Yedekleme Desteği', 'VIP Teknik Destek'],
+                                features: ['Aylık 100 İşlem / Kredi', 'Taksit & Ödeme Takibi', 'Personel Maaş Takibi', 'Yapay Zeka Finans Analizi', 'Gelişmiş Raporlama'],
                                 color: 'indigo',
                                 popular: true,
                                 tier: 'tam'
@@ -232,7 +234,7 @@ export default function LandingPage() {
                             {
                                 name: 'VIP KURUMSAL AI',
                                 desc: 'Büyük ölçekli yapılar için tam profesyonellik.',
-                                features: ['Sınırsız Aylık İşlem', 'Sınırsız Veri Depolama', 'Sınırsız Alt Kullanıcı', 'AI Özelleştirme Desteği', '7/24 Öncelikli Danışman'],
+                                features: ['Sınırsız Aylık İşlem', 'Personel & Taksit Otomasyonu', 'Sınırsız Veri Depolama', 'Sınırsız Alt Kullanıcı', '7/24 Öncelikli Danışman'],
                                 color: 'purple',
                                 popular: false,
                                 tier: 'vip'
