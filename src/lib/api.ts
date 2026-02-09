@@ -369,6 +369,18 @@ export interface Urun {
     profile_id?: string;
     created_at?: string;
     updated_at?: string;
+    // New fields
+    urun_tipi?: string;
+    urun_cinsi?: string;
+    urun_kodu?: string;
+    urun_barkodu?: string;
+    alis_kdv_dahil?: boolean;
+    satis_kdv_dahil?: boolean;
+    kdv_orani?: number;
+    otv_orani?: number;
+    oiv_orani?: number;
+    stok_takibi?: boolean;
+    stok_uyari_limiti?: number;
 }
 
 export interface SatisFaturasi {

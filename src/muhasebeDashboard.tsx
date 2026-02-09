@@ -14,6 +14,8 @@ import {
   auth
 } from './lib/api';
 import { useProfile } from './contexts/ProfileContext';
+import Sidebar from './components/feature/Sidebar';
+import Header from './components/feature/Header';
 
 interface Istatistikler {
   toplamCari: number;
@@ -23,7 +25,7 @@ interface Istatistikler {
 
 const MuhasebeDashboard = () => {
   const navigate = useNavigate();
-  const { selectedProfile } = useProfile();
+  const { selectedProfile, currentUser } = useProfile();
   const [cariler, setCariler] = useState<Cari[]>([]);
   const [istatistikler, setIstatistikler] = useState<Istatistikler>({
     toplamCari: 0,
@@ -33,6 +35,33 @@ const MuhasebeDashboard = () => {
   const [todayIslemler, setTodayIslemler] = useState<any[]>([]);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [hata, setHata] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, mins: 0, secs: 0 });
+
+  useEffect(() => {
+    if (!currentUser?.created_at) return;
+
+    const timer = setInterval(() => {
+      const createdAt = new Date(currentUser.created_at);
+      const expiryDate = new Date(createdAt.getTime() + (365 * 24 * 60 * 60 * 1000));
+      const now = new Date();
+      const diff = expiryDate.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        setTimeLeft({ days: 0, hours: 0, mins: 0, secs: 0 });
+        clearInterval(timer);
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setTimeLeft({ days, hours, mins, secs });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [currentUser]);
 
   useEffect(() => {
     const veriGetir = async () => {
@@ -162,73 +191,66 @@ const MuhasebeDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex font-sans antialiased text-slate-900">
-      {/* Sidebar - Modern Design */}
-      <div className="w-72 bg-slate-900 text-white p-8 shadow-2xl flex flex-col shrink-0">
-        <div className="mb-12">
-          <h1 className="text-2xl font-black flex items-center gap-3 text-white tracking-tighter leading-none cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-12 h-12 bg-white/5 backdrop-blur-2xl rounded-xl flex items-center justify-center border border-white/10 shadow-lg p-1.5 transition-transform hover:scale-110">
-              <img src="/logo.png" alt="Net Muhasebe AI" className="w-full h-full object-contain" />
-            </div>
-            NET MUHASEBE<span className="text-blue-500 uppercase italic ml-1">AI</span>
-          </h1>
-        </div>
+    <div className="min-h-screen bg-[#F8FAFC] flex font-sans antialiased text-slate-900">
+      <Sidebar />
 
-        <nav className="flex-1 space-y-2">
-          {menuItems.map((item, idx) => (
-            <div
-              key={idx}
-              onClick={() => navigate(item.path)}
-              className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl cursor-pointer transition-all ${item.active ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
-            >
-              <item.icon size={20} />
-              <span className="font-bold text-sm">{item.label}</span>
-            </div>
-          ))}
-        </nav>
-
-        <div
-          onClick={handleLogout}
-          className="mt-6 flex items-center gap-4 px-4 py-3.5 rounded-2xl cursor-pointer transition-all text-rose-400 hover:bg-rose-500/10 hover:text-rose-500"
-        >
-          <LogOut size={20} />
-          <span className="font-bold text-sm uppercase">Çıkış Yap</span>
-        </div>
-
-        <div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/5 uppercase">
-          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Hesap Türü</p>
-          <p className="text-sm font-bold text-blue-400 uppercase">Premium Plan</p>
-        </div>
-      </div>
-
-      <div className="flex-1 p-10 overflow-y-auto">
-        <header className="flex justify-between items-center mb-12">
+      <div className="flex-1 flex flex-col p-10 overflow-y-auto">
+        <Header />
+        <header className="flex justify-between items-center mb-12 mt-10 lg:mt-0">
           <div>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight leading-none mb-2 uppercase">Finansal Durum</h2>
-            <p className="text-slate-500 font-medium tracking-tight">İşletmenizin anlık verilerine hoş geldiniz.</p>
+            <h2 className="text-4xl font-black text-slate-900 tracking-tight leading-none mb-3 uppercase">Pano Paneli</h2>
+            <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.2em] opacity-80">Finansal Verilerinizin Anlık Özeti</p>
           </div>
           <div className="flex gap-4">
             <button
-              onClick={() => {
-                const link = document.createElement('a');
-                link.href = '/NetMuhasebe_AI_Kurulum.exe';
-                link.download = 'NetMuhasebe_AI_Kurulum.exe';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-              }}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 h-14 rounded-2xl flex items-center gap-3 transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-indigo-600/10 font-bold text-sm uppercase"
-            >
-              <Download size={20} /> MASAÜSTÜNE KUR
-            </button>
-            <button
               onClick={() => navigate('/satis-faturasi')}
-              className="bg-slate-900 hover:bg-slate-800 text-white px-6 h-14 rounded-2xl flex items-center gap-3 transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-slate-900/10 font-bold text-sm uppercase"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 h-14 rounded-2xl flex items-center gap-3 transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-indigo-600/20 font-black text-[10px] tracking-widest uppercase"
             >
-              <PlusCircle size={20} /> YENİ İŞLEM EKLE
+              <PlusCircle size={20} /> YENİ SATIŞ EKLE
             </button>
           </div>
         </header>
+
+        {/* Abonelik Banner (Cari Style) */}
+        {timeLeft.days <= 14 && (
+          <div className="bg-rose-600 rounded-[32px] p-10 mb-12 relative overflow-hidden flex flex-col xl:flex-row items-center justify-between gap-10 shadow-2xl shadow-rose-500/30 text-white group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-white/10 transition-colors"></div>
+
+            <div className="flex flex-col lg:flex-row items-center gap-10 z-10">
+              <div className="flex gap-4">
+                <div className="flex flex-col items-center">
+                  <div className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-3xl flex items-center justify-center text-4xl font-black border border-white/20 shadow-lg">{timeLeft.days}</div>
+                  <span className="text-[9px] font-black uppercase mt-3 opacity-60 tracking-widest">GÜN</span>
+                </div>
+                <div className="flex flex-col items-center text-white/50 text-4xl font-thin mt-6">:</div>
+                <div className="flex flex-col items-center">
+                  <div className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-3xl flex items-center justify-center text-4xl font-black border border-white/20 shadow-lg">{timeLeft.hours}</div>
+                  <span className="text-[9px] font-black uppercase mt-3 opacity-60 tracking-widest">SAAT</span>
+                </div>
+                <div className="flex flex-col items-center text-white/50 text-4xl font-thin mt-6">:</div>
+                <div className="flex flex-col items-center">
+                  <div className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-3xl flex items-center justify-center text-4xl font-black border border-white/20 shadow-lg">{timeLeft.mins}</div>
+                  <span className="text-[9px] font-black uppercase mt-3 opacity-60 tracking-widest">DAKİKA</span>
+                </div>
+                <div className="flex flex-col items-center text-white/50 text-4xl font-thin mt-6">:</div>
+                <div className="flex flex-col items-center">
+                  <div className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-3xl flex items-center justify-center text-4xl font-black border border-white/20 shadow-lg">{timeLeft.secs}</div>
+                  <span className="text-[9px] font-black uppercase mt-3 opacity-60 tracking-widest">SANİYE</span>
+                </div>
+              </div>
+              <div className="text-center lg:text-left">
+                <h4 className="text-3xl font-black tracking-tight leading-tight mb-3">Abonelik süreniz yakın zamanda sona erecek</h4>
+                <p className="text-white/80 font-bold text-base max-w-lg">Sistemi kesintisiz kullanmaya devam edebilmek için lütfen abonelik sürenizi uzatınız.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/premium')}
+              className="bg-white text-rose-600 px-10 h-16 rounded-[24px] font-black text-xs tracking-[0.1em] uppercase hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-rose-900/40 z-10 shrink-0"
+            >
+              PAKETLERİ GÖR VE UZAT
+            </button>
+          </div>
+        )}
 
         {/* Dinamik İstatistik Kartları */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">

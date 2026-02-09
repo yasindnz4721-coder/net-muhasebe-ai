@@ -25,100 +25,52 @@ import GizlilikPolitikasiPage from '../pages/gizlilik-politikasi/page';
 import TanitimPage from '../pages/tanitim/page';
 import LandingPage from '../pages/landing/page';
 import NotFoundPage from '../pages/NotFound';
+import ComingSoonPage from '../pages/ComingSoon';
+import SMSVerificationPage from '../pages/sms-verification/page';
+
+// Helper to create stub routes
+const stub = (title: string) => <ComingSoonPage title={title} />;
 
 const routes: RouteObject[] = [
-  {
-    path: '/tanitim-filmi',
-    element: <TanitimPage />,
-  },
-  {
-    path: '/tanitim_filmi',
-    element: <TanitimPage />,
-  },
-  {
-    path: '/login',
-    element: <LoginPage />,
-  },
-  {
-    path: '/kayit',
-    element: <LoginPage />,
-  },
-  {
-    path: '/sifre-sifirlama',
-    element: <SifreSifirlamaPage />,
-  },
-  {
-    path: '/yeni-sifre',
-    element: <YeniSifrePage />,
-  },
-  {
-    path: '/',
-    element: <LandingPage />,
-  },
-  {
-    path: '/dashboard',
-    element: <MuhasebeDashboard />,
-  },
-  {
-    path: '/admin',
-    element: <AdminPage />,
-  },
-  {
-    path: '/cariler',
-    element: <CarilerPage />,
-  },
-  {
-    path: '/cari-detay/:id',
-    element: <CariDetayPage />,
-  },
-  {
-    path: '/urunler',
-    element: <UrunlerPage />,
-  },
-  {
-    path: '/stok',
-    element: <StokPage />,
-  },
-  {
-    path: '/satis-faturasi',
-    element: <SatisFaturasiPage />,
-  },
-  {
-    path: '/alis-faturasi',
-    element: <AlisFaturasiPage />,
-  },
-  {
-    path: '/odemeler',
-    element: <OdemelerPage />,
-  },
-  {
-    path: '/raporlar',
-    element: <RaporlarPage />,
-  },
-  {
-    path: '/tum-islemler',
-    element: <TumIslemlerPage />,
-  },
-  {
-    path: '/profil-ayarlari',
-    element: <ProfilAyarlariPage />,
-  },
-  {
-    path: '/premium',
-    element: <LoginPage />,
-  },
-  {
-    path: '/ai-analiz',
-    element: <AIAnalizPage />,
-  },
-  {
-    path: '/gizlilik-politikasi',
-    element: <GizlilikPolitikasiPage />,
-  },
-  {
-    path: '*',
-    element: <NotFoundPage />,
-  },
+  { path: '/tanitim-filmi', element: <TanitimPage /> },
+  { path: '/login', element: <LoginPage /> },
+  { path: '/', element: <LandingPage /> },
+  { path: '/dashboard', element: <MuhasebeDashboard /> },
+  { path: '/admin', element: <AdminPage /> },
+  { path: '/sms-dogrulama', element: <SMSVerificationPage /> },
+  { path: '/cariler', element: <CarilerPage /> },
+  { path: '/cari-detay/:id', element: <CariDetayPage /> },
+  { path: '/urunler', element: <UrunlerPage /> },
+  { path: '/stok', element: <StokPage /> },
+  { path: '/satis-faturasi', element: <SatisFaturasiPage /> },
+  { path: '/alis-faturasi', element: <AlisFaturasiPage /> },
+  { path: '/odemeler', element: <OdemelerPage /> },
+  { path: '/raporlar', element: <RaporlarPage /> },
+  { path: '/tum-islemler', element: <TumIslemlerPage /> },
+  { path: '/profil-ayarlari', element: <ProfilAyarlariPage /> },
+  { path: '/ai-analiz', element: <AIAnalizPage /> },
+
+  // New "Cari" Style Routes (Stubs)
+  { path: '/teklifler', element: stub('Teklif Yönetimi') },
+  { path: '/satis-siparis', element: stub('Satış Siparişleri') },
+  { path: '/alis-siparis', element: stub('Alış Siparişleri') },
+  { path: '/urun-varyantlari', element: stub('Ürün Varyantları') },
+  { path: '/uretim-recetesi', element: stub('Üretim Reçetesi') },
+  { path: '/uretim', element: stub('Üretim Planlama') },
+  { path: '/stok-transferi', element: stub('Depo Transferi') },
+  { path: '/stok-karlilik', element: stub('Kârlılık Analizi') },
+  { path: '/urun-ekstre', element: stub('Ürün Hareket Ekstresi') },
+  { path: '/bankalar', element: stub('Banka Hesapları') },
+  { path: '/cek-senet', element: stub('Çek ve Senetler') },
+  { path: '/taksit-takibi', element: stub('Taksit Planlama') },
+  { path: '/taksitler', element: stub('Taksit Listesi') },
+  { path: '/kdv-raporu', element: stub('KDV Raporu') },
+  { path: '/cari-ekstre', element: stub('Cari Ekstre Raporu') },
+  { path: '/personel', element: stub('Personel Listesi') },
+  { path: '/zimmet-listesi', element: stub('Zimmet Takibi') },
+
+  { path: '/gizlilik-politikasi', element: <GizlilikPolitikasiPage /> },
+  { path: '*', element: <NotFoundPage /> },
 ];
 
 export default routes;

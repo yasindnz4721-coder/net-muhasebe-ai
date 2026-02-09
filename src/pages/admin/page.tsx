@@ -236,7 +236,7 @@ export default function AdminPanel() {
                                                 const now = new Date();
                                                 const diffTime = now.getTime() - createdAt.getTime();
                                                 const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                                                const remainingDays = Math.max(0, 14 - diffDays);
+                                                const remainingDays = Math.max(0, 365 - diffDays);
 
                                                 return (
                                                     <tr key={user.id} className="hover:bg-white/[0.01] transition-colors group">
@@ -260,7 +260,7 @@ export default function AdminPanel() {
                                                         </td>
                                                         <td className="px-10 py-8">
                                                             <div className="flex items-center gap-2">
-                                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-[10px] ${remainingDays > 5 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20 animate-pulse'}`}>
+                                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-[10px] ${remainingDays > 30 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-500 border border-rose-500/20 animate-pulse'}`}>
                                                                     {remainingDays}
                                                                 </div>
                                                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">GÜN</span>
