@@ -41,6 +41,7 @@ const stokRoutes = require('./routes/stok');
 const profilesRoutes = require('./routes/profiles');
 const adminRoutes = require('./routes/admin');
 const personelRoutes = require('./routes/personel');
+const taksitlerRoutes = require('./routes/taksitler');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/cariler', carilerRoutes);
@@ -53,6 +54,7 @@ app.use('/api/stok', stokRoutes);
 app.use('/api/profiles', profilesRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/personel', personelRoutes);
+app.use('/api/taksitler', taksitlerRoutes);
 
 // Health check
 app.get('/api/health', async (req, res) => {

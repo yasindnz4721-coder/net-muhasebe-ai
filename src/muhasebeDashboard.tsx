@@ -10,8 +10,10 @@ import {
   satisFaturalari as satisApi,
   alisFaturalari as alisApi,
   odemeler as odemelerApi,
+  taksitler as taksitApi,
   Cari,
-  auth
+  auth,
+  TaksitOdeme
 } from './lib/api';
 import { useProfile } from './contexts/ProfileContext';
 import Sidebar from './components/feature/Sidebar';
@@ -35,6 +37,7 @@ const MuhasebeDashboard = () => {
   const [yukleniyor, setYukleniyor] = useState(true);
   const [hata, setHata] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, mins: 0, secs: 0 });
+  const [upcomingTaksitler, setUpcomingTaksitler] = useState<TaksitOdeme[]>([]);
 
   useEffect(() => {
     if (!currentUser?.created_at) return;
@@ -73,11 +76,15 @@ const MuhasebeDashboard = () => {
         setYukleniyor(true);
         setHata(null);
 
-        const [cariRes, satisRes, alisRes, odemeRes] = await Promise.all([
+        // Otomatik ödeme kontrolü
+        await taksitApi.checkPayments(selectedProfile.id);
+
+        const [cariRes, satisRes, alisRes, odemeRes, taksitRes] = await Promise.all([
           carilerApi.getAll(selectedProfile.id),
           satisApi.getAll(selectedProfile.id),
           alisApi.getAll(selectedProfile.id),
-          odemelerApi.getAll(selectedProfile.id)
+          odemelerApi.getAll(selectedProfile.id),
+          taksitApi.getTakip(selectedProfile.id)
         ]);
 
         if (cariRes.error || satisRes.error || alisRes.error || odemeRes.error) {
@@ -88,8 +95,19 @@ const MuhasebeDashboard = () => {
         const satisData = satisRes.data || [];
         const alisData = alisRes.data || [];
         const odemeData = odemeRes.data || [];
+        const taksitData = taksitRes.data || [];
 
+        // Gelecek 2 günün taksitlerini filtrele
         const bugun = new Date();
+        const ikiGunSonra = new Date();
+        ikiGunSonra.setDate(bugun.getDate() + 2);
+
+        const upcoming = taksitData.filter(t => {
+          const vade = new Date(t.vade_tarihi);
+          return t.durum === 'Bekliyor' && vade >= bugun && vade <= ikiGunSonra;
+        });
+        setUpcomingTaksitler(upcoming);
+
         bugun.setHours(0, 0, 0, 0);
 
         const tumIslemler: any[] = [
@@ -197,6 +215,30 @@ const MuhasebeDashboard = () => {
               <PlusCircle size={20} /> YENİ SATIŞ
             </button>
           </header>
+
+          {upcomingTaksitler.length > 0 && (
+            <div className="mb-12 animate-slide-down">
+              <div className="premium-card p-6 bg-orange-500/5 border-orange-500/20 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-6">
+                  <div className="w-16 h-16 bg-orange-500/20 rounded-2xl flex items-center justify-center text-orange-400 border border-orange-500/30">
+                    <CreditCard size={32} />
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-black text-white uppercase tracking-tight">Taksit <span className="text-orange-400">Hatırlatıcı.</span></h4>
+                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Ödeme vadesi yaklaşan {upcomingTaksitler.length} işleminiz var.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => navigate('/taksit-takibi')}
+                    className="bg-orange-500 text-white font-black text-[10px] tracking-widest px-8 py-4 rounded-xl hover:bg-orange-600 transition-colors uppercase"
+                  >
+                    ÖDEMELERİ GÖR
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {yukleniyor ? (

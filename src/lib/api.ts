@@ -500,6 +500,61 @@ export const personel = {
     },
 };
 
+// Taksit API
+export const taksitler = {
+    async getAll(profile_id: string) {
+        return fetchApi<TaksitPlan[]>(`/api/taksitler?profile_id=${profile_id}`);
+    },
+
+    async create(data: Partial<TaksitPlan>) {
+        return fetchApi<TaksitPlan>('/api/taksitler', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async getTakip(profile_id: string, yil?: number, ay?: number) {
+        let url = `/api/taksitler/takip?profile_id=${profile_id}`;
+        if (yil && ay) url += `&yil=${yil}&ay=${ay}`;
+        return fetchApi<TaksitOdeme[]>(url);
+    },
+
+    async checkPayments(profile_id: string) {
+        return fetchApi<{ message: string; count: number }>('/api/taksitler/check-payments', {
+            method: 'POST',
+            body: JSON.stringify({ profile_id }),
+        });
+    },
+};
+
+export interface TaksitPlan {
+    id: string;
+    cari_id?: string;
+    cari_ad?: string;
+    toplam_tutar: number;
+    taksit_tutari: number;
+    taksit_sayisi: number;
+    odeme_gunu: number;
+    baslangic_tarihi: string;
+    aciklama?: string;
+    durum: string;
+    profile_id: string;
+    created_at?: string;
+}
+
+export interface TaksitOdeme {
+    id: string;
+    taksit_id: string;
+    vade_tarihi: string;
+    tutar: number;
+    durum: string;
+    odeme_tarihi?: string;
+    odeme_id?: string;
+    cari_ad?: string;
+    plan_aciklama?: string;
+    profile_id: string;
+}
+
 export interface Personel {
     id: string;
     ad_soyad: string;

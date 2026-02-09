@@ -28,13 +28,6 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
     if (setMbOpen) setMbOpen(false);
   }, [location.pathname]);
 
-  const toggleMenu = (id: string, hasSubItems: boolean) => {
-    if (!hasSubItems) return;
-    setExpandedMenus(prev =>
-      prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]
-    );
-  };
-
   const sidebarOpen = mbOpen !== undefined ? mbOpen : isOpen;
 
   const menuItems: MenuItem[] = [
@@ -118,6 +111,22 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
     { id: 'ai-analiz', label: 'AI Analiz', icon: 'ri-sparkling-2-line', path: '/ai-analiz' },
     { id: 'admin', label: 'Yönetici', icon: 'ri-settings-5-line', path: '/admin', adminOnly: true },
   ];
+
+  // Rota değiştiğinde ilgili ana menüyü otomatik aç
+  useEffect(() => {
+    menuItems.forEach(item => {
+      if (item.subItems?.some(sub => sub.path === location.pathname)) {
+        setExpandedMenus(prev => prev.includes(item.id) ? prev : [...prev, item.id]);
+      }
+    });
+  }, [location.pathname]);
+
+  const toggleMenu = (id: string, hasSubItems: boolean) => {
+    if (!hasSubItems) return;
+    setExpandedMenus(prev =>
+      prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]
+    );
+  };
 
   const handleToggle = () => {
     if (setMbOpen) {

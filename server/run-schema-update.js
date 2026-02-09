@@ -70,6 +70,37 @@ async function updateSchema() {
         await query("ALTER TABLE users ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'card'");
         await query("ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_status VARCHAR(50) DEFAULT 'active'");
 
+        await query(`
+            CREATE TABLE IF NOT EXISTS taksitler (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                cari_id UUID REFERENCES cariler(id) ON DELETE SET NULL,
+                cari_ad VARCHAR(255),
+                toplam_tutar DECIMAL(15, 2) NOT NULL,
+                taksit_tutari DECIMAL(15, 2) NOT NULL,
+                taksit_sayisi INTEGER NOT NULL,
+                odeme_gunu INTEGER NOT NULL,
+                baslangic_tarihi DATE NOT NULL,
+                aciklama TEXT,
+                durum VARCHAR(50) DEFAULT 'Aktif',
+                profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            )
+        `);
+
+        await query(`
+            CREATE TABLE IF NOT EXISTS taksit_odemeleri (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                taksit_id UUID REFERENCES taksitler(id) ON DELETE CASCADE,
+                vade_tarihi DATE NOT NULL,
+                tutar DECIMAL(15, 2) NOT NULL,
+                durum VARCHAR(50) DEFAULT 'Bekliyor',
+                odeme_tarihi TIMESTAMP WITH TIME ZONE,
+                odeme_id UUID REFERENCES odemeler(id) ON DELETE SET NULL,
+                profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            )
+        `);
+
         console.log('✅ Veritabanı şeması başarıyla güncellendi.');
         process.exit(0);
     } catch (error) {

@@ -27,6 +27,8 @@ import ComingSoonPage from '../pages/ComingSoon';
 import SMSVerificationPage from '../pages/sms-verification/page';
 import PersonelPage from '../pages/personel/page';
 import PuantajTakibiPage from '../pages/personel/puantaj';
+import TaksitlerPage from '../pages/taksitler/page';
+import TaksitTakibiPage from '../pages/taksit-takibi/page';
 import TrialExpiredPage from '../pages/TrialExpired';
 
 // Helper to create stub routes
@@ -67,8 +69,8 @@ const routes: RouteObject[] = [
   { path: '/urun-ekstre', element: stub('Ürün Hareket Ekstresi') },
   { path: '/bankalar', element: stub('Banka Hesapları') },
   { path: '/cek-senet', element: stub('Çek ve Senetler') },
-  { path: '/taksit-takibi', element: stub('Taksit Planlama') },
-  { path: '/taksitler', element: stub('Taksit Listesi') },
+  { path: '/taksit-takibi', element: <TaksitTakibiPage /> },
+  { path: '/taksitler', element: <TaksitlerPage /> },
   { path: '/kdv-raporu', element: stub('KDV Raporu') },
   { path: '/cari-ekstre', element: stub('Cari Ekstre Raporu') },
   { path: '/zimmet-listesi', element: stub('Zimmet Takibi') },
