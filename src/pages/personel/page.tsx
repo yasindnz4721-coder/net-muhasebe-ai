@@ -280,12 +280,10 @@ const PersonelPage = () => {
                                                             <span className={`inline-flex px-3 py-1 rounded-lg text-[10px] font-black tracking-widest uppercase ${p.durum === 'Aktif' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
                                                                 {p.durum}
                                                             </span>
-                                                            {maasOzetleri[p.id]?.eksik_gun > 0 && (
-                                                                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[9px] font-black uppercase tracking-widest">
-                                                                    <i className="ri-error-warning-line"></i>
-                                                                    {maasOzetleri[p.id].eksik_gun} GÜN GELMEDİ
-                                                                </span>
-                                                            )}
+                                                            <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[9px] font-black uppercase tracking-widest transition-all ${maasOzetleri[p.id]?.eksik_gun > 0 ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' : 'bg-white/5 border-white/10 text-slate-500'}`}>
+                                                                <i className={maasOzetleri[p.id]?.eksik_gun > 0 ? "ri-error-warning-line" : "ri-checkbox-circle-line"}></i>
+                                                                {maasOzetleri[p.id]?.eksik_gun || 0} GÜN GELMEDİ
+                                                            </span>
                                                         </div>
                                                     </td>
                                                     <td className="px-8 py-6 text-right">
@@ -349,12 +347,16 @@ const PersonelPage = () => {
                                     <input type="text" value={formData.telefon} onChange={e => setFormData({ ...formData, telefon: e.target.value })} className="premium-input h-14" placeholder="05XX XXX XX XX" />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">MAAŞ (AYLIK)</label>
-                                    <input type="number" value={formData.maas} onChange={e => setFormData({ ...formData, maas: Number(e.target.value) })} className="premium-input h-14" />
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">TC KİMLİK NO</label>
+                                    <input type="text" value={formData.tckn} onChange={e => setFormData({ ...formData, tckn: e.target.value })} className="premium-input h-14" maxLength={11} placeholder="12345678901" />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">MAAŞ (AYLIK)</label>
+                                    <input type="number" value={formData.maas} onChange={e => setFormData({ ...formData, maas: Number(e.target.value) })} className="premium-input h-14" />
+                                </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">DURUM</label>
                                     <select value={formData.durum} onChange={e => setFormData({ ...formData, durum: e.target.value })} className="premium-input h-14">
@@ -362,15 +364,25 @@ const PersonelPage = () => {
                                         <option value="Ayrıldı">AYRILDI</option>
                                     </select>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-rose-500 uppercase tracking-widest ml-2 italic">DEVAMSIZLIK EKLE (HIZLI)</label>
-                                    <input
-                                        type="date"
-                                        value={formData.absentDate}
-                                        onChange={e => setFormData({ ...formData, absentDate: e.target.value })}
-                                        className="premium-input h-14 border-rose-500/20 focus:border-rose-500/50"
-                                    />
-                                    <p className="text-[9px] font-bold text-slate-500 ml-2 uppercase italic leading-none">Bu tarihe "GELMEDİ" kaydı eklenir ve maaştan düşülür.</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-6">
+                                <div className="space-y-2 bg-rose-500/5 p-6 rounded-2xl border border-rose-500/10">
+                                    <label className="text-[10px] font-black text-rose-500 uppercase tracking-widest italic flex items-center gap-2">
+                                        <i className="ri-error-warning-line"></i>
+                                        YENİ DEVAMSIZLIK KAYDI (HIZLI)
+                                    </label>
+                                    <div className="flex gap-4 items-center">
+                                        <input
+                                            type="date"
+                                            value={formData.absentDate}
+                                            onChange={e => setFormData({ ...formData, absentDate: e.target.value })}
+                                            className="premium-input h-14 border-rose-500/20 focus:border-rose-500/50 flex-1"
+                                        />
+                                        <div className="text-[11px] font-bold text-slate-400 max-w-[200px] leading-tight">
+                                            Bu tarihe "GELMEDİ" kaydı eklenir ve maaştan düşülür.
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
