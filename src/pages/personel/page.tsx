@@ -241,7 +241,11 @@ const PersonelPage = () => {
                                             </tr>
                                         ) : (
                                             filteredList.map((p) => (
-                                                <tr key={p.id} className="hover:bg-white/[0.02] transition-colors group/row">
+                                                <tr
+                                                    key={p.id}
+                                                    onClick={() => handleEdit(p)}
+                                                    className="hover:bg-white/[0.02] transition-colors group/row cursor-pointer"
+                                                >
                                                     <td className="px-8 py-6">
                                                         <div className="flex items-center gap-4">
                                                             <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-black text-xl">
