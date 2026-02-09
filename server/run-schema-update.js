@@ -41,15 +41,26 @@ async function updateSchema() {
             )
         `);
         await query(`
-            CREATE TABLE IF NOT EXISTS personel_puantaj (
+             CREATE TABLE IF NOT EXISTS personel_puantaj (
+                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                 personel_id UUID REFERENCES personeller(id) ON DELETE CASCADE,
+                 tarih DATE NOT NULL,
+                 durum VARCHAR(50) DEFAULT 'Geldi',
+                 notlar TEXT DEFAULT '',
+                 profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+                 created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                 UNIQUE(personel_id, tarih)
+             )
+         `);
+        await query(`
+            CREATE TABLE IF NOT EXISTS personel_avanslar (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                 personel_id UUID REFERENCES personeller(id) ON DELETE CASCADE,
                 tarih DATE NOT NULL,
-                durum VARCHAR(50) DEFAULT 'Geldi',
-                notlar TEXT DEFAULT '',
+                tutar DECIMAL(15, 2) NOT NULL,
+                aciklama TEXT DEFAULT '',
                 profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                UNIQUE(personel_id, tarih)
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
             )
         `);
 

@@ -114,7 +114,7 @@ router.post('/:id/puantaj', async (req, res) => {
             `INSERT INTO personel_puantaj (personel_id, tarih, durum, notlar, profile_id)
              VALUES ($1, $2, $3, $4, $5)
              ON CONFLICT (personel_id, tarih) 
-             DO UPDATE SET durum = EXCLUDED.durum,向 notlar = EXCLUDED.notlar
+             DO UPDATE SET durum = EXCLUDED.durum, notlar = EXCLUDED.notlar
              RETURNING *`,
             [id, tarih, durum, notlar || '', profile_id]
         );
@@ -122,6 +122,45 @@ router.post('/:id/puantaj', async (req, res) => {
     } catch (error) {
         console.error('Puantaj kaydetme hatası:', error);
         res.status(500).json({ error: 'Puantaj kaydedilemedi' });
+    }
+});
+
+// AVANS İŞLEMLERİ
+
+// Belirli bir ay için avansları getir
+router.get('/:id/avanslar', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { yil, ay } = req.query;
+
+        const result = await query(
+            `SELECT * FROM personel_avanslar 
+             WHERE personel_id = $1 AND EXTRACT(YEAR FROM tarih) = $2 AND EXTRACT(MONTH FROM tarih) = $3
+             ORDER BY tarih ASC`,
+            [id, yil, ay]
+        );
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Avans getirme hatası:', error);
+        res.status(500).json({ error: 'Avans bilgileri getirilemedi' });
+    }
+});
+
+// Avans kaydet
+router.post('/:id/avanslar', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { tarih, tutar, aciklama, profile_id } = req.body;
+
+        const result = await query(
+            `INSERT INTO personel_avanslar (personel_id, tarih, tutar, aciklama, profile_id)
+             VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+            [id, tarih, tutar, aciklama || '', profile_id]
+        );
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Avans kaydetme hatası:', error);
+        res.status(500).json({ error: 'Avans kaydedilemedi' });
     }
 });
 
@@ -146,13 +185,26 @@ router.get('/:id/maas-ozeti', async (req, res) => {
 
         const eksikGun = parseInt(qResult.rows[0].eksik_gun);
         const gunlukUcret = aylikMaas / 30;
-        const kesinti = eksikGun * gunlukUcret;
-        const odenecekMaas = Math.max(0, aylikMaas - kesinti);
+        const devamsizlikKesintisi = eksikGun * gunlukUcret;
+
+        // O ayki toplam avansları al
+        const aResult = await query(
+            `SELECT COALESCE(SUM(tutar), 0) as toplam_avans FROM personel_avanslar 
+             WHERE personel_id = $1 
+             AND EXTRACT(YEAR FROM tarih) = $2 AND EXTRACT(MONTH FROM tarih) = $3`,
+            [id, yil, ay]
+        );
+        const toplamAvans = parseFloat(aResult.rows[0].toplam_avans);
+
+        const toplamKesinti = devamsizlikKesintisi + toplamAvans;
+        const odenecekMaas = Math.max(0, aylikMaas - toplamKesinti);
 
         res.json({
             aylik_maas: aylikMaas,
             eksik_gun: eksikGun,
-            kesinti: kesinti,
+            kesinti: devamsizlikKesintisi,
+            toplam_avans: toplamAvans,
+            toplam_kesinti: toplamKesinti,
             odenecek_maas: odenecekMaas,
             yil,
             ay

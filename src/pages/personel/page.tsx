@@ -31,7 +31,7 @@ const PersonelPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState<Partial<Personel & { absentDate?: string }>>({
+    const [formData, setFormData] = useState<Partial<Personel & { absentDate?: string; advanceAmount?: number; advanceDate?: string }>>({
         ad_soyad: '',
         unvan: '',
         tckn: '',
@@ -39,7 +39,9 @@ const PersonelPage = () => {
         email: '',
         maas: 0,
         durum: 'Aktif',
-        absentDate: ''
+        absentDate: '',
+        advanceAmount: 0,
+        advanceDate: new Date().toISOString().split('T')[0]
     });
     const [maasOzetleri, setMaasOzetleri] = useState<Record<string, any>>({});
 
@@ -95,9 +97,18 @@ const PersonelPage = () => {
                 });
             }
 
+            // Eğer avans girildiyse kaydet
+            if (pid && formData.advanceAmount && formData.advanceAmount > 0) {
+                await personelApi.saveAvans(pid, {
+                    tarih: formData.advanceDate || new Date().toISOString().split('T')[0],
+                    tutar: formData.advanceAmount,
+                    profile_id: selectedProfile?.id
+                });
+            }
+
             setShowModal(false);
             loadPersonel();
-            setFormData({ ad_soyad: '', unvan: '', tckn: '', telefon: '', email: '', maas: 0, durum: 'Aktif', absentDate: '' });
+            setFormData({ ad_soyad: '', unvan: '', tckn: '', telefon: '', email: '', maas: 0, durum: 'Aktif', absentDate: '', advanceAmount: 0, advanceDate: new Date().toISOString().split('T')[0] });
             setIsEditing(false);
         } catch (err) {
             console.error(err);
@@ -154,7 +165,7 @@ const PersonelPage = () => {
                             <div className="flex gap-4">
                                 <button
                                     onClick={() => {
-                                        setFormData({ ad_soyad: '', unvan: '', tckn: '', telefon: '', email: '', maas: 0, durum: 'Aktif', absentDate: '' });
+                                        setFormData({ ad_soyad: '', unvan: '', tckn: '', telefon: '', email: '', maas: 0, durum: 'Aktif', absentDate: '', advanceAmount: 0, advanceDate: new Date().toISOString().split('T')[0] });
                                         setIsEditing(false);
                                         setShowModal(true);
                                     }}
@@ -266,9 +277,15 @@ const PersonelPage = () => {
                                                             <div className="text-lg font-black text-emerald-400 tracking-tighter leading-none">
                                                                 ₺{Number(maasOzetleri[p.id]?.odenecek_maas || p.maas).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                                                             </div>
-                                                            {maasOzetleri[p.id]?.eksik_gun > 0 ? (
-                                                                <div className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wider">
-                                                                    ₺{Number(p.maas).toLocaleString()} - ₺{Number((Number(p.maas) / 30) * maasOzetleri[p.id].eksik_gun).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} (KESİNTİ)
+                                                            {maasOzetleri[p.id]?.toplam_kesinti > 0 ? (
+                                                                <div className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wider flex flex-col gap-0.5">
+                                                                    <span>₺{Number(p.maas).toLocaleString()} MAAŞ</span>
+                                                                    {maasOzetleri[p.id].kesinti > 0 && (
+                                                                        <span className="text-rose-400">- ₺{Number(maasOzetleri[p.id].kesinti).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} DEVAMSIZLIK</span>
+                                                                    )}
+                                                                    {maasOzetleri[p.id].toplam_avans > 0 && (
+                                                                        <span className="text-orange-400">- ₺{Number(maasOzetleri[p.id].toplam_avans).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} AVANS</span>
+                                                                    )}
                                                                 </div>
                                                             ) : (
                                                                 <div className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wider italic opacity-50">TAM MAAŞ</div>
@@ -366,22 +383,38 @@ const PersonelPage = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-6">
-                                <div className="space-y-2 bg-rose-500/5 p-6 rounded-2xl border border-rose-500/10">
-                                    <label className="text-[10px] font-black text-rose-500 uppercase tracking-widest italic flex items-center gap-2">
+                            <div className="grid grid-cols-2 gap-6 p-6 bg-white/[0.02] rounded-2xl border border-white/5">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-rose-500 uppercase tracking-widest italic flex items-center gap-2 ml-2">
                                         <i className="ri-error-warning-line"></i>
-                                        YENİ DEVAMSIZLIK KAYDI (HIZLI)
+                                        YENİ DEVAMSIZLIK (HIZLI)
                                     </label>
-                                    <div className="flex gap-4 items-center">
+                                    <input
+                                        type="date"
+                                        value={formData.absentDate}
+                                        onChange={e => setFormData({ ...formData, absentDate: e.target.value })}
+                                        className="premium-input h-14 border-rose-500/20 focus:border-rose-500/50"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-orange-500 uppercase tracking-widest italic flex items-center gap-2 ml-2">
+                                        <i className="ri-money-dollar-circle-line"></i>
+                                        YENİ AVANS EKLE
+                                    </label>
+                                    <div className="flex gap-3">
+                                        <input
+                                            type="number"
+                                            value={formData.advanceAmount}
+                                            onChange={e => setFormData({ ...formData, advanceAmount: Number(e.target.value) })}
+                                            className="premium-input h-14 border-orange-500/20 focus:border-orange-500/50 flex-[1.5]"
+                                            placeholder="Tutar"
+                                        />
                                         <input
                                             type="date"
-                                            value={formData.absentDate}
-                                            onChange={e => setFormData({ ...formData, absentDate: e.target.value })}
-                                            className="premium-input h-14 border-rose-500/20 focus:border-rose-500/50 flex-1"
+                                            value={formData.advanceDate}
+                                            onChange={e => setFormData({ ...formData, advanceDate: e.target.value })}
+                                            className="premium-input h-14 border-orange-500/20 focus:border-orange-500/50 flex-1"
                                         />
-                                        <div className="text-[11px] font-bold text-slate-400 max-w-[200px] leading-tight">
-                                            Bu tarihe "GELMEDİ" kaydı eklenir ve maaştan düşülür.
-                                        </div>
                                     </div>
                                 </div>
                             </div>

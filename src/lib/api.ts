@@ -487,6 +487,17 @@ export const personel = {
     async getMaasOzeti(id: string, yil: number, ay: number) {
         return fetchApi<MaasOzeti>(`/api/personel/${id}/maas-ozeti?yil=${yil}&ay=${ay}`);
     },
+
+    async getAvanslar(id: string, yil: number, ay: number) {
+        return fetchApi<AvansRecord[]>(`/api/personel/${id}/avanslar?yil=${yil}&ay=${ay}`);
+    },
+
+    async saveAvans(id: string, data: Partial<AvansRecord>) {
+        return fetchApi<AvansRecord>(`/api/personel/${id}/avanslar`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
 };
 
 export interface Personel {
@@ -519,7 +530,18 @@ export interface MaasOzeti {
     aylik_maas: number;
     eksik_gun: number;
     kesinti: number;
+    toplam_avans: number;
+    toplam_kesinti: number;
     odenecek_maas: number;
     yil: string;
     ay: string;
+}
+
+export interface AvansRecord {
+    id: string;
+    personel_id: string;
+    tarih: string;
+    tutar: number;
+    aciklama?: string;
+    profile_id?: string;
 }
