@@ -1,219 +1,67 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { odemeler as odemelerApi, cariler as carilerApi, Odeme, Cari } from '../../lib/api';
+import React, { useState, useEffect } from 'react';
+import {
+  odemeler as odemelerApi,
+  Odeme,
+  cariler as carilerApi,
+  Cari
+} from '../../lib/api';
 import { useProfile } from '../../contexts/ProfileContext';
-import Header from '../../components/feature/Header';
 import Sidebar from '../../components/feature/Sidebar';
-import SearchableSelect from '../../components/ui/SearchableSelect';
+import Header from '../../components/feature/Header';
+import {
+  CreditCard,
+  Search,
+  Plus,
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+  Wallet,
+  ArrowUpRight,
+  ArrowDownLeft,
+  ChevronDown
+} from 'lucide-react';
 
-export default function Odemeler() {
-  const { selectedProfile, currentUser } = useProfile();
-  const [odemeler, setOdemeler] = useState<Odeme[]>([]);
-  const [cariler, setCariler] = useState<Cari[]>([]);
+const OdemelerPage = () => {
+  const { selectedProfile } = useProfile();
+  const [odemeList, setOdemeList] = useState<Odeme[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedOdeme, setSelectedOdeme] = useState<Odeme | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const location = useLocation();
-  const [stateProcessed, setStateProcessed] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('all');
-  const [formData, setFormData] = useState({
-    cari_id: '',
-    cari_ad: '',
-    tip: 'Tahsilat',
-    tutar: '',
-    tarih: new Date().toISOString().split('T')[0],
-    odeme_yontemi: 'Nakit',
-    aciklama: ''
-  });
+  const [filterTip, setFilterTip] = useState('all');
 
   useEffect(() => {
     if (selectedProfile) {
-      loadData();
+      loadOdemeler();
     }
   }, [selectedProfile]);
 
-  const loadData = async () => {
-    if (!selectedProfile) return;
-
+  const loadOdemeler = async () => {
     try {
       setLoading(true);
-      const { data: odemelerData } = await odemelerApi.getAll(selectedProfile.id);
-      const { data: carilerData } = await carilerApi.getAll(selectedProfile.id);
-
-      setOdemeler(odemelerData || []);
-      setCariler(carilerData || []);
-    } catch (error) {
-      console.error('Veriler yüklenirken hata:', error);
+      const res = await odemelerApi.getAll(selectedProfile!.id);
+      if (res.data) setOdemeList(res.data);
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (!loading && odemeler.length > 0 && !stateProcessed && location.state) {
-      const state = location.state as any;
-      if (state.autoOpen && state.id) {
-        const odeme = odemeler.find(o => o.id === state.id);
-        if (odeme) {
-          if (state.action === 'edit') {
-            handleEdit(odeme);
-          }
-          setStateProcessed(true);
-        }
-      }
-    }
-  }, [loading, odemeler, location.state, stateProcessed]);
-
-  const handleCariChange = (cariId: string) => {
-    const cari = cariler.find(c => c.id === cariId);
-    setFormData({
-      ...formData,
-      cari_id: cariId,
-      cari_ad: cari ? cari.ad : ''
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedProfile) return;
-
-    if (!formData.cari_id || !formData.tutar) {
-      // Silent return preserved
-      return;
-
-      return;
-    }
-
-    try {
-      if (isEditing && selectedOdeme) {
-        const { error } = await odemelerApi.update(selectedOdeme.id, {
-          cari_id: formData.cari_id,
-          cari_ad: formData.cari_ad,
-          tip: formData.tip,
-          tutar: parseFloat(formData.tutar),
-          tarih: formData.tarih,
-          odeme_yontemi: formData.odeme_yontemi,
-          aciklama: formData.aciklama,
-          profile_id: selectedProfile.id
-        });
-        if (error) throw new Error(error);
-      } else {
-        const { error } = await odemelerApi.create({
-          cari_id: formData.cari_id,
-          cari_ad: formData.cari_ad,
-          tip: formData.tip,
-          tutar: parseFloat(formData.tutar),
-          tarih: formData.tarih,
-          odeme_yontemi: formData.odeme_yontemi,
-          aciklama: formData.aciklama,
-          profile_id: selectedProfile.id
-        });
-        if (error) throw new Error(error);
-      }
-
-      await loadData();
-      setShowModal(false);
-      resetForm();
-    } catch (error) {
-      console.error('Ödeme kaydedilirken hata:', error);
-    }
-  };
-
-  const handleEdit = (odeme: Odeme) => {
-    setSelectedOdeme(odeme);
-    setFormData({
-      cari_id: odeme.cari_id,
-      cari_ad: odeme.cari_ad,
-      tip: odeme.tip,
-      tutar: odeme.tutar.toString(),
-      tarih: odeme.tarih,
-      odeme_yontemi: odeme.odeme_yontemi,
-      aciklama: odeme.aciklama || ''
-    });
-    setIsEditing(true);
-    setShowModal(true);
-  };
-
-  const handleDelete = async () => {
-    if (!selectedOdeme || !selectedProfile) return;
-
-    try {
-      const { error } = await odemelerApi.delete(selectedOdeme.id);
-
-      if (error) throw new Error(error);
-
-      await loadData();
-      setShowDeleteModal(false);
-      setSelectedOdeme(null);
-    } catch (error) {
-      console.error('Ödeme silinirken hata:', error);
-      console.error('Ödeme silinirken bir hata oluştu!');
-
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      cari_id: '',
-      cari_ad: '',
-      tip: 'Tahsilat',
-      tutar: '',
-      tarih: new Date().toISOString().split('T')[0],
-      odeme_yontemi: 'Nakit',
-      aciklama: ''
-    });
-    setIsEditing(false);
-    setSelectedOdeme(null);
-  };
-
-  const filteredOdemeler = odemeler.filter(odeme => {
-    const matchesSearch = odeme.cari_ad.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'all' || odeme.tip === filterType;
-    return matchesSearch && matchesType;
+  const filteredList = odemeList.filter(o => {
+    const matchesSearch = o.cari_ad.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTip = filterTip === 'all' || o.tip === filterTip;
+    return matchesSearch && matchesTip;
   });
 
-  const toplamAlınan = odemeler
-    .filter(o => o.tip === 'Tahsilat')
-    .reduce((sum, o) => sum + parseFloat((o.tutar || 0).toString()), 0);
+  const toplamTahsilat = odemeList.filter(o => o.tip === 'Tahsilat').reduce((acc, curr) => acc + Number(curr.tutar), 0);
+  const toplamOdeme = odemeList.filter(o => o.tip === 'Ödeme').reduce((acc, curr) => acc + Number(curr.tutar), 0);
 
-  const toplamVerilen = odemeler
-    .filter(o => o.tip === 'Tediye')
-    .reduce((sum, o) => sum + parseFloat((o.tutar || 0).toString()), 0);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto"></div>
-          <p className="text-slate-500 font-black text-xs tracking-widest uppercase">Finansal Veriler İşleniyor...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!selectedProfile) {
-    return (
-      <div className="min-h-screen bg-[#020617] text-white flex items-center justify-center p-6 text-center">
-        <div className="premium-card p-12 max-w-md animate-slide-up">
-          <div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-indigo-500/20">
-            <i className="ri-profile-line text-4xl text-indigo-500"></i>
-          </div>
-          <h3 className="text-2xl font-black uppercase tracking-tight mb-4">Profil Seçimi Gerekli</h3>
-          <p className="text-slate-400 font-medium mb-8">Ödemeleri yönetmek için bir profil seçmelisiniz.</p>
-          <button onClick={() => window.location.reload()} className="premium-button px-10 h-14 text-xs tracking-widest uppercase bg-indigo-600 hover:bg-indigo-700 border-indigo-500/30">YENİDEN DENE</button>
-        </div>
-      </div>
-    );
-  }
+  if (!selectedProfile) return null;
 
   return (
     <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-x-hidden relative">
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[140px] animate-aurora-2"></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[700px] h-[700px] bg-purple-600/5 rounded-full blur-[120px] animate-aurora-1"></div>
+        <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-indigo-600/15 rounded-full blur-[140px] animate-aurora-1"></div>
+        <div className="absolute bottom-[-20%] left-[-10%] w-[700px] h-[700px] bg-blue-600/10 rounded-full blur-[120px] animate-aurora-2"></div>
       </div>
 
       <div className="flex relative z-10">
@@ -227,367 +75,144 @@ export default function Odemeler() {
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black uppercase tracking-widest">
-                  <i className="ri-money-dollar-circle-line"></i>
-                  <span>FİNANS VE KASA YÖNETİMİ</span>
+                  <i className="ri-wallet-line"></i>
+                  <span>KASA & NAKİT AKIŞI</span>
                 </div>
                 <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-none">
-                  Nakit <span className="text-gradient from-indigo-400 to-purple-500">Akışı.</span>
+                  Ödemeler <span className="text-gradient">Defteri.</span>
                 </h1>
-                <p className="text-slate-500 text-lg font-medium max-w-xl">Tahsilat ve tediye işlemlerinizi kaydedin, kasanızın anlık durumunu izleyin.</p>
-                {/* Limit Göstergesi */}
-                {selectedProfile && (
-                  <div className="flex items-center gap-4 mt-2">
-                    <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden max-w-[200px]">
-                      <div
-                        className={`h-full transition-all duration-1000 ${(odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length / (currentUser?.subscription_tier === 'tam' ? 100 : 50)) >= 1 ? 'bg-rose-500' : 'bg-indigo-500'
-                          }`}
-                        style={{
-                          width: `${Math.min(100, (odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length / (currentUser?.subscription_tier === 'tam' ? 100 : currentUser?.subscription_tier === 'vip' ? 1 : 50)) * 100)}%`
-                        }}
-                      ></div>
-                    </div>
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                      AYLIK KREDİ: {odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length} / {currentUser?.subscription_tier === 'vip' ? '∞' : (currentUser?.subscription_tier === 'tam' ? '100' : '50')}
-                    </span>
-                  </div>
-                )}
+                <p className="text-slate-500 text-lg font-medium max-w-xl">Tahsilat ve ödeme hareketlerinizi takip edin, borç ve alacak dengesini koruyun.</p>
               </div>
 
-              <button
-                onClick={() => {
-                  const currentMonthCount = odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length;
-                  const limit = currentUser?.subscription_tier === 'tam' ? 100 : (currentUser?.subscription_tier === 'vip' ? Infinity : 50);
-                  if (currentMonthCount >= limit) {
-                    alert(`Aylık ödeme limitinize ulaştınız (${limit}). Daha fazla işlem için paketinizi yükseltin.`);
-                    return;
-                  }
-                  setShowModal(true);
-                }}
-                className={`premium-button px-8 h-16 text-sm uppercase tracking-widest group ${odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length >= (currentUser?.subscription_tier === 'tam' ? 100 : currentUser?.subscription_tier === 'vip' ? Infinity : 50)
-                  ? 'bg-rose-600/20 border-rose-500/30 text-rose-400'
-                  : 'bg-indigo-600/20 border-indigo-500/30 text-indigo-400 hover:bg-indigo-600 hover:text-white'
-                  }`}
-              >
-                <span>{odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length >= (currentUser?.subscription_tier === 'tam' ? 100 : currentUser?.subscription_tier === 'vip' ? Infinity : 50) ? 'LİMİT DOLDU' : 'YENİ İŞLEM EKLE'}</span>
-                <i className={`${odemeler.filter(o => new Date(o.created_at || '').getMonth() === new Date().getMonth()).length >= (currentUser?.subscription_tier === 'tam' ? 100 : currentUser?.subscription_tier === 'vip' ? Infinity : 50) ? 'ri-error-warning-line' : 'ri-add-line'} text-xl group-hover:rotate-90 transition-transform`}></i>
-              </button>
+              <div className="flex gap-4">
+                <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-16 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-600/20 flex items-center gap-3">
+                  <ArrowUpRight size={20} /> TAHSİLAT EKLE
+                </button>
+                <button className="bg-rose-600 hover:bg-rose-700 text-white px-8 h-16 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-rose-600/20 flex items-center gap-3">
+                  <ArrowDownLeft size={20} /> ÖDEME EKLE
+                </button>
+              </div>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="premium-card p-8 border-emerald-500/10 hover:border-emerald-500/30 transition-all group overflow-hidden relative">
-                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-all">
-                  <i className="ri-arrow-left-down-line text-9xl -rotate-12 translate-x-8 -translate-y-8"></i>
-                </div>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 group-hover:bg-emerald-500 transition-colors group-hover:text-white text-emerald-500">
-                    <i className="ri-arrow-left-down-line text-2xl"></i>
-                  </div>
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">TOPLAM TAHSİLAT</span>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="premium-card p-8 group transition-all flex items-center justify-between">
                 <div className="space-y-1">
-                  <div className="text-3xl font-black tracking-tighter text-white">₺{toplamAlınan.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
-                  <div className="text-[10px] font-black text-emerald-400/60 uppercase tracking-widest">GELEN NAKİT AKIŞI</div>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">KASA BAKİYESİ</span>
+                  <div className="text-4xl font-black tracking-tighter text-white">₺{(toplamTahsilat - toplamOdeme).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
+                </div>
+                <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400">
+                  <Wallet size={24} />
                 </div>
               </div>
 
-              <div className="premium-card p-8 border-rose-500/10 hover:border-rose-500/30 transition-all group overflow-hidden relative">
-                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-all">
-                  <i className="ri-arrow-right-up-line text-9xl -rotate-12 translate-x-8 -translate-y-8"></i>
-                </div>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-rose-500/10 rounded-2xl flex items-center justify-center border border-rose-500/20 group-hover:bg-rose-500 transition-colors group-hover:text-white text-rose-500">
-                    <i className="ri-arrow-right-up-line text-2xl"></i>
-                  </div>
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">TOPLAM TEDİYE</span>
-                </div>
+              <div className="premium-card p-8 group transition-all flex items-center justify-between">
                 <div className="space-y-1">
-                  <div className="text-3xl font-black tracking-tighter text-white">₺{toplamVerilen.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
-                  <div className="text-[10px] font-black text-rose-400/60 uppercase tracking-widest">ÇIKAN NAKİT AKIŞI</div>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TOPLAM TAHSİLAT</span>
+                  <div className="text-4xl font-black tracking-tighter text-emerald-400">₺{toplamTahsilat.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
+                </div>
+                <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400">
+                  <TrendingUp size={24} />
                 </div>
               </div>
 
-              <div className="premium-card p-8 border-indigo-500/10 hover:border-indigo-500/30 transition-all group overflow-hidden relative">
-                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-all">
-                  <i className="ri-wallet-3-line text-9xl -rotate-12 translate-x-8 -translate-y-8"></i>
-                </div>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20 group-hover:bg-indigo-500 transition-colors group-hover:text-white text-indigo-500">
-                    <i className="ri-wallet-3-line text-2xl"></i>
-                  </div>
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">NET DURUM</span>
-                </div>
+              <div className="premium-card p-8 group transition-all flex items-center justify-between">
                 <div className="space-y-1">
-                  <div className={`text-3xl font-black tracking-tighter ${toplamAlınan - toplamVerilen >= 0 ? 'text-emerald-400' : 'text-rose-500'}`}>
-                    ₺{(toplamAlınan - toplamVerilen).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                  </div>
-                  <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">KASA BAKİYESİ</div>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TOPLAM ÖDEME</span>
+                  <div className="text-4xl font-black tracking-tighter text-rose-400">₺{toplamOdeme.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
+                </div>
+                <div className="w-14 h-14 bg-rose-500/10 rounded-2xl flex items-center justify-center text-rose-400">
+                  <TrendingDown size={24} />
                 </div>
               </div>
             </div>
 
             {/* List Section */}
             <div className="premium-card overflow-hidden">
-              <div className="p-8 border-b border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="p-8 border-b border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 bg-white/[0.01]">
                 <div className="relative w-full md:max-w-md group">
-                  <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
+                  <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors" size={20} />
                   <input
                     type="text"
-                    placeholder="Cari adı ile ara..."
+                    placeholder="Cari adı veya açıklama ile ara..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="premium-input pl-12 h-14"
+                    className="premium-input pl-16 h-14"
                   />
                 </div>
-                <div className="flex gap-2 p-1 bg-white/[0.02] border border-white/5 rounded-2xl">
-                  {['all', 'Tahsilat', 'Tediye'].map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => setFilterType(type)}
-                      className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filterType === type
-                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
-                        : 'text-slate-500 hover:text-white'
-                        }`}
-                    >
-                      {type === 'all' ? 'TÜMÜ' : type === 'Tahsilat' ? 'TAHSİLAT' : 'TEDİYE'}
-                    </button>
-                  ))}
+                <div className="flex items-center gap-4">
+                  <select
+                    value={filterTip}
+                    onChange={e => setFilterTip(e.target.value)}
+                    className="premium-input h-14 px-10 min-w-[200px]"
+                  >
+                    <option value="all">TÜMÜ</option>
+                    <option value="Tahsilat">SADECE TAHSİLAT</option>
+                    <option value="Ödeme">SADECE ÖDEME</option>
+                  </select>
                 </div>
               </div>
 
-              {filteredOdemeler.length === 0 ? (
-                <div className="p-24 text-center space-y-6">
-                  <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
-                    <i className="ri-money-dollar-circle-line text-5xl text-slate-700"></i>
-                  </div>
-                  <h3 className="text-2xl font-black tracking-tight text-slate-200 uppercase">İşlem Bulunamadı</h3>
-                  <p className="text-slate-500 font-bold max-w-sm mx-auto uppercase tracking-widest text-[10px]">Herhangi bir ödeme veya tahsilat işlemi kaydı bulunamadı.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto max-h-[calc(100vh-420px)] overflow-y-auto custom-scrollbar">
-                  <table className="w-full text-left relative border-separate border-spacing-0">
-                    <thead className="sticky top-0 z-10">
-                      <tr className="bg-[#0f172a] shadow-sm">
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">CARİ HESAP</th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">İŞLEM TİPİ</th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ÖDEME YÖNTEMİ</th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TARİH</th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TUTAR</th>
-                        <th className="px-8 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">AKSİYON</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5 text-sm">
-                      {filteredOdemeler.map((odeme) => (
-                        <tr key={odeme.id} className="hover:bg-white/[0.02] transition-colors group/row">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-separate border-spacing-0">
+                  <thead>
+                    <tr className="bg-[#0f172a]/50">
+                      <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">İŞLEM TİPİ</th>
+                      <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">CARİ / MÜŞTERİ</th>
+                      <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TARİH</th>
+                      <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ÖDEME YÖNTEMİ</th>
+                      <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">TUTAR</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 text-sm">
+                    {loading ? (
+                      [...Array(3)].map((_, i) => (
+                        <tr key={i} className="animate-skeleton h-20">
+                          <td colSpan={5} className="px-8 py-6 opacity-10"><div className="h-4 bg-white/20 rounded"></div></td>
+                        </tr>
+                      ))
+                    ) : filteredList.length === 0 ? (
+                      <tr><td colSpan={5} className="px-8 py-20 text-center text-slate-500 font-bold uppercase tracking-widest text-xs italic">İşlem bulunamadı.</td></tr>
+                    ) : (
+                      filteredList.map((o) => (
+                        <tr key={o.id} className="hover:bg-white/[0.02] transition-colors group">
                           <td className="px-8 py-6">
-                            <div className="font-bold text-slate-300">{odeme.cari_ad.toUpperCase()}</div>
-                            <div className="text-[10px] text-slate-600 font-bold uppercase tracking-widest mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">{odeme.aciklama || 'Açıklama yok'}</div>
+                            <div className="flex items-center gap-4">
+                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center border border-white/5 ${o.tip === 'Tahsilat' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`}>
+                                <i className={o.tip === 'Tahsilat' ? 'ri-arrow-up-line' : 'ri-arrow-down-line'}></i>
+                              </div>
+                              <span className="font-black text-white text-xs tracking-tight uppercase">{o.tip}</span>
+                            </div>
                           </td>
                           <td className="px-8 py-6">
-                            <span className={`inline-flex px-3 py-1 rounded-lg text-[10px] font-black tracking-widest uppercase ${odeme.tip === 'Tahsilat' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                              }`}>
-                              {odeme.tip === 'Tahsilat' ? 'TAHSİLAT (GİRİŞ)' : 'TEDİYE (ÇIKIŞ)'}
+                            <div className="font-black text-slate-200 text-sm uppercase">{o.cari_ad}</div>
+                            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1 opacity-60 truncate max-w-[200px]">{o.aciklama || 'Açıklama yok'}</div>
+                          </td>
+                          <td className="px-8 py-6 text-slate-400 font-bold">
+                            {new Date(o.tarih).toLocaleDateString('tr-TR')}
+                          </td>
+                          <td className="px-8 py-6">
+                            <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-black tracking-widest uppercase text-slate-400">
+                              {o.odeme_yontemi.toUpperCase()}
                             </span>
                           </td>
-                          <td className="px-8 py-6">
-                            <div className="inline-flex items-center gap-2 text-slate-400 font-bold">
-                              <i className={`text-lg ${odeme.odeme_yontemi === 'Nakit' ? 'ri-money-cny-box-line' :
-                                odeme.odeme_yontemi === 'Kredi Kartı' ? 'ri-bank-card-line' :
-                                  'ri-bank-line'
-                                }`}></i>
-                              <span className="uppercase tracking-widest text-[10px]">{odeme.odeme_yontemi}</span>
-                            </div>
-                          </td>
-                          <td className="px-8 py-6 text-slate-500 font-bold">
-                            {new Date(odeme.tarih).toLocaleDateString('tr-TR')}
-                          </td>
-                          <td className="px-8 py-6">
-                            <div className={`text-lg font-black tracking-tighter ${odeme.tip === 'Tahsilat' ? 'text-emerald-400' : 'text-rose-500'}`}>
-                              {odeme.tip === 'Tahsilat' ? '+ ₺' : '- ₺'}{(parseFloat((odeme.tutar || 0).toString()) || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                            </div>
-                          </td>
                           <td className="px-8 py-6 text-right">
-                            <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all">
-                              <button
-                                onClick={() => handleEdit(odeme)}
-                                className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all"
-                              >
-                                <i className="ri-edit-line"></i>
-                              </button>
-                              <button
-                                onClick={() => { setSelectedOdeme(odeme); setShowDeleteModal(true); }}
-                                className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 hover:bg-red-600 hover:text-white transition-all"
-                              >
-                                <i className="ri-delete-bin-line"></i>
-                              </button>
-                            </div>
+                            <span className={`text-lg font-black tracking-tighter ${o.tip === 'Tahsilat' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              ₺{Number(o.tutar).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                            </span>
                           </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </main>
         </div>
       </div>
-
-      {/* Add Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[110] p-4 animate-fade-in">
-          <div className="premium-card p-0 w-full max-w-2xl animate-slide-up border-white/10 relative overflow-hidden">
-            <div className="px-10 py-10 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.01]">
-              <div className="space-y-1">
-                <h3 className="text-3xl font-black tracking-tight text-white uppercase leading-none">{isEditing ? 'İşlemi Güncelle' : 'Finansal İşlem Girişi'}</h3>
-                <p className="text-slate-500 font-bold text-sm uppercase tracking-widest text-indigo-400/80">{isEditing ? 'Mevcut kaydı düzenleyin.' : 'Kasa hareketini veya cari ödemeyi kaydedin.'}</p>
-              </div>
-              <button
-                onClick={() => { setShowModal(false); resetForm(); }}
-                className="w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-all"
-              >
-                <i className="ri-close-line text-2xl"></i>
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="p-10 space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                  <SearchableSelect
-                    label="CARİ HESAP SEÇİMİ *"
-                    options={cariler.map(c => ({ id: c.id, name: c.ad, subText: c.vergi_no }))}
-                    value={formData.cari_id}
-                    onChange={(value) => handleCariChange(value)}
-                    placeholder="CARİ SEÇİN..."
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">İŞLEM TİPİ *</label>
-                  <div className="grid grid-cols-2 gap-2 p-1 bg-white/[0.02] border border-white/5 rounded-2xl h-14">
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, tip: 'Tahsilat' })}
-                      className={`rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${formData.tip === 'Tahsilat' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:text-white'
-                        }`}
-                    >
-                      TAHSİLAT
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, tip: 'Tediye' })}
-                      className={`rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${formData.tip === 'Tediye' ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/20' : 'text-slate-500 hover:text-white'
-                        }`}
-                    >
-                      TEDİYE
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">İŞLEM TUTARI ₺ *</label>
-                  <input
-                    type="number"
-                    value={formData.tutar}
-                    onChange={(e) => setFormData({ ...formData, tutar: e.target.value })}
-                    className="premium-input h-14 font-black text-lg"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">İŞLEM TARİHİ *</label>
-                  <input
-                    type="date"
-                    value={formData.tarih}
-                    onChange={(e) => setFormData({ ...formData, tarih: e.target.value })}
-                    className="premium-input h-14 font-black"
-                    required
-                  />
-                </div>
-
-                <div className="col-span-2 space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">ÖDEME YÖNTEMİ *</label>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-                    {['Nakit', 'Banka Kartı', 'Kredi Kartı', 'Banka Transferi'].map((method) => (
-                      <button
-                        key={method}
-                        type="button"
-                        onClick={() => setFormData({ ...formData, odeme_yontemi: method })}
-                        className={`h-14 rounded-2xl text-[8px] font-black uppercase tracking-widest transition-all border ${formData.odeme_yontemi === method
-                          ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/20'
-                          : 'bg-white/5 border-white/10 text-slate-500 hover:text-white hover:border-white/20'
-                          }`}
-                      >
-                        {method}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">BORÇ/ALACAK NOTU</label>
-                <textarea
-                  value={formData.aciklama}
-                  onChange={(e) => setFormData({ ...formData, aciklama: e.target.value })}
-                  className="premium-input p-6 h-32 resize-none"
-                  placeholder="İşlem detayı hakkında kısa bir not..."
-                />
-              </div>
-
-              <div className="flex gap-4 pt-4">
-                <button
-                  type="button"
-                  onClick={() => { setShowModal(false); resetForm(); }}
-                  className="flex-1 h-14 text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors border border-white/5 rounded-2xl"
-                >
-                  VAZGEÇ
-                </button>
-                <button
-                  type="submit"
-                  className="premium-button flex-[2] h-14 text-[10px] tracking-widest uppercase font-black bg-indigo-600 hover:bg-indigo-700 border-indigo-500/30 text-white"
-                >
-                  <span>{isEditing ? 'DEĞİŞİKLİKLERİ KAYDET' : 'İŞLEMİ KAYDET VE BİTİR'}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[110] p-4 animate-fade-in">
-          <div className="premium-card p-10 w-full max-w-md animate-slide-up border-red-500/20 text-center">
-            <div className="w-20 h-20 bg-red-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-red-500/20">
-              <i className="ri-delete-bin-line text-4xl text-red-500"></i>
-            </div>
-            <h3 className="text-2xl font-black uppercase tracking-tight mb-4">İşlemi Sil</h3>
-            <p className="text-slate-400 font-medium mb-10">
-              Bu finansal hareketi sildiğinizde cari bakiye ve kasa durumu anında güncellenecektir. Bu işlem geri alınamaz.
-            </p>
-            <div className="flex gap-4">
-              <button
-                onClick={() => { setShowDeleteModal(false); setSelectedOdeme(null); }}
-                className="flex-1 h-14 text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors border border-white/5 rounded-2xl"
-              >
-                VAZGEÇ
-              </button>
-              <button
-                onClick={handleDelete}
-                className="flex-1 h-14 bg-red-600 text-white rounded-2xl font-black text-[10px] tracking-widest uppercase hover:bg-red-700 transition-all shadow-lg shadow-red-600/20"
-              >
-                ONAYLA VE SİL
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
-}
+};
+
+export default OdemelerPage;

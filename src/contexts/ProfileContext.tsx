@@ -29,7 +29,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     const checkAuth = async () => {
       if (!auth.isAuthenticated()) {
         const currentPath = window.location.pathname;
-        const publicPaths = ['/', '/login', '/kayit', '/sifre-sifirlama', '/yeni-sifre', '/tanitim-filmi', '/tanitim_filmi', '/gizlilik-politikasi'];
+        const publicPaths = ['/', '/login', '/kayit', '/sifre-sifirlama', '/yeni-sifre', '/tanitim-filmi', '/tanitim_filmi', '/gizlilik-politikasi', '/deneme-suresi-doldu'];
 
         if (!publicPaths.some(path => currentPath === path || currentPath.startsWith(path + '/'))) {
           if (currentPath !== '/') {

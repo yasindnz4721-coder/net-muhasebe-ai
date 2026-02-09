@@ -40,6 +40,7 @@ const odemelerRoutes = require('./routes/odemeler');
 const stokRoutes = require('./routes/stok');
 const profilesRoutes = require('./routes/profiles');
 const adminRoutes = require('./routes/admin');
+const personelRoutes = require('./routes/personel');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/cariler', carilerRoutes);
@@ -51,6 +52,7 @@ app.use('/api/odemeler', odemelerRoutes);
 app.use('/api/stok', stokRoutes);
 app.use('/api/profiles', profilesRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/personel', personelRoutes);
 
 // Health check
 app.get('/api/health', async (req, res) => {

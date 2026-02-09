@@ -8,7 +8,9 @@ export default function KayitPage() {
     email: '',
     password: '',
     companyName: '',
+    fullName: '',
   });
+  const [isTrial, setIsTrial] = useState(false);
   const [paymentData, setPaymentData] = useState({
     cardNumber: '',
     expiry: '',
@@ -29,12 +31,18 @@ export default function KayitPage() {
   };
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const plan = params.get('plan');
-    if (plan) {
-      const selected = plans.find(p => p.tier === plan);
-      if (selected) {
-        setSelectedPlan(selected);
-        setStep(2);
+    const trial = params.get('trial');
+    if (trial === 'true') {
+      setIsTrial(true);
+      setStep(3);
+    } else {
+      const plan = params.get('plan');
+      if (plan) {
+        const selected = plans.find(p => p.tier === plan);
+        if (selected) {
+          setSelectedPlan(selected);
+          setStep(2);
+        }
       }
     }
   }, []);
@@ -49,9 +57,10 @@ export default function KayitPage() {
       const { data, error: registerError } = await auth.register(
         formData.email.trim(),
         formData.password,
-        formData.companyName.trim(),
+        `${formData.companyName.trim()} | ${formData.fullName.trim()}`,
         paymentMethod,
-        selectedPlan?.tier
+        selectedPlan?.tier,
+        isTrial
       );
 
       if (registerError) {
@@ -62,12 +71,14 @@ export default function KayitPage() {
       if (data?.user) {
         if (paymentMethod === 'eft') {
           setSuccess('✅ Kayıt talebiniz alındı! EFT ödemeniz onaylandıktan sonra hesabınız aktif edilecektir.');
+        } else if (isTrial) {
+          setSuccess('✅ 14 Günlük deneme süreniz başladı! Yönlendiriliyorsunuz...');
         } else {
           setSuccess('✅ Ödeme başarılı ve hesabınız oluşturuldu!');
         }
-        setFormData({ email: '', password: '', companyName: '' });
+        setFormData({ email: '', password: '', companyName: '', fullName: '' });
         setTimeout(() => {
-          window.location.href = '/login';
+          window.location.href = isTrial ? '/dashboard' : '/login';
         }, 2000);
       }
     } catch (err) {
@@ -361,14 +372,28 @@ export default function KayitPage() {
                 <div className="absolute top-0 right-0 p-12 bg-indigo-600/10 blur-3xl"></div>
 
                 <form onSubmit={handleSubmit} className="relative z-10 space-y-8">
-                  <button
-                    type="button"
-                    onClick={() => setStep(2)}
-                    className="text-indigo-400 font-black text-[10px] tracking-widest uppercase flex items-center gap-2 hover:text-white transition-colors"
-                  >
-                    <i className="ri-arrow-left-line font-black"></i>
-                    ÖDEME BİLGİLERİNE DÖN
-                  </button>
+                  {!isTrial && (
+                    <button
+                      type="button"
+                      onClick={() => setStep(2)}
+                      className="text-indigo-400 font-black text-[10px] tracking-widest uppercase flex items-center gap-2 hover:text-white transition-colors"
+                    >
+                      <i className="ri-arrow-left-line font-black"></i>
+                      ÖDEME BİLGİLERİNE DÖN
+                    </button>
+                  )}
+
+                  {isTrial && (
+                    <div className="p-6 bg-indigo-500/10 border border-indigo-500/20 rounded-3xl mb-4">
+                      <div className="flex items-center gap-4 text-indigo-400 mb-2">
+                        <i className="ri-flashlight-line text-2xl"></i>
+                        <span className="text-sm font-black uppercase tracking-widest">14 GÜNLÜK ÜCRETSİZ DENEME</span>
+                      </div>
+                      <p className="text-[10px] font-medium text-slate-400 uppercase leading-relaxed tracking-wider">
+                        TÜM ÖZELLİKLERİ HİÇBİR ÜCRET ÖDEMEDEN 14 GÜN BOYUNCA KULLANABİLİRSİNİZ.
+                      </p>
+                    </div>
+                  )}
 
                   {error && (
                     <div className="p-5 rounded-3xl bg-red-500/10 border border-red-500/20 text-red-200 text-sm font-bold flex gap-3">
@@ -383,6 +408,18 @@ export default function KayitPage() {
                   )}
 
                   <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">Adınız ve Soyadınız</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.fullName}
+                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                        className="premium-input"
+                        placeholder="Örn: Yasin Deniz"
+                      />
+                    </div>
+
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">İşletme / Şirket Adı</label>
                       <input

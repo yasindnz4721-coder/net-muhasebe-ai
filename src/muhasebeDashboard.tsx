@@ -26,7 +26,6 @@ interface Istatistikler {
 const MuhasebeDashboard = () => {
   const navigate = useNavigate();
   const { selectedProfile, currentUser } = useProfile();
-  const [cariler, setCariler] = useState<Cari[]>([]);
   const [istatistikler, setIstatistikler] = useState<Istatistikler>({
     toplamCari: 0,
     toplamSatis: 0,
@@ -74,7 +73,6 @@ const MuhasebeDashboard = () => {
         setYukleniyor(true);
         setHata(null);
 
-        // API çağrılarını paralel yapalım (performans için)
         const [cariRes, satisRes, alisRes, odemeRes] = await Promise.all([
           carilerApi.getAll(selectedProfile.id),
           satisApi.getAll(selectedProfile.id),
@@ -91,29 +89,21 @@ const MuhasebeDashboard = () => {
         const alisData = alisRes.data || [];
         const odemeData = odemeRes.data || [];
 
-        setCariler(cariData);
-
         const bugun = new Date();
         bugun.setHours(0, 0, 0, 0);
 
         const tumIslemler: any[] = [
-          ...satisData.map((f: any) => ({ ...f, type: 'Satış Faturası', amount: f.toplam, iconColor: 'text-emerald-600', bgColor: 'bg-emerald-50' })),
-          ...alisData.map((f: any) => ({ ...f, type: 'Alış Faturası', amount: f.toplam, iconColor: 'text-orange-600', bgColor: 'bg-orange-50' })),
-          ...odemeData.map((o: any) => ({ ...o, type: o.tip, amount: o.tutar, iconColor: o.tip === 'Tahsilat' ? 'text-blue-600' : 'text-red-600', bgColor: o.tip === 'Tahsilat' ? 'bg-blue-50' : 'bg-red-50' }))
+          ...satisData.map((f: any) => ({ ...f, type: 'Satış Faturası', amount: f.toplam, iconColor: 'text-emerald-400', bgColor: 'bg-emerald-500/10' })),
+          ...alisData.map((f: any) => ({ ...f, type: 'Alış Faturası', amount: f.toplam, iconColor: 'text-orange-400', bgColor: 'bg-orange-500/10' })),
+          ...odemeData.map((o: any) => ({ ...o, type: o.tip, amount: o.tutar, iconColor: o.tip === 'Tahsilat' ? 'text-blue-400' : 'text-red-400', bgColor: o.tip === 'Tahsilat' ? 'bg-blue-500/10' : 'bg-red-500/10' }))
         ].filter(item => {
           const itemDate = new Date(item.tarih);
           itemDate.setHours(0, 0, 0, 0);
           return itemDate.getTime() === bugun.getTime();
         }).sort((a, b) => new Date(b.tarih).getTime() - new Date(a.tarih).getTime());
 
-        // Satış toplamını hesapla
-        const toplamSatis = satisData.reduce((acc: number, curr: any) =>
-          acc + (Number(curr.toplam || curr.toplam_tutar || 0)), 0
-        );
-
-        const toplamAlis = alisData.reduce((acc: number, curr: any) =>
-          acc + (Number(curr.toplam || curr.toplam_tutar || 0)), 0
-        );
+        const toplamSatis = satisData.reduce((acc: number, curr: any) => acc + (Number(curr.toplam || 0)), 0);
+        const toplamAlis = alisData.reduce((acc: number, curr: any) => acc + (Number(curr.toplam || 0)), 0);
 
         setIstatistikler({
           toplamCari: cariData.length,
@@ -121,7 +111,6 @@ const MuhasebeDashboard = () => {
           toplamAlis: toplamAlis
         });
 
-        // @ts-ignore
         setTodayIslemler(tumIslemler);
       } catch (error: any) {
         console.error("Veri çekme hatası:", error);
@@ -134,13 +123,8 @@ const MuhasebeDashboard = () => {
     veriGetir();
   }, [selectedProfile]);
 
-  const handleLogout = () => {
-    auth.logout();
-    window.location.href = '/login';
-  };
-
   const StatCardSkeleton = () => (
-    <div className="bg-white p-8 rounded-[28px] border border-gray-100 animate-skeleton overflow-hidden h-[160px]">
+    <div className="premium-card p-10 animate-skeleton h-[180px]">
       <div className="h-4 w-24 bg-white/10 rounded mb-4"></div>
       <div className="h-10 w-32 bg-white/10 rounded"></div>
     </div>
@@ -148,244 +132,139 @@ const MuhasebeDashboard = () => {
 
   const TableRowSkeleton = () => (
     <tr className="animate-skeleton">
-      <td className="px-8 py-5 h-16"><div className="w-full h-4 bg-white/10 rounded"></div></td>
-      <td className="px-8 py-5 h-16"><div className="w-full h-4 bg-white/10 rounded"></div></td>
-      <td className="px-8 py-5 h-16"><div className="w-full h-4 bg-white/10 rounded"></div></td>
-      <td className="px-8 py-5 h-16"><div className="w-full h-4 bg-white/10 rounded"></div></td>
+      <td className="px-10 py-6 h-20"><div className="w-full h-4 bg-white/10 rounded"></div></td>
+      <td className="px-10 py-6 h-20"><div className="w-full h-4 bg-white/10 rounded"></div></td>
+      <td className="px-10 py-6 h-20"><div className="w-full h-4 bg-white/10 rounded"></div></td>
+      <td className="px-10 py-6 h-20"><div className="w-full h-4 bg-white/10 rounded"></div></td>
     </tr>
   );
 
-  if (hata) return (
-    <div className="flex flex-col justify-center items-center h-screen bg-gray-50 p-6 text-center font-sans text-slate-900">
-      <div className="w-16 h-16 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-        <PlusCircle size={32} className="rotate-45" />
+  const StatCard = ({ title, value, sub, color, icon: Icon }: any) => (
+    <div className="premium-card p-10 group hover:-translate-y-2 transition-all duration-500 relative overflow-hidden h-[180px] flex flex-col justify-between">
+      <div className={`absolute top-0 right-0 w-32 h-32 bg-${color}-500/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-${color}-500/10 transition-colors`}></div>
+      <div className="relative z-10 flex justify-between items-start">
+        <div className={`w-14 h-14 bg-${color}-500/10 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-${color}-500/20 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
+          <Icon size={24} className={`text-${color}-400`} />
+        </div>
       </div>
-      <h3 className="text-xl font-black text-slate-800 mb-2 uppercase">Bir Sorun Oluştu</h3>
-      <p className="text-slate-500 max-w-sm mb-6 mx-auto">{hata}</p>
-      <button
-        onClick={() => window.location.reload()}
-        className="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold text-sm hover:bg-slate-800 transition-all"
-      >
-        TEKRAR DENE
-      </button>
+      <div className="relative z-10">
+        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">{title}</p>
+        <h3 className="text-3xl font-black text-white tracking-tighter">{value}</h3>
+        <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-tight opacity-60">{sub}</p>
+      </div>
+    </div>
+  );
+
+  if (hata) return (
+    <div className="flex flex-col justify-center items-center h-screen bg-[#020617] p-6 text-center font-sans text-white">
+      <div className="w-20 h-20 bg-rose-500/10 text-rose-500 rounded-3xl flex items-center justify-center mb-6 border border-rose-500/20 shadow-2xl shadow-rose-500/10">
+        <PlusCircle size={40} className="rotate-45" />
+      </div>
+      <h3 className="text-2xl font-black mb-2 uppercase tracking-tight">Bir Sorun Oluştu</h3>
+      <p className="text-slate-400 max-w-sm mb-8 font-medium">{hata}</p>
+      <button onClick={() => window.location.reload()} className="premium-button px-10 h-14 tracking-widest uppercase">TEKRAR DENE</button>
     </div>
   );
 
   if (!selectedProfile) return (
-    <div className="flex flex-col justify-center items-center h-screen bg-gray-50 p-6 text-center font-sans text-slate-900">
-      <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-        <Users size={32} />
+    <div className="flex flex-col justify-center items-center h-screen bg-[#020617] p-6 text-center font-sans text-white">
+      <div className="w-20 h-20 bg-indigo-500/10 text-indigo-500 rounded-3xl flex items-center justify-center mb-6 border border-indigo-500/20 shadow-2xl shadow-indigo-500/10">
+        <Users size={40} />
       </div>
-      <h3 className="text-xl font-black text-slate-800 mb-2 uppercase">Profil Seçilmedi</h3>
-      <p className="text-slate-500 max-w-sm mb-6 mx-auto">İşlem yapabilmek için lütfen bir profil seçin.</p>
+      <h3 className="text-2xl font-black mb-2 uppercase tracking-tight">Profil Seçilmedi</h3>
+      <p className="text-slate-400 max-w-sm mb-8 font-medium">İşlem yapabilmek için lütfen bir profil seçin.</p>
     </div>
   );
 
-  const menuItems = [
-    { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard', active: true },
-    { label: 'Cari Hesaplar', icon: Users, path: '/cariler' },
-    { label: 'Faturalar', icon: FileText, path: '/satis-faturasi' },
-    { label: 'Ödemeler', icon: CreditCard, path: '/odemeler' },
-    { label: 'AI Analiz', icon: BarChart2, path: '/ai-analiz' },
-    { label: 'Ayarlar', icon: Settings, path: '/profil-ayarlari' },
-  ];
-
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-sans antialiased text-slate-900">
-      <Sidebar />
+    <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-x-hidden relative">
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-indigo-600/15 rounded-full blur-[140px] animate-aurora-1"></div>
+        <div className="absolute bottom-[-20%] left-[-10%] w-[700px] h-[700px] bg-blue-600/10 rounded-full blur-[120px] animate-aurora-2"></div>
+      </div>
 
-      <div className="flex-1 flex flex-col p-10 overflow-y-auto">
-        <Header />
-        <header className="flex justify-between items-center mb-12 mt-10 lg:mt-0">
-          <div>
-            <h2 className="text-4xl font-black text-slate-900 tracking-tight leading-none mb-3 uppercase">Pano Paneli</h2>
-            <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.2em] opacity-80">Finansal Verilerinizin Anlık Özeti</p>
-          </div>
-          <div className="flex gap-4">
-            <button
-              onClick={() => navigate('/satis-faturasi')}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 h-14 rounded-2xl flex items-center gap-3 transition-all transform hover:scale-105 active:scale-95 shadow-xl shadow-indigo-600/20 font-black text-[10px] tracking-widest uppercase"
-            >
-              <PlusCircle size={20} /> YENİ SATIŞ EKLE
-            </button>
-          </div>
-        </header>
+      <div className="flex relative z-10">
+        <Sidebar />
 
-        {/* Abonelik Banner (Cari Style) */}
-        {timeLeft.days <= 14 && (
-          <div className="bg-rose-600 rounded-[32px] p-10 mb-12 relative overflow-hidden flex flex-col xl:flex-row items-center justify-between gap-10 shadow-2xl shadow-rose-500/30 text-white group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-white/10 transition-colors"></div>
-
-            <div className="flex flex-col lg:flex-row items-center gap-10 z-10">
-              <div className="flex gap-4">
-                <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-3xl flex items-center justify-center text-4xl font-black border border-white/20 shadow-lg">{timeLeft.days}</div>
-                  <span className="text-[9px] font-black uppercase mt-3 opacity-60 tracking-widest">GÜN</span>
-                </div>
-                <div className="flex flex-col items-center text-white/50 text-4xl font-thin mt-6">:</div>
-                <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-3xl flex items-center justify-center text-4xl font-black border border-white/20 shadow-lg">{timeLeft.hours}</div>
-                  <span className="text-[9px] font-black uppercase mt-3 opacity-60 tracking-widest">SAAT</span>
-                </div>
-                <div className="flex flex-col items-center text-white/50 text-4xl font-thin mt-6">:</div>
-                <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-3xl flex items-center justify-center text-4xl font-black border border-white/20 shadow-lg">{timeLeft.mins}</div>
-                  <span className="text-[9px] font-black uppercase mt-3 opacity-60 tracking-widest">DAKİKA</span>
-                </div>
-                <div className="flex flex-col items-center text-white/50 text-4xl font-thin mt-6">:</div>
-                <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-3xl flex items-center justify-center text-4xl font-black border border-white/20 shadow-lg">{timeLeft.secs}</div>
-                  <span className="text-[9px] font-black uppercase mt-3 opacity-60 tracking-widest">SANİYE</span>
-                </div>
-              </div>
-              <div className="text-center lg:text-left">
-                <h4 className="text-3xl font-black tracking-tight leading-tight mb-3">Abonelik süreniz yakın zamanda sona erecek</h4>
-                <p className="text-white/80 font-bold text-base max-w-lg">Sistemi kesintisiz kullanmaya devam edebilmek için lütfen abonelik sürenizi uzatınız.</p>
-              </div>
+        <div className="flex-1 flex flex-col p-10 overflow-y-auto max-w-full">
+          <Header />
+          <header className="flex justify-between items-center mb-12 mt-10 lg:mt-0">
+            <div>
+              <h2 className="text-4xl font-black text-white tracking-tight leading-none mb-3 uppercase">Sistem <span className="text-gradient">Özeti.</span></h2>
+              <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.2em] opacity-80">Finansal Verilerinizin Anlık Durumu</p>
             </div>
-            <button
-              onClick={() => navigate('/premium')}
-              className="bg-white text-rose-600 px-10 h-16 rounded-[24px] font-black text-xs tracking-[0.1em] uppercase hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-rose-900/40 z-10 shrink-0"
-            >
-              PAKETLERİ GÖR VE UZAT
+            <button onClick={() => navigate('/satis-faturasi')} className="premium-button px-8 h-14 tracking-widest uppercase flex items-center gap-3">
+              <PlusCircle size={20} /> YENİ SATIŞ
             </button>
+          </header>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            {yukleniyor ? (
+              <>
+                <StatCardSkeleton />
+                <StatCardSkeleton />
+                <StatCardSkeleton />
+                <StatCardSkeleton />
+              </>
+            ) : (
+              <>
+                <StatCard title="Paydaşlar" value={istatistikler.toplamCari.toString()} sub="Kayıtlı Cari Hesap" color="blue" icon={Users} />
+                <StatCard title="Toplam Satış" value={`₺${istatistikler.toplamSatis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`} sub="Brüt Ciro (Tümü)" color="emerald" icon={FileText} />
+                <StatCard title="Toplam Alış" value={`₺${istatistikler.toplamAlis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`} sub="Gider Toplamı" color="orange" icon={Download} />
+                <StatCard title="Sistem Durumu" value="Aktif" sub="Bulut Senkronizasyonu" color="indigo" icon={BarChart2} />
+              </>
+            )}
           </div>
-        )}
 
-        {/* Dinamik İstatistik Kartları */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-          {yukleniyor ? (
-            <>
-              <StatCardSkeleton />
-              <StatCardSkeleton />
-              <StatCardSkeleton />
-            </>
-          ) : (
-            <>
-              <StatCard title="Toplam Cari" value={istatistikler.toplamCari.toString()} sub="Kayıtlı Paydaş" color="blue" />
-              <StatCard title="Toplam Satış" value={`₺${istatistikler.toplamSatis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`} sub="Bu Ayki Ciro" color="green" />
-              <StatCard title="Sistem Durumu" value="Aktif" sub="Veriler Güncel" color="indigo" isStatus />
-            </>
-          )}
-        </div>
-
-        <div className="bg-white rounded-[32px] shadow-2xl shadow-slate-200/50 border border-gray-100 overflow-hidden">
-          <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 text-slate-800">
-            <h3 className="font-black uppercase tracking-widest text-xs">Bugünün İşlemleri</h3>
-            <button
-              onClick={() => navigate('/tum-islemler')}
-              className="text-[10px] font-black text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors uppercase tracking-wider"
-            >
-              Tüm İşlemleri Gör
-            </button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="text-slate-400">
-                  <th className="px-8 py-5 font-black uppercase text-[10px] tracking-widest">İşlem</th>
-                  <th className="px-8 py-5 font-black uppercase text-[10px] tracking-widest">Cari</th>
-                  <th className="px-8 py-5 font-black uppercase text-[10px] tracking-widest text-right">Tutar</th>
-                  <th className="px-8 py-5 font-black uppercase text-[10px] tracking-widest text-right">Aksiyon</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50 uppercase">
-                {yukleniyor ? (
-                  <>
-                    <TableRowSkeleton />
-                    <TableRowSkeleton />
-                    <TableRowSkeleton />
-                  </>
-                ) : todayIslemler.length === 0 ? (
-                  <tr><td colSpan={4} className="px-8 py-10 text-center text-slate-400 italic">Bugün henüz işlem yapılmadı.</td></tr>
-                ) : (
-                  todayIslemler.map((islem, idx) => {
-                    // ... existing mapping logic
-                    const getTargetPage = (tip: string) => {
-                      switch (tip) {
-                        case 'Satış Faturası': return '/satis-faturasi';
-                        case 'Alış Faturası': return '/alis-faturasi';
-                        default: return '/odemeler';
-                      }
-                    };
-
-                    const handleAction = (action: 'edit' | 'print') => {
-                      navigate(getTargetPage(islem.type), {
-                        state: {
-                          action,
-                          id: islem.id,
-                          autoOpen: true
-                        }
-                      });
-                    };
-
-                    return (
-                      <tr key={`${islem.type}-${islem.id}-${idx}`} className="hover:bg-blue-50/30 transition-all group">
-                        <td className="px-8 py-5">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg ${islem.bgColor} ${islem.iconColor} flex items-center justify-center font-black text-xs transition-all uppercase`}>
-                              {islem.type.substring(0, 1).toUpperCase()}
+          <div className="premium-card overflow-hidden">
+            <div className="p-10 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+              <h3 className="text-xl font-black text-white tracking-tight uppercase leading-none">Güncel İşlemler</h3>
+              <div className="px-5 py-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black tracking-widest rounded-full uppercase">BUGÜN</div>
+            </div>
+            <div className="overflow-x-auto h-[450px] custom-scrollbar">
+              <table className="w-full text-left border-separate border-spacing-0">
+                <thead className="sticky top-0 z-20 bg-[#020617] shadow-sm">
+                  <tr>
+                    <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">İŞLEM</th>
+                    <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">CARİ</th>
+                    <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">TUTAR</th>
+                    <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">SAAT</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {todayIslemler.length === 0 ? (
+                    <tr><td colSpan={4} className="px-10 py-20 text-center text-slate-500 font-bold uppercase tracking-widest text-xs opacity-50">Bugün henüz bir işlem kaydedilmedi.</td></tr>
+                  ) : (
+                    todayIslemler.map((islem: any, index: number) => (
+                      <tr key={index} className="group hover:bg-white/[0.02] transition-all cursor-pointer" onClick={() => navigate(islem.type === 'Satış Faturası' ? '/satis-faturasi' : islem.type === 'Alış Faturası' ? '/alis-faturasi' : '/odemeler')}>
+                        <td className="px-10 py-6">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center border border-white/5 ${islem.bgColor} ${islem.iconColor}`}>
+                              <i className={islem.type === 'Satış Faturası' ? 'ri-arrow-left-up-line' : islem.type === 'Alış Faturası' ? 'ri-arrow-right-down-line' : 'ri-exchange-line'}></i>
                             </div>
-                            <span className="font-bold text-slate-700 uppercase text-xs">{islem.type}</span>
+                            <span className="font-black text-white text-xs tracking-tight uppercase">{islem.type}</span>
                           </div>
                         </td>
-                        <td className="px-8 py-5 text-slate-400 font-medium text-xs tracking-widest uppercase">{islem.cari_ad}</td>
-                        <td className="px-8 py-5 text-right">
-                          <span className={`font-black tabular-nums text-sm ${islem.type === 'Satış Faturası' || islem.type === 'Tahsilat' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                            ₺{Number(islem.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        <td className="px-10 py-6 text-slate-300 font-black text-sm uppercase">{islem.cari_ad}</td>
+                        <td className="px-10 py-6 text-right">
+                          <span className={`text-lg font-black tracking-tighter ${islem.iconColor.includes('emerald') ? 'text-emerald-400' : islem.iconColor.includes('orange') ? 'text-orange-400' : 'text-blue-400'}`}>
+                            ₺{Number(islem.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                           </span>
                         </td>
-                        <td className="px-8 py-5 text-right">
-                          <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                            <button
-                              onClick={() => handleAction('print')}
-                              className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all"
-                              title="Yazdır"
-                            >
-                              <i className="ri-printer-line"></i>
-                            </button>
-                            <button
-                              onClick={() => handleAction('edit')}
-                              className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all"
-                              title="Düzenle"
-                            >
-                              <i className="ri-edit-line"></i>
-                            </button>
-                          </div>
+                        <td className="px-10 py-6 text-right font-black text-slate-500 text-[10px] uppercase tracking-widest">
+                          {new Date(islem.tarih).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                         </td>
                       </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 };
-
-const StatCard = ({ title, value, sub, color, isStatus }: { title: string, value: string, sub: string, color: string, isStatus?: boolean }) => (
-  <div className="bg-white p-8 rounded-[28px] border border-gray-100 transition-all group relative overflow-hidden text-slate-900 hover-glow">
-    <div className={`absolute top-0 right-0 w-24 h-24 bg-${color}-50 rounded-full -mr-8 -mt-8 opacity-0 group-hover:opacity-100 transition-opacity`}></div>
-    <h3 className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2 flex items-center gap-2">
-      <span className={`w-1.5 h-1.5 rounded-full bg-${color}-500`}></span>
-      {title}
-    </h3>
-    <div className="flex items-end justify-between gap-4">
-      <div>
-        <p className={`text-4xl font-black text-slate-800 tracking-tighter ${isStatus ? 'text-blue-600' : ''}`}>{value}</p>
-        <p className="text-slate-400 text-xs font-bold mt-1 uppercase tracking-tighter">{sub}</p>
-      </div>
-      {isStatus && (
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-600 rounded-full border border-green-100 mb-1">
-          <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-          <span className="text-[10px] font-bold uppercase tracking-widest">Online</span>
-        </div>
-      )}
-    </div>
-  </div>
-);
 
 export default MuhasebeDashboard;

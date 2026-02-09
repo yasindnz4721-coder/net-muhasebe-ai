@@ -19,7 +19,7 @@ interface MenuItem {
 
 export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
   const location = useLocation();
-  const { isAdmin } = useProfile();
+  const { isAdmin, currentUser } = useProfile();
   const [isOpen, setIsOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
 
@@ -214,6 +214,22 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
             );
           })}
         </nav>
+
+        {currentUser?.subscription_status === 'trial' && currentUser?.trial_ends_at && (
+          <div className="px-6 mb-4">
+            <div className={`p-4 rounded-2xl border ${new Date(currentUser.trial_ends_at).getTime() - Date.now() < 2 * 24 * 60 * 60 * 1000 ? 'bg-rose-500/10 border-rose-500/20' : 'bg-indigo-500/10 border-indigo-500/20'}`}>
+              <div className="flex items-center gap-3 mb-2">
+                <i className={`ri-flashlight-line ${new Date(currentUser.trial_ends_at).getTime() - Date.now() < 2 * 24 * 60 * 60 * 1000 ? 'text-rose-500' : 'text-indigo-400'}`}></i>
+                <span className="text-[10px] font-black uppercase tracking-widest">
+                  {new Date(currentUser.trial_ends_at).getTime() - Date.now() < 2 * 24 * 60 * 60 * 1000 ? 'Süre Dolmak Üzere' : 'Deneme Süresi'}
+                </span>
+              </div>
+              <p className="text-[11px] font-bold text-slate-300 leading-tight">
+                {Math.ceil((new Date(currentUser.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} gün kaldı. Verimli kullanım dileriz!
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="p-6 mt-8">
           <div className="p-5 rounded-3xl bg-indigo-600/5 border border-indigo-500/10 group hover:bg-indigo-600/10 transition-colors">

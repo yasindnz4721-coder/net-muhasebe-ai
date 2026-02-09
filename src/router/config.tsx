@@ -1,5 +1,3 @@
-
-import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
 
 import HomePage from '../pages/home/page';
@@ -27,6 +25,9 @@ import LandingPage from '../pages/landing/page';
 import NotFoundPage from '../pages/NotFound';
 import ComingSoonPage from '../pages/ComingSoon';
 import SMSVerificationPage from '../pages/sms-verification/page';
+import PersonelPage from '../pages/personel/page';
+import PuantajTakibiPage from '../pages/personel/puantaj';
+import TrialExpiredPage from '../pages/TrialExpired';
 
 // Helper to create stub routes
 const stub = (title: string) => <ComingSoonPage title={title} />;
@@ -34,6 +35,8 @@ const stub = (title: string) => <ComingSoonPage title={title} />;
 const routes: RouteObject[] = [
   { path: '/tanitim-filmi', element: <TanitimPage /> },
   { path: '/login', element: <LoginPage /> },
+  { path: '/kayit', element: <KayitPage /> },
+  { path: '/deneme-suresi-doldu', element: <TrialExpiredPage /> },
   { path: '/', element: <LandingPage /> },
   { path: '/dashboard', element: <MuhasebeDashboard /> },
   { path: '/admin', element: <AdminPage /> },
@@ -49,6 +52,8 @@ const routes: RouteObject[] = [
   { path: '/tum-islemler', element: <TumIslemlerPage /> },
   { path: '/profil-ayarlari', element: <ProfilAyarlariPage /> },
   { path: '/ai-analiz', element: <AIAnalizPage /> },
+  { path: '/personel', element: <PersonelPage /> },
+  { path: '/puantaj-takibi', element: <PuantajTakibiPage /> },
 
   // New "Cari" Style Routes (Stubs)
   { path: '/teklifler', element: stub('Teklif Yönetimi') },
@@ -66,7 +71,6 @@ const routes: RouteObject[] = [
   { path: '/taksitler', element: stub('Taksit Listesi') },
   { path: '/kdv-raporu', element: stub('KDV Raporu') },
   { path: '/cari-ekstre', element: stub('Cari Ekstre Raporu') },
-  { path: '/personel', element: stub('Personel Listesi') },
   { path: '/zimmet-listesi', element: stub('Zimmet Takibi') },
 
   { path: '/gizlilik-politikasi', element: <GizlilikPolitikasiPage /> },

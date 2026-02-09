@@ -56,7 +56,12 @@ export default function LandingPage() {
                         {currentUser ? (
                             <Link to="/dashboard" className="premium-button px-8 h-12 text-[10px] tracking-widest bg-indigo-600 shadow-xl shadow-indigo-600/20">DASHBOARD'A GİT</Link>
                         ) : (
-                            <Link to="/login" className="premium-button px-8 h-12 text-[10px] tracking-widest bg-indigo-600 shadow-xl shadow-indigo-600/20">GİRİŞ YAP</Link>
+                            <>
+                                <Link to="/kayit?trial=true" className="text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors hidden sm:block">
+                                    14 GÜN ÜCRETSİZ DENEYİN
+                                </Link>
+                                <Link to="/login" className="premium-button px-8 h-12 text-[10px] tracking-widest bg-indigo-600 shadow-xl shadow-indigo-600/20">GİRİŞ YAP</Link>
+                            </>
                         )}
                     </div>
                 </div>
@@ -85,13 +90,12 @@ export default function LandingPage() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-6 animate-slide-up delay-300">
-                        <button onClick={() => handleAction()} className="premium-button px-12 h-20 text-xs tracking-[0.2em] font-black bg-indigo-600 shadow-2xl shadow-indigo-600/40 w-full sm:w-auto">
-                            HEMEN GİRİŞ YAP <i className="ri-arrow-right-line ml-2"></i>
-                        </button>
-                        <Link to="/tanitim-filmi" className="px-12 h-20 border border-white/10 bg-white/5 rounded-3xl font-black text-xs tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-white/10 transition-all uppercase w-full sm:w-auto">
-                            <i className="ri-play-circle-fill text-2xl text-indigo-500"></i>
-                            TANITIM FİLMİ
+                        <Link to="/kayit?trial=true" className="premium-button px-12 h-20 text-xs tracking-[0.2em] font-black bg-indigo-600 shadow-2xl shadow-indigo-600/40 w-full sm:w-auto flex items-center justify-center">
+                            14 GÜN ÜCRETSİZ DENEYİN <i className="ri-flashlight-line ml-2 text-lg"></i>
                         </Link>
+                        <button onClick={() => handleAction()} className="px-12 h-20 border border-white/10 bg-white/5 rounded-3xl font-black text-xs tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-white/10 transition-all uppercase w-full sm:w-auto">
+                            GİRİŞ YAP <i className="ri-login-box-line text-lg text-indigo-500"></i>
+                        </button>
                     </div>
 
                     {/* Social Proof */}

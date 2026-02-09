@@ -21,6 +21,44 @@ async function updateSchema() {
         await query("ALTER TABLE urunler ADD COLUMN IF NOT EXISTS stok_takibi BOOLEAN DEFAULT TRUE");
         await query("ALTER TABLE urunler ADD COLUMN IF NOT EXISTS stok_uyari_limiti DECIMAL(15, 2) DEFAULT 10");
 
+        console.log('🔄 Veritabanı şeması güncelleniyor (Personel Modülü)...');
+        await query(`
+            CREATE TABLE IF NOT EXISTS personeller (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                ad_soyad VARCHAR(255) NOT NULL,
+                unvan VARCHAR(255) DEFAULT '',
+                tckn VARCHAR(11) DEFAULT '',
+                telefon VARCHAR(50) DEFAULT '',
+                email VARCHAR(255) DEFAULT '',
+                adres TEXT DEFAULT '',
+                ise_giris_tarihi DATE DEFAULT CURRENT_DATE,
+                maas DECIMAL(15, 2) DEFAULT 0,
+                iban VARCHAR(34) DEFAULT '',
+                durum VARCHAR(50) DEFAULT 'Aktif',
+                profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            )
+        `);
+        await query(`
+            CREATE TABLE IF NOT EXISTS personel_puantaj (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                personel_id UUID REFERENCES personeller(id) ON DELETE CASCADE,
+                tarih DATE NOT NULL,
+                durum VARCHAR(50) DEFAULT 'Geldi',
+                notlar TEXT DEFAULT '',
+                profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                UNIQUE(personel_id, tarih)
+            )
+        `);
+
+        console.log('🔄 Veritabanı şeması güncelleniyor (Ücretsiz Deneme)...');
+        await query('ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMP WITH TIME ZONE');
+        await query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_approved BOOLEAN DEFAULT TRUE");
+        await query("ALTER TABLE users ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'card'");
+        await query("ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_status VARCHAR(50) DEFAULT 'active'");
+
         console.log('✅ Veritabanı şeması başarıyla güncellendi.');
         process.exit(0);
     } catch (error) {

@@ -27,6 +27,9 @@ async function fetchApi<T>(
         const data = await response.json();
 
         if (!response.ok) {
+            if (data.code === 'TRIAL_EXPIRED') {
+                window.location.href = '/deneme-suresi-doldu';
+            }
             return { data: null, error: data.error || 'Bir hata oluştu' };
         }
 
@@ -52,10 +55,10 @@ export const auth = {
         return result;
     },
 
-    async register(email: string, password: string, companyName?: string, paymentMethod?: string, subscription_tier?: string) {
+    async register(email: string, password: string, companyName?: string, paymentMethod?: string, subscription_tier?: string, isTrial?: boolean) {
         const result = await fetchApi<{ user: User; token: string }>('/api/auth/register', {
             method: 'POST',
-            body: JSON.stringify({ email, password, companyName, paymentMethod, subscription_tier }),
+            body: JSON.stringify({ email, password, companyName, paymentMethod, subscription_tier, isTrial }),
         });
 
         if (result.data?.token) {
@@ -326,6 +329,8 @@ export interface User {
     subscription_tier?: string;
     is_approved?: boolean;
     payment_method?: string;
+    trial_ends_at?: string;
+    subscription_status?: string;
     created_at?: string;
 }
 
@@ -440,4 +445,81 @@ export interface StokHareketi {
     cari_id?: string;
     cari_ad?: string;
     created_at?: string;
+}
+
+// Personel API
+export const personel = {
+    async getAll(profile_id: string) {
+        return fetchApi<Personel[]>(`/api/personel?profile_id=${profile_id}`);
+    },
+
+    async create(data: Partial<Personel>) {
+        return fetchApi<Personel>('/api/personel', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async update(id: string, data: Partial<Personel>) {
+        return fetchApi<Personel>(`/api/personel/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async delete(id: string) {
+        return fetchApi<{ message: string }>(`/api/personel/${id}`, {
+            method: 'DELETE',
+        });
+    },
+
+    async getPuantaj(id: string, yil: number, ay: number) {
+        return fetchApi<PuantajRecord[]>(`/api/personel/${id}/puantaj?yil=${yil}&ay=${ay}`);
+    },
+
+    async savePuantaj(id: string, data: Partial<PuantajRecord>) {
+        return fetchApi<PuantajRecord>(`/api/personel/${id}/puantaj`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+
+    async getMaasOzeti(id: string, yil: number, ay: number) {
+        return fetchApi<MaasOzeti>(`/api/personel/${id}/maas-ozeti?yil=${yil}&ay=${ay}`);
+    },
+};
+
+export interface Personel {
+    id: string;
+    ad_soyad: string;
+    unvan?: string;
+    tckn?: string;
+    telefon?: string;
+    email?: string;
+    adres?: string;
+    ise_giris_tarihi?: string;
+    maas: number | string;
+    iban?: string;
+    durum: string;
+    profile_id?: string;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface PuantajRecord {
+    id: string;
+    personel_id: string;
+    tarih: string;
+    durum: string;
+    notlar?: string;
+    profile_id?: string;
+}
+
+export interface MaasOzeti {
+    aylik_maas: number;
+    eksik_gun: number;
+    kesinti: number;
+    odenecek_maas: number;
+    yil: string;
+    ay: string;
 }

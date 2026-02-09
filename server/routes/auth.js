@@ -9,7 +9,7 @@ const router = express.Router();
 // Kullanıcı kaydı (Ortak Hesap Desteği)
 router.post('/register', async (req, res) => {
     try {
-        const { email, password, companyName, paymentMethod, subscription_tier } = req.body;
+        const { email, password, companyName, paymentMethod, subscription_tier, isTrial } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({ error: 'E-posta ve şifre gerekli' });
@@ -47,10 +47,14 @@ router.post('/register', async (req, res) => {
                 // Mevcut kullanıcının varsayılan profilini bu yeni profil yap (opsiyonel)
                 await query('UPDATE users SET current_profile_id = $1 WHERE id = $2', [profileId, userId]);
             } else {
-                const isApproved = paymentMethod !== 'eft';
+                const isApproved = isTrial ? true : (paymentMethod !== 'eft');
+                const tier = isTrial ? 'deneme' : (subscription_tier || 'temel');
+                const status = isTrial ? 'trial' : 'active';
+                const trialEndsAt = isTrial ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) : null;
+
                 const userResult = await query(
-                    'INSERT INTO users (email, password_hash, current_profile_id, subscription_tier, is_approved, payment_method) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-                    [userEmail, passwordHash, profileId, subscription_tier || 'temel', isApproved, paymentMethod || 'card']
+                    'INSERT INTO users (email, password_hash, current_profile_id, subscription_tier, is_approved, payment_method, subscription_status, trial_ends_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
+                    [userEmail, passwordHash, profileId, tier, isApproved, paymentMethod || 'card', status, trialEndsAt]
                 );
 
                 userId = userResult.rows[0].id;
@@ -130,7 +134,9 @@ router.post('/login', async (req, res) => {
                 id: user.id,
                 email: user.email,
                 role: user.role,
-                subscription_tier: user.subscription_tier
+                subscription_tier: user.subscription_tier,
+                trial_ends_at: user.trial_ends_at,
+                subscription_status: user.subscription_status
             },
             token
         });
@@ -144,7 +150,7 @@ router.post('/login', async (req, res) => {
 // Mevcut kullanıcı bilgisi
 router.get('/user', authMiddleware, async (req, res) => {
     try {
-        const result = await query('SELECT id, email, role, subscription_tier, created_at FROM users WHERE id = $1', [req.user.id]);
+        const result = await query('SELECT id, email, role, subscription_tier, trial_ends_at, subscription_status, created_at FROM users WHERE id = $1', [req.user.id]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Kullanıcı bulunamadı' });
