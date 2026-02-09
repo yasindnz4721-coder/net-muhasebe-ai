@@ -258,19 +258,31 @@ const PersonelPage = () => {
                                                         <div className="text-slate-500 text-xs">{p.email || 'Email Yok'}</div>
                                                     </td>
                                                     <td className="px-8 py-6">
-                                                        <div className="text-lg font-black text-emerald-400 tracking-tighter">
-                                                            ₺{Number(maasOzetleri[p.id]?.odenecek_maas || p.maas).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
-                                                        </div>
-                                                        {maasOzetleri[p.id]?.eksik_gun > 0 && (
-                                                            <div className="text-[10px] font-black text-rose-500 uppercase tracking-widest leading-none mt-1 whitespace-nowrap">
-                                                                {maasOzetleri[p.id].eksik_gun} GÜN KESİNTİLİ
+                                                        <div className="flex flex-col">
+                                                            <div className="text-lg font-black text-emerald-400 tracking-tighter leading-none">
+                                                                ₺{Number(maasOzetleri[p.id]?.odenecek_maas || p.maas).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                                                             </div>
-                                                        )}
+                                                            {maasOzetleri[p.id]?.eksik_gun > 0 ? (
+                                                                <div className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wider">
+                                                                    ₺{Number(p.maas).toLocaleString()} - ₺{Number((Number(p.maas) / 30) * maasOzetleri[p.id].eksik_gun).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} (KESİNTİ)
+                                                                </div>
+                                                            ) : (
+                                                                <div className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wider italic opacity-50">TAM MAAŞ</div>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                     <td className="px-8 py-6">
-                                                        <span className={`inline-flex px-3 py-1 rounded-lg text-[10px] font-black tracking-widest uppercase ${p.durum === 'Aktif' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
-                                                            {p.durum}
-                                                        </span>
+                                                        <div className="flex items-center gap-3">
+                                                            <span className={`inline-flex px-3 py-1 rounded-lg text-[10px] font-black tracking-widest uppercase ${p.durum === 'Aktif' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
+                                                                {p.durum}
+                                                            </span>
+                                                            {maasOzetleri[p.id]?.eksik_gun > 0 && (
+                                                                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[9px] font-black uppercase tracking-widest">
+                                                                    <i className="ri-error-warning-line"></i>
+                                                                    {maasOzetleri[p.id].eksik_gun} GÜN GELMEDİ
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </td>
                                                     <td className="px-8 py-6 text-right">
                                                         <div className="flex items-center justify-end gap-3 opacity-0 group-hover/row:opacity-100 transition-all">
