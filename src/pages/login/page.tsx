@@ -71,7 +71,15 @@ export default function LoginPage() {
         </div>
 
         <div className="hidden md:flex items-center gap-8 bg-white/5 backdrop-blur-xl px-1 py-1 rounded-2xl border border-white/10">
-          <Link to="/login" className="px-6 py-3 text-sm font-bold text-white hover:text-indigo-400 transition-colors">Giriş Yap</Link>
+          <a
+            href="/NetMuhasebe_AI_Kurulum.exe"
+            download
+            className="px-6 py-3 text-sm font-bold text-slate-400 hover:text-white transition-colors flex items-center gap-2"
+          >
+            <i className="ri-download-cloud-2-line text-lg"></i>
+            Masaüstüne Kur
+          </a>
+          <Link to="/login" className="px-6 py-3 text-sm font-bold text-white hover:text-indigo-400 transition-colors bg-white/5 rounded-xl border border-white/10">Giriş Yap</Link>
         </div>
       </nav>
 
