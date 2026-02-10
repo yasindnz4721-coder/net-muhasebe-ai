@@ -22,23 +22,11 @@ export default function TaksitTakibiPage() {
             await taksitApi.checkPayments(selectedProfile.id);
             // Eğer 'upcoming' modundaysa tüm bekleyenleri al, yoksa aylık al
             const res = viewType === 'upcoming'
-                ? await taksitApi.getTakip(selectedProfile.id) // Query paramsız hepsi gelir
+                ? await taksitApi.getTakip(selectedProfile.id, undefined, undefined, true)
                 : await taksitApi.getTakip(selectedProfile.id, filter.yil, filter.ay);
 
             if (res.data) {
-                let data = res.data;
-                if (viewType === 'upcoming') {
-                    // Gelecek 30 günü filtrele (veya tüm bekleyenleri göster)
-                    const today = new Date();
-                    const next30 = new Date();
-                    next30.setDate(today.getDate() + 30);
-
-                    data = data.filter(o => {
-                        const vT = new Date(o.vade_tarihi);
-                        return o.durum === 'Bekliyor' && vT <= next30;
-                    });
-                }
-                setTakipVerisi(data);
+                setTakipVerisi(res.data);
             }
         } catch (error) {
             console.error('Takip verisi hatası:', error);

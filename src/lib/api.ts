@@ -569,9 +569,10 @@ export const taksitler = {
         });
     },
 
-    async getTakip(profile_id: string, yil?: number, ay?: number) {
+    async getTakip(profile_id: string, yil?: number, ay?: number, upcoming?: boolean) {
         let url = `/api/taksitler/takip?profile_id=${profile_id}`;
-        if (yil && ay) url += `&yil=${yil}&ay=${ay}`;
+        if (upcoming) url += `&upcoming=true`;
+        else if (yil && ay) url += `&yil=${yil}&ay=${ay}`;
         return fetchApi<TaksitOdeme[]>(url);
     },
 
