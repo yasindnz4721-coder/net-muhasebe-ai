@@ -31,12 +31,12 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Gerekli alanlar eksik' });
         }
 
-        // 1. Taksit planını kaydet
+        // 1. Taksit planını kaydet (cari_id ve cari_ad artık opsiyonel)
         const planResult = await query(
             `INSERT INTO taksitler (cari_id, cari_ad, toplam_tutar, taksit_tutari, taksit_sayisi, odeme_gunu, baslangic_tarihi, aciklama, profile_id)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
              RETURNING *`,
-            [cari_id, cari_ad, toplam_tutar, taksit_tutari, taksit_sayisi, odeme_gunu, baslangic_tarihi, aciklama, profile_id]
+            [cari_id || null, cari_ad || 'Genel', toplam_tutar, taksit_tutari, taksit_sayisi, odeme_gunu, baslangic_tarihi, aciklama, profile_id]
         );
 
         const planId = planResult.rows[0].id;
@@ -98,6 +98,10 @@ router.post('/check-payments', async (req, res) => {
 
         const bugun = new Date().toISOString().split('T')[0];
 
+        // Varsayılan kasayı bul
+        const kasaResult = await query('SELECT id FROM kasalar WHERE profile_id = $1 AND is_default = TRUE', [profile_id]);
+        const defaultKasaId = kasaResult.rows.length > 0 ? kasaResult.rows[0].id : null;
+
         // Bugün vadesi gelmiş ve henüz ödenmemiş taksitleri bul
         const duePayments = await query(
             `SELECT to.*, t.cari_id, t.cari_ad, t.aciklama as plan_aciklama 
@@ -112,16 +116,21 @@ router.post('/check-payments', async (req, res) => {
         for (const payment of duePayments.rows) {
             // 1. Kasaya (odemeler) gider olarak ekle
             const odemeResult = await query(
-                `INSERT INTO odemeler (cari_id, cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, profile_id)
-                 VALUES ($1, $2, 'Ödeme', $3, NOW(), 'Nakit', $4, $5)
+                `INSERT INTO odemeler (cari_id, cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, profile_id, kasa_id)
+                 VALUES ($1, $2, 'Ödeme', $3, NOW(), 'Nakit', $4, $5, $6)
                  RETURNING id`,
-                [payment.cari_id, payment.cari_ad, payment.tutar, `Taksit Ödemesi: ${payment.plan_aciklama || ''}`, profile_id]
+                [payment.cari_id, payment.cari_ad, payment.tutar, `Taksit Ödemesi: ${payment.plan_aciklama || ''}`, profile_id, defaultKasaId]
             );
 
-            // 2. Taksit ödemesini 'Ödendi' olarak işaretle
+            // 2. Kasa bakiyesini güncelle
+            if (defaultKasaId) {
+                await query('UPDATE kasalar SET bakiye = bakiye - $1, updated_at = NOW() WHERE id = $2', [payment.tutar, defaultKasaId]);
+            }
+
+            // 3. Taksit ödemesini 'Ödendi' olarak işaretle
             await query(
-                `UPDATE taksit_odemeleri SET durum = 'Ödendi', odeme_tarihi = NOW(), odeme_id = $1 WHERE id = $2`,
-                [odemeResult.rows[0].id, payment.id]
+                `UPDATE taksit_odemeleri SET durum = 'Ödendi', odeme_tarihi = NOW(), odeme_id = $1, kasa_id = $2 WHERE id = $3`,
+                [odemeResult.rows[0].id, defaultKasaId, payment.id]
             );
 
             processed.push(payment.id);
@@ -131,6 +140,18 @@ router.post('/check-payments', async (req, res) => {
     } catch (error) {
         console.error('Taksit kontrol hatası:', error);
         res.status(500).json({ error: 'Taksitler kontrol edilemedi' });
+    }
+});
+
+// Taksit planını sil
+router.delete('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await query('DELETE FROM taksitler WHERE id = $1', [id]);
+        res.json({ message: 'Taksit planı silindi' });
+    } catch (error) {
+        console.error('Taksit silme hatası:', error);
+        res.status(500).json({ error: 'Taksit silinemedi' });
     }
 });
 

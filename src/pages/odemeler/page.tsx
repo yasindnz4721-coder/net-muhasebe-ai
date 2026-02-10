@@ -3,7 +3,9 @@ import {
   odemeler as odemelerApi,
   Odeme,
   cariler as carilerApi,
-  Cari
+  Cari,
+  kasalar as kasalarApi,
+  Kasa
 } from '../../lib/api';
 import { useProfile } from '../../contexts/ProfileContext';
 import Sidebar from '../../components/feature/Sidebar';
@@ -27,6 +29,7 @@ const OdemelerPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTip, setFilterTip] = useState('all');
+  const [anaKasa, setAnaKasa] = useState<Kasa | null>(null);
 
   useEffect(() => {
     if (selectedProfile) {
@@ -37,8 +40,16 @@ const OdemelerPage = () => {
   const loadOdemeler = async () => {
     try {
       setLoading(true);
-      const res = await odemelerApi.getAll(selectedProfile!.id);
-      if (res.data) setOdemeList(res.data);
+      const [odemelerRes, kasalarRes] = await Promise.all([
+        odemelerApi.getAll(selectedProfile!.id),
+        kasalarApi.getAll(selectedProfile!.id)
+      ]);
+
+      if (odemelerRes.data) setOdemeList(odemelerRes.data);
+      if (kasalarRes.data) {
+        const defaultKasa = kasalarRes.data.find(k => k.is_default) || kasalarRes.data[0];
+        setAnaKasa(defaultKasa);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -98,8 +109,8 @@ const OdemelerPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="premium-card p-8 group transition-all flex items-center justify-between">
                 <div className="space-y-1">
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">KASA BAKİYESİ</span>
-                  <div className="text-4xl font-black tracking-tighter text-white">₺{(toplamTahsilat - toplamOdeme).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">KASA BAKİYESİ (ANA KASA)</span>
+                  <div className="text-4xl font-black tracking-tighter text-white">₺{Number(anaKasa?.bakiye || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
                 </div>
                 <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400">
                   <Wallet size={24} />

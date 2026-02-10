@@ -1,6 +1,9 @@
-const express = require('express');
 const router = express.Router();
 const { query } = require('../db');
+const AuditService = require('../services/auditService');
+const authMiddleware = require('../middleware/auth');
+
+router.use(authMiddleware);
 
 // Tüm personelleri getir
 router.get('/', async (req, res) => {
@@ -75,7 +78,22 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        // Önce personel bilgilerini al (log için)
+        const personelResult = await query('SELECT ad_soyad, profile_id FROM personeller WHERE id = $1', [id]);
+        if (personelResult.rows.length === 0) return res.status(404).json({ error: 'Personel bulunamadı' });
+        const p = personelResult.rows[0];
+
         await query('DELETE FROM personeller WHERE id = $1', [id]);
+
+        await AuditService.log(
+            p.profile_id,
+            'SİLME',
+            'personeller',
+            id,
+            `Personel silindi: ${p.ad_soyad}`,
+            req.user.email
+        );
+
         res.json({ message: 'Personel başarıyla silindi' });
     } catch (error) {
         console.error('Personel silme hatası:', error);
@@ -152,11 +170,35 @@ router.post('/:id/avanslar', async (req, res) => {
         const { id } = req.params;
         const { tarih, tutar, aciklama, profile_id } = req.body;
 
+        // 1. Personel bilgilerini al
+        const pResult = await query('SELECT ad_soyad FROM personeller WHERE id = $1', [id]);
+        if (pResult.rows.length === 0) return res.status(404).json({ error: 'Personel bulunamadı' });
+        const adSoyad = pResult.rows[0].ad_soyad;
+
+        // 2. Varsayılan kasayı bul
+        const kasaResult = await query('SELECT id FROM kasalar WHERE profile_id = $1 AND is_default = TRUE', [profile_id]);
+        const defaultKasaId = kasaResult.rows.length > 0 ? kasaResult.rows[0].id : null;
+
+        // 3. Avansı kaydet
         const result = await query(
-            `INSERT INTO personel_avanslar (personel_id, tarih, tutar, aciklama, profile_id)
-             VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-            [id, tarih, tutar, aciklama || '', profile_id]
+            `INSERT INTO personel_avanslar (personel_id, tarih, tutar, aciklama, profile_id, kasa_id)
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+            [id, tarih, tutar, aciklama || '', profile_id, defaultKasaId]
         );
+
+        // 4. Ödemeler defterine ekle
+        const odemeResult = await query(
+            `INSERT INTO odemeler (cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, profile_id, kasa_id)
+             VALUES ($1, 'Ödeme', $2, $3, 'Nakit', $4, $5, $6)
+             RETURNING id`,
+            [adSoyad, tutar, tarih, `Personel Avansı: ${aciklama || ''}`, profile_id, defaultKasaId]
+        );
+
+        // 5. Kasa bakiyesini güncelle
+        if (defaultKasaId) {
+            await query('UPDATE kasalar SET bakiye = bakiye - $1, updated_at = NOW() WHERE id = $2', [tutar, defaultKasaId]);
+        }
+
         res.json(result.rows[0]);
     } catch (error) {
         console.error('Avans kaydetme hatası:', error);

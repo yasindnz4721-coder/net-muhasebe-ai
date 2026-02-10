@@ -1,6 +1,6 @@
-const express = require('express');
 const { pool, query } = require('../db');
 const authMiddleware = require('../middleware/auth');
+const AuditService = require('../services/auditService');
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -221,6 +221,16 @@ router.delete('/:id', async (req, res) => {
 
         // 3. Faturayı sil
         await client.query('DELETE FROM satis_faturalari WHERE id = $1', [id]);
+
+        // 4. Denetim kaydı oluştur
+        await AuditService.log(
+            fatura.profile_id,
+            'SİLME',
+            'satis_faturalari',
+            id,
+            `Satış Faturası silindi: ${fatura.fatura_no} (${fatura.cari_ad})`,
+            req.user.email
+        );
 
         await client.query('COMMIT');
         res.json({ message: 'Fatura silindi', id });

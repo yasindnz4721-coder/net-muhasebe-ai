@@ -3,6 +3,7 @@ import { useProfile } from '../../contexts/ProfileContext';
 import { taksitler as taksitApi, TaksitOdeme } from '../../lib/api';
 import Sidebar from '../../components/feature/Sidebar';
 import Header from '../../components/feature/Header';
+import { Trash2 } from 'lucide-react';
 
 export default function TaksitTakibiPage() {
     const { selectedProfile } = useProfile();
@@ -17,12 +18,24 @@ export default function TaksitTakibiPage() {
         if (!selectedProfile) return;
         setLoading(true);
         try {
+            // Ödeme zamanı geldiyse otomatik öde
+            await taksitApi.checkPayments(selectedProfile.id);
             const res = await taksitApi.getTakip(selectedProfile.id, filter.yil, filter.ay);
             if (res.data) setTakipVerisi(res.data);
         } catch (error) {
             console.error('Takip verisi hatası:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDeletePlan = async (taksitId: string) => {
+        if (!confirm('Bu taksit planını ve tüm ödemelerini silmek istediğinize emin misiniz?')) return;
+        try {
+            await taksitApi.delete(taksitId);
+            fetchData();
+        } catch (error) {
+            console.error('Taksit silme hatası:', error);
         }
     };
 
@@ -75,6 +88,7 @@ export default function TaksitTakibiPage() {
                                     <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">Açıklama / Cari</th>
                                     <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Tutar</th>
                                     <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Durum</th>
+                                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">İşlem</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
@@ -93,11 +107,20 @@ export default function TaksitTakibiPage() {
                                             <td className="px-8 py-6 text-right font-black text-white">₺{Number(odeme.tutar).toLocaleString()}</td>
                                             <td className="px-8 py-6 text-center">
                                                 <span className={`px-4 py-1.5 text-[10px] font-black rounded-full border ${odeme.durum === 'Ödendi'
-                                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                                        : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                                    : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
                                                     }`}>
                                                     {odeme.durum}
                                                 </span>
+                                            </td>
+                                            <td className="px-8 py-6 text-right">
+                                                <button
+                                                    onClick={() => handleDeletePlan(odeme.taksit_id)}
+                                                    className="p-2 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-all"
+                                                    title="Planı Sil"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
                                             </td>
                                         </tr>
                                     );

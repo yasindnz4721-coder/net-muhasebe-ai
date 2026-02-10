@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { satisFaturalari as satisApi, alisFaturalari as alisApi, odemeler as odemelerApi, SatisFaturasi, AlisFaturasi, Odeme } from '../../lib/api';
+import { satisFaturalari as satisApi, alisFaturalari as alisApi, odemeler as odemelerApi, personel as personelApi, giderler as giderApi, SatisFaturasi, AlisFaturasi, Odeme } from '../../lib/api';
 import { useProfile } from '../../contexts/ProfileContext';
 import Header from '../../components/feature/Header';
 import Sidebar from '../../components/feature/Sidebar';
@@ -15,6 +15,8 @@ export default function Raporlar() {
   const [satisFaturalari, setSatisFaturalari] = useState<SatisFaturasi[]>([]);
   const [alisFaturalari, setAlisFaturalari] = useState<AlisFaturasi[]>([]);
   const [odemeler, setOdemeler] = useState<Odeme[]>([]);
+  const [personeller, setPersoneller] = useState<any[]>([]);
+  const [expenses, setExpenses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'ozet' | 'kdv' | 'gelir-gider' | 'mizan'>('ozet');
 
@@ -33,10 +35,14 @@ export default function Raporlar() {
       const { data: satisData } = await satisApi.getAll(selectedProfile.id);
       const { data: alisData } = await alisApi.getAll(selectedProfile.id);
       const { data: odemelerData } = await odemelerApi.getAll(selectedProfile.id);
+      const { data: personelData } = await personelApi.getAll(selectedProfile.id);
+      const { data: expenseData } = await giderApi.getAll(selectedProfile.id);
 
       setSatisFaturalari(satisData || []);
       setAlisFaturalari(alisData || []);
       setOdemeler(odemelerData || []);
+      setPersoneller(personelData || []);
+      setExpenses(expenseData || []);
     } catch (error) {
       console.error('Veriler yüklenirken hata:', error);
     } finally {
@@ -65,11 +71,19 @@ export default function Raporlar() {
     return tarih >= baslangic && tarih <= bitis;
   });
 
+  const filteredExpenses = expenses.filter(e => {
+    const tarih = new Date(e.tarih);
+    const baslangic = new Date(dateRange.baslangic);
+    const bitis = new Date(dateRange.bitis);
+    return tarih >= baslangic && tarih <= bitis;
+  });
+
   // Mali hesaplamalar
   const toplamSatis = filteredSatisFaturalari.reduce((sum, f) => sum + Number(f.toplam || 0), 0);
   const toplamAlis = filteredAlisFaturalari.reduce((sum, f) => sum + Number(f.toplam || 0), 0);
   const toplamAlinanOdeme = filteredOdemeler.filter(o => o.tip === 'Tahsilat' || o.tip === 'Alınan Ödeme').reduce((sum, o) => sum + Number(o.tutar || 0), 0);
   const toplamVerilenOdeme = filteredOdemeler.filter(o => o.tip === 'Tediye' || o.tip === 'Verilen Ödeme').reduce((sum, o) => sum + Number(o.tutar || 0), 0);
+  const toplamEkstraGider = filteredExpenses.reduce((sum, e) => sum + Number(e.tutar || 0), 0);
 
   // KDV Hesaplamaları (Varsayılan %20)
   const kdvOrani = 0.20;
@@ -77,11 +91,14 @@ export default function Raporlar() {
   const satisKDV = toplamSatis - satisMatrah;
   const alisMatrah = toplamAlis / (1 + kdvOrani);
   const alisKDV = toplamAlis - alisMatrah;
-  const odenecekKDV = satisKDV - alisKDV;
+  const odenecekKDV = Math.max(0, satisKDV - alisKDV);
+
+  // Personel Maliyetleri (Aylık toplam)
+  const toplamPersonelMaliyeti = personeller.reduce((sum, p) => sum + (Number(p.maas) || 0), 0);
 
   // Gelir-Gider Tablosu
   const brutKar = toplamSatis - toplamAlis;
-  const netKar = brutKar - odenecekKDV;
+  const netKar = brutKar - odenecekKDV - toplamPersonelMaliyeti - toplamEkstraGider;
 
   // Mizan (Cari Bazlı)
   const cariMizan: any[] = [];
@@ -253,13 +270,22 @@ export default function Raporlar() {
                 <p className="text-slate-500 text-lg font-medium max-w-xl">İşletmenizin finansal performansını anlık olarak izleyin ve yasal uyum raporlarınızı hazırlayın.</p>
               </div>
 
-              <button
-                onClick={exportToExcel}
-                className="premium-button px-8 h-16 text-[10px] uppercase tracking-widest group bg-emerald-600/20 border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white"
-              >
-                <span>EXCEL ÜRETEREK İNDİR</span>
-                <i className="ri-file-excel-line text-xl group-hover:translate-y-1 transition-transform"></i>
-              </button>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => window.print()}
+                  className="premium-button px-8 h-16 text-[10px] uppercase tracking-widest group bg-indigo-600/20 border-indigo-500/30 text-indigo-400 hover:bg-indigo-600 hover:text-white"
+                >
+                  <span>PDF OLARAK YAZDIR</span>
+                  <i className="ri-printer-line text-xl group-hover:translate-y-1 transition-transform"></i>
+                </button>
+                <button
+                  onClick={exportToExcel}
+                  className="premium-button px-8 h-16 text-[10px] uppercase tracking-widest group bg-emerald-600/20 border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white"
+                >
+                  <span>EXCEL ÜRETEREK İNDİR</span>
+                  <i className="ri-file-excel-line text-xl group-hover:translate-y-1 transition-transform"></i>
+                </button>
+              </div>
             </div>
 
             {/* Date Filters */}
@@ -514,6 +540,11 @@ export default function Raporlar() {
                         <td className="px-10 py-5 text-right font-black text-rose-500">₺{toplamAlis.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
                       </tr>
                       <tr className="hover:bg-white/[0.01]">
+                        <td className="px-16 py-5 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Personel Maaş Ödemeleri (Net)</td>
+                        <td className="px-10 py-5 text-right font-black text-slate-700">—</td>
+                        <td className="px-10 py-5 text-right font-black text-rose-500">₺{toplamPersonelMaliyeti.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                      </tr>
+                      <tr className="hover:bg-white/[0.01]">
                         <td className="px-16 py-5 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Yapılan Cari Ödemeler</td>
                         <td className="px-10 py-5 text-right font-black text-slate-700">—</td>
                         <td className="px-10 py-5 text-right font-black text-rose-500">₺{toplamVerilenOdeme.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
@@ -523,10 +554,15 @@ export default function Raporlar() {
                         <td className="px-10 py-5 text-right font-black text-slate-700">—</td>
                         <td className="px-10 py-5 text-right font-black text-rose-500">₺{odenecekKDV.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
                       </tr>
+                      <tr className="hover:bg-white/[0.01]">
+                        <td className="px-16 py-5 text-indigo-400 font-bold uppercase tracking-widest text-[10px]">Genel İşletme Giderleri (Kira, Fatura vb.)</td>
+                        <td className="px-10 py-5 text-right font-black text-slate-700">—</td>
+                        <td className="px-10 py-5 text-right font-black text-rose-500">₺{toplamEkstraGider.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                      </tr>
                       <tr className="bg-rose-500/5">
                         <td className="px-10 py-8 font-black text-white">BRÜT GİDER TOPLAMI</td>
                         <td className="px-10 py-8 text-right font-black text-slate-700">—</td>
-                        <td className="px-10 py-8 text-right font-black text-rose-500 text-xl tracking-tighter">₺{(toplamAlis + toplamVerilenOdeme + odenecekKDV).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-10 py-8 text-right font-black text-rose-500 text-xl tracking-tighter">₺{(toplamAlis + toplamVerilenOdeme + odenecekKDV + toplamEkstraGider).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
                       </tr>
 
                       <tr className={`border-t-4 ${netKar >= 0 ? 'border-indigo-500 bg-indigo-500/10' : 'border-rose-500 bg-rose-500/10'}`}>

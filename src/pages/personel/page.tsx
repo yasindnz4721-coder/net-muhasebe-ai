@@ -393,7 +393,7 @@ const PersonelPage = () => {
                                         type="date"
                                         value={formData.absentDate}
                                         onChange={e => setFormData({ ...formData, absentDate: e.target.value })}
-                                        className="premium-input h-14 border-rose-500/20 focus:border-rose-500/50"
+                                        className="premium-input h-14 border-rose-500/20 focus:border-rose-500/50 text-white"
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -404,16 +404,16 @@ const PersonelPage = () => {
                                     <div className="flex gap-3">
                                         <input
                                             type="number"
-                                            value={formData.advanceAmount}
+                                            value={formData.advanceAmount || ''}
                                             onChange={e => setFormData({ ...formData, advanceAmount: Number(e.target.value) })}
-                                            className="premium-input h-14 border-orange-500/20 focus:border-orange-500/50 flex-[1.5]"
+                                            className="premium-input h-14 border-orange-500/20 focus:border-orange-500/50 flex-[1.5] text-white"
                                             placeholder="Tutar"
                                         />
                                         <input
                                             type="date"
                                             value={formData.advanceDate}
                                             onChange={e => setFormData({ ...formData, advanceDate: e.target.value })}
-                                            className="premium-input h-14 border-orange-500/20 focus:border-orange-500/50 flex-1"
+                                            className="premium-input h-14 border-orange-500/20 focus:border-orange-500/50 flex-1 text-white"
                                         />
                                     </div>
                                 </div>

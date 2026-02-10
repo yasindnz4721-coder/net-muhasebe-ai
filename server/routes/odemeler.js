@@ -56,12 +56,23 @@ router.post('/', async (req, res) => {
         }
         // ---------------------
 
+        // Varsayılan kasayı bul
+        const kasaResult = await query('SELECT id FROM kasalar WHERE profile_id = $1 AND is_default = TRUE', [profile_id]);
+        const defaultKasaId = kasaResult.rows.length > 0 ? kasaResult.rows[0].id : null;
+        const targetKasaId = req.body.kasa_id || defaultKasaId;
+
         const result = await query(
-            `INSERT INTO odemeler (cari_id, cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, profile_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            `INSERT INTO odemeler (cari_id, cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, profile_id, kasa_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
-            [cari_id, cari_ad || '', tip || 'Tahsilat', tutar, tarih || new Date().toISOString(), odeme_yontemi || 'Nakit', aciklama || '', profile_id]
+            [cari_id || null, cari_ad || 'Genel', tip || 'Tahsilat', tutar, tarih || new Date().toISOString(), odeme_yontemi || 'Nakit', aciklama || '', profile_id, targetKasaId]
         );
+
+        // Kasa bakiyesini güncelle
+        if (targetKasaId) {
+            const miktar = tip === 'Tahsilat' ? tutar : -tutar;
+            await query('UPDATE kasalar SET bakiye = bakiye + $1, updated_at = NOW() WHERE id = $2', [miktar, targetKasaId]);
+        }
 
         res.status(201).json(result.rows[0]);
     } catch (error) {

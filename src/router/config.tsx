@@ -11,6 +11,7 @@ import OdemelerPage from '../pages/odemeler/page';
 import RaporlarPage from '../pages/raporlar/page';
 import TumIslemlerPage from '../pages/tum-islemler/page';
 import ProfilAyarlariPage from '../pages/profil-ayarlari/page';
+import GiderlerPage from '../pages/giderler/page';
 import LoginPage from '../pages/login/page';
 import KayitPage from '../pages/kayit/page';
 import SifreSifirlamaPage from '../pages/sifre-sifirlama/page';
@@ -30,6 +31,7 @@ import PuantajTakibiPage from '../pages/personel/puantaj';
 import TaksitlerPage from '../pages/taksitler/page';
 import TaksitTakibiPage from '../pages/taksit-takibi/page';
 import TrialExpiredPage from '../pages/TrialExpired';
+import DenetimPage from '../pages/denetim/page';
 
 // Helper to create stub routes
 const stub = (title: string) => <ComingSoonPage title={title} />;
@@ -50,6 +52,7 @@ const routes: RouteObject[] = [
   { path: '/satis-faturasi', element: <SatisFaturasiPage /> },
   { path: '/alis-faturasi', element: <AlisFaturasiPage /> },
   { path: '/odemeler', element: <OdemelerPage /> },
+  { path: '/giderler', element: <GiderlerPage /> },
   { path: '/raporlar', element: <RaporlarPage /> },
   { path: '/tum-islemler', element: <TumIslemlerPage /> },
   { path: '/profil-ayarlari', element: <ProfilAyarlariPage /> },
@@ -74,6 +77,7 @@ const routes: RouteObject[] = [
   { path: '/kdv-raporu', element: stub('KDV Raporu') },
   { path: '/cari-ekstre', element: stub('Cari Ekstre Raporu') },
   { path: '/zimmet-listesi', element: stub('Zimmet Takibi') },
+  { path: '/denetim', element: <DenetimPage /> },
 
   { path: '/gizlilik-politikasi', element: <GizlilikPolitikasiPage /> },
   { path: '*', element: <NotFoundPage /> },

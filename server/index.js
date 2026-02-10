@@ -42,6 +42,10 @@ const profilesRoutes = require('./routes/profiles');
 const adminRoutes = require('./routes/admin');
 const personelRoutes = require('./routes/personel');
 const taksitlerRoutes = require('./routes/taksitler');
+const kasalarRoutes = require('./routes/kasalar');
+const bildirimlerRoutes = require('./routes/bildirimler');
+const denetimRoutes = require('./routes/denetim');
+const giderlerRoutes = require('./routes/giderler');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/cariler', carilerRoutes);
@@ -55,6 +59,10 @@ app.use('/api/profiles', profilesRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/personel', personelRoutes);
 app.use('/api/taksitler', taksitlerRoutes);
+app.use('/api/kasalar', kasalarRoutes);
+app.use('/api/bildirimler', bildirimlerRoutes);
+app.use('/api/denetim', denetimRoutes);
+app.use('/api/giderler', giderlerRoutes);
 
 // Health check
 app.get('/api/health', async (req, res) => {
@@ -74,6 +82,11 @@ app.get('/api/health', async (req, res) => {
             timestamp: new Date().toISOString()
         });
     }
+});
+
+// Keep-alive ping endpoint
+app.get('/api/ping', (req, res) => {
+    res.status(200).send('pong');
 });
 
 // Error handler

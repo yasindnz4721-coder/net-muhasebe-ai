@@ -37,6 +37,9 @@ interface DashboardStats {
   toplamTediye: number;
   gunlukSatis: number;
   gunlukTahsilat: number;
+  gunlukNetKasa: number;
+  aylikKarZarar: number;
+  enCokGelirMusteri: string;
   aylikTrend: any[];
   sonIslemler: any[];
   tahminlemeData?: any[];
@@ -63,6 +66,9 @@ export default function HomePage() {
     toplamTediye: 0,
     gunlukSatis: 0,
     gunlukTahsilat: 0,
+    gunlukNetKasa: 0,
+    aylikKarZarar: 0,
+    enCokGelirMusteri: '-',
     aylikTrend: [],
     sonIslemler: [],
   });
@@ -90,12 +96,14 @@ export default function HomePage() {
         { data: satisFaturalari },
         { data: alisFaturalari },
         { data: odemeler },
+        { data: personeller },
       ] = await Promise.all([
         api.cariler.getAll(selectedProfile.id),
         api.urunler.getAll(selectedProfile.id),
         api.satisFaturalari.getAll(selectedProfile.id),
         api.alisFaturalari.getAll(selectedProfile.id),
         api.odemeler.getAll(selectedProfile.id),
+        api.personel.getAll(selectedProfile.id),
       ]);
 
       const bekleyenSatis = satisFaturalari?.filter((f: any) => f.durum === 'Onaylandı')?.length || 0;
@@ -147,6 +155,28 @@ export default function HomePage() {
         })
         .reduce((sum: number, o: any) => sum + (Number(o.tutar) || 0), 0);
 
+      const gunlukOdemeToplam = (odemeler || [])
+        .filter((o: any) => {
+          if (o.tip !== 'Ödeme') return false;
+          const odemeTarih = new Date(o.tarih);
+          odemeTarih.setHours(0, 0, 0, 0);
+          return odemeTarih.getTime() === bugun.getTime();
+        })
+        .reduce((sum: number, o: any) => sum + (Number(o.tutar) || 0), 0);
+
+      const gunlukNetKasa = gunlukTahsilatToplam - gunlukOdemeToplam;
+
+      // Aylık Personel Maliyeti
+      const toplamPersonelMaas = personeller?.reduce((sum: number, p: any) => sum + (Number(p.maas) || 0), 0) || 0;
+      const aylikKarZararValue = aylikSatisToplam - aylikAlisToplam - toplamPersonelMaas;
+
+      // En Çok Gelir Getiren Müşteri
+      const musteriler = satisFaturalari?.reduce((acc: any, f: any) => {
+        acc[f.cari_ad] = (acc[f.cari_ad] || 0) + Number(f.toplam);
+        return acc;
+      }, {}) || {};
+      const enCokGelirMusteri = Object.entries(musteriler).sort((a: any, b: any) => b[1] - a[1])[0] || ['-', 0];
+
       const aylar = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
       const aylikTrendData = [];
       const simdi = new Date();
@@ -197,6 +227,9 @@ export default function HomePage() {
         toplamTediye: tediyeler,
         gunlukSatis: gunlukSatisToplam,
         gunlukTahsilat: gunlukTahsilatToplam,
+        gunlukNetKasa: gunlukNetKasa,
+        aylikKarZarar: aylikKarZararValue,
+        enCokGelirMusteri: enCokGelirMusteri[0] as string,
         aylikTrend: aylikTrendData,
         sonIslemler: islemler,
         tahminlemeData: [
@@ -358,10 +391,38 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard label="Toplam Cari" value={stats.toplamCari} icon="ri-group-line" color="blue" sub="Kayıtlı" />
-            <StatCard label="Toplam Ürün" value={stats.toplamUrun} icon="ri-box-3-line" color="purple" sub="Stok" />
-            <StatCard label="Onaylanan Satış" value={stats.bekleyenSatisFaturasi} icon="ri-file-check-line" color="teal" sub="Fatura" />
-            <StatCard label="Onaylanan Alış" value={stats.bekleyenAlisFaturasi} icon="ri-file-history-line" color="orange" sub="Fatura" />
+            <StatCard
+              label="BÜGÜNKÜ KASA DURUMU"
+              value={(stats as any).gunlukNetKasa || 0}
+              icon="ri-wallet-3-line"
+              color={(stats as any).gunlukNetKasa < 0 ? "rose" : "teal"}
+              sub="Günlük Net"
+              currency="₺"
+            />
+            <StatCard
+              label="BU AY KÂR / ZARAR"
+              value={(stats as any).aylikKarZar || 0}
+              icon="ri-funds-line"
+              color={(stats as any).aylikKarZar < 0 ? "rose" : "emerald"}
+              sub="Net Finansal"
+              currency="₺"
+            />
+            <StatCard
+              label="EN DEĞERLİ MÜŞTERİ"
+              value={(stats as any).enCokGelirMusteri || '-'}
+              icon="ri-vip-crown-line"
+              color="indigo"
+              sub="Revenue Top"
+              isText
+            />
+            <StatCard
+              label="TOPLAM ALACAK"
+              value={stats.toplamAlacak}
+              icon="ri-arrow-left-down-line"
+              color="blue"
+              sub="Kümülatif"
+              currency="₺"
+            />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -479,7 +540,7 @@ export default function HomePage() {
   );
 }
 
-function StatCard({ label, value, icon, color, sub }: any) {
+function StatCard({ label, value, icon, color, sub, currency = '', isText = false }: any) {
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 border-b-4 border-b-transparent hover:border-b-indigo-500 transition-all">
       <div className="flex justify-between items-start mb-4">
@@ -487,7 +548,9 @@ function StatCard({ label, value, icon, color, sub }: any) {
         <span className={`text-[10px] font-bold uppercase px-2 py-1 bg-${color}-50 text-${color}-600 rounded-lg`}>{sub}</span>
       </div>
       <div className="text-xs text-gray-400 font-bold uppercase mb-1">{label}</div>
-      <div className="text-2xl font-black text-gray-900">{value.toLocaleString('tr-TR')}</div>
+      <div className="text-2xl font-black text-gray-900 truncate">
+        {isText ? value : `${Number(value).toLocaleString('tr-TR')} ${currency}`}
+      </div>
     </div>
   );
 }

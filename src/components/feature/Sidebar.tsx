@@ -74,6 +74,7 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
       isNew: true,
       subItems: [
         { id: 'kasalar', label: 'Kasalar', path: '/odemeler' },
+        { id: 'giderler', label: 'Giderler', path: '/giderler', isNew: true },
         { id: 'bankalar', label: 'Bankalar', path: '/bankalar' },
         { id: 'cek-senet', label: 'Çek-Senet', path: '/cek-senet' },
       ]
@@ -109,6 +110,7 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
       ]
     },
     { id: 'ai-analiz', label: 'AI Analiz', icon: 'ri-sparkling-2-line', path: '/ai-analiz' },
+    { id: 'denetim', label: 'Denetim Kayıtları', icon: 'ri-shield-check-line', path: '/denetim', adminOnly: true },
     { id: 'admin', label: 'Yönetici', icon: 'ri-settings-5-line', path: '/admin', adminOnly: true },
   ];
 
@@ -160,11 +162,11 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
         <div className="p-8">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white/5 backdrop-blur-2xl rounded-xl flex items-center justify-center border border-white/10 shadow-lg p-1.5">
-              <img src="/logo.png" alt="Net Muhasebe AI" className="w-full h-full object-contain" />
+              <img src="/logo.png" alt="İşletme Yönetim Sistemi" className="w-full h-full object-contain" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white tracking-tight leading-none mb-1">Net Muhasebe <span className="text-indigo-400 italic font-black">AI</span></h1>
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] opacity-80">AKILLI YÖNETİM</span>
+              <h1 className="text-xl font-bold text-white tracking-tight leading-none mb-1">İşletme Yönetim <span className="text-indigo-400 italic font-black">SİSTEMİ</span></h1>
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] opacity-80">KURUMSAL ZEKÂ</span>
             </div>
           </div>
         </div>

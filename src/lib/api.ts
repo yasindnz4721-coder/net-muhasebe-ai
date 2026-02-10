@@ -95,10 +95,56 @@ export const profiles = {
         return fetchApi<Profile>('/api/profiles');
     },
 
-    async update(name: string, logo_url?: string) {
+    async update(data: Partial<Profile>) {
         return fetchApi<Profile>('/api/profiles', {
             method: 'PUT',
-            body: JSON.stringify({ name, logo_url }),
+            body: JSON.stringify(data),
+        });
+    },
+};
+
+// Bildirimler API
+export const bildirimler = {
+    async getAll(profile_id: string) {
+        return fetchApi<any[]>(`/api/bildirimler?profile_id=${profile_id}`);
+    },
+
+    async markAsRead(id: string) {
+        return fetchApi<{ success: boolean }>(`/api/bildirimler/${id}/read`, {
+            method: 'POST',
+        });
+    },
+
+    async markAllAsRead(profile_id: string) {
+        return fetchApi<{ success: boolean }>('/api/bildirimler/read-all', {
+            method: 'POST',
+            body: JSON.stringify({ profile_id }),
+        });
+    },
+};
+
+export const denetim = {
+    async getAll(profile_id: string) {
+        return fetchApi<any[]>(`/api/denetim?profile_id=${profile_id}`);
+    },
+};
+
+export const giderler = {
+    async getAll(profile_id: string) {
+        return fetchApi<any[]>(`/api/giderler?profile_id=${profile_id}`);
+    },
+    async getKategoriler(profile_id: string) {
+        return fetchApi<any[]>(`/api/giderler/kategoriler?profile_id=${profile_id}`);
+    },
+    async add(data: any) {
+        return fetchApi<any>('/api/giderler', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
+    async delete(id: string) {
+        return fetchApi<any>(`/api/giderler/${id}`, {
+            method: 'DELETE',
         });
     },
 };
@@ -341,6 +387,16 @@ export interface Profile {
     created_at?: string;
 }
 
+export interface Kasa {
+    id: string;
+    ad: string;
+    bakiye: number;
+    is_default: boolean;
+    profile_id: string;
+    created_at?: string;
+    updated_at?: string;
+}
+
 export interface Cari {
     id: string;
     ad: string;
@@ -523,6 +579,26 @@ export const taksitler = {
         return fetchApi<{ message: string; count: number }>('/api/taksitler/check-payments', {
             method: 'POST',
             body: JSON.stringify({ profile_id }),
+        });
+    },
+
+    async delete(id: string) {
+        return fetchApi<{ message: string }>(`/api/taksitler/${id}`, {
+            method: 'DELETE',
+        });
+    },
+};
+
+// Kasalar API
+export const kasalar = {
+    async getAll(profile_id: string) {
+        return fetchApi<Kasa[]>(`/api/kasalar?profile_id=${profile_id}`);
+    },
+
+    async create(data: Partial<Kasa>) {
+        return fetchApi<Kasa>('/api/kasalar', {
+            method: 'POST',
+            body: JSON.stringify(data),
         });
     },
 };

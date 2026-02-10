@@ -2,18 +2,50 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import ProfileSelector from './ProfileSelector';
-import { auth } from '../../lib/api';
+import { auth, bildirimler as bildirimApi } from '../../lib/api';
+import { useProfile } from '../../contexts/ProfileContext';
+import { useEffect } from 'react';
 
 interface HeaderProps {
   onMenuClick?: () => void;
 }
 
 export default function Header({ onMenuClick }: HeaderProps) {
+  const { selectedProfile } = useProfile();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [showNotifMenu, setShowNotifMenu] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { i18n, t } = useTranslation();
   const navigate = useNavigate();
+
+  const unreadCount = notifications.filter(n => !n.okundu).length;
+
+  useEffect(() => {
+    if (selectedProfile) {
+      loadNotifications();
+    }
+  }, [selectedProfile]);
+
+  const loadNotifications = async () => {
+    if (!selectedProfile) return;
+    const { data } = await bildirimApi.getAll(selectedProfile.id);
+    if (data) setNotifications(data);
+  };
+
+  const markAsRead = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    await bildirimApi.markAsRead(id);
+    loadNotifications();
+  };
+
+  const markAllAsRead = async () => {
+    if (!selectedProfile) return;
+    await bildirimApi.markAllAsRead(selectedProfile.id);
+    setShowNotifMenu(false);
+    loadNotifications();
+  };
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -40,6 +72,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
               </span>
               <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Sistem Aktif</span>
             </div>
+            <div className="hidden lg:block">
+              <span className="text-slate-400 text-sm font-medium">Hoş geldin, <span className="text-white font-bold">{localStorage.getItem('user_name') || 'Yasin'}</span> 👋</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-5">
@@ -63,10 +98,65 @@ export default function Header({ onMenuClick }: HeaderProps) {
               )}
             </div>
 
-            <button className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all relative">
-              <i className="ri-notification-3-line text-slate-400"></i>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-indigo-500 rounded-full"></span>
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifMenu(!showNotifMenu)}
+                className="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all relative"
+              >
+                <i className={`ri-notification-3-line ${unreadCount > 0 ? 'text-indigo-400' : 'text-slate-400'}`}></i>
+                {unreadCount > 0 && (
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-indigo-500 rounded-full"></span>
+                )}
+              </button>
+
+              {showNotifMenu && (
+                <div className="absolute right-0 mt-3 w-80 bg-[#0f172a] border border-white/10 rounded-2xl shadow-2xl py-0 z-50 animate-slide-up overflow-hidden">
+                  <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between bg-white/5">
+                    <p className="text-xs font-bold text-white uppercase tracking-widest">Bildirimler</p>
+                    {unreadCount > 0 && (
+                      <button onClick={markAllAsRead} className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300">TÜMÜNÜ OKUNDU YAP</button>
+                    )}
+                  </div>
+                  <div className="max-h-[350px] overflow-y-auto custom-scrollbar">
+                    {notifications.length === 0 ? (
+                      <div className="px-5 py-8 text-center">
+                        <i className="ri-notification-off-line text-2xl text-slate-600 mb-2"></i>
+                        <p className="text-xs text-slate-500">Henüz bildirim yok.</p>
+                      </div>
+                    ) : (
+                      notifications.map((n) => (
+                        <div key={n.id} className={`px-5 py-4 border-b border-white/5 hover:bg-white/5 transition-colors group cursor-pointer ${!n.okundu ? 'bg-indigo-500/5' : ''}`}>
+                          <div className="flex gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${n.tip === 'warning' ? 'bg-amber-500/10 text-amber-500' :
+                                n.tip === 'error' ? 'bg-rose-500/10 text-rose-500' :
+                                  n.tip === 'success' ? 'bg-emerald-500/10 text-emerald-500' :
+                                    'bg-indigo-500/10 text-indigo-500'
+                              }`}>
+                              <i className={
+                                n.tip === 'warning' ? 'ri-alert-line' :
+                                  n.tip === 'error' ? 'ri-error-warning-line' :
+                                    n.tip === 'success' ? 'ri-checkbox-circle-line' :
+                                      'ri-information-line'
+                              }></i>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-xs font-bold mb-0.5 ${!n.okundu ? 'text-white' : 'text-slate-400'}`}>{n.baslik}</p>
+                              <p className="text-[10px] text-slate-500 line-clamp-2 leading-relaxed">{n.mesaj}</p>
+                              <p className="text-[9px] text-slate-600 mt-1">{new Date(n.olusturma_tarihi).toLocaleDateString('tr-TR')}</p>
+                            </div>
+                            {!n.okundu && (
+                              <button onClick={(e) => markAsRead(n.id, e)} className="w-5 h-5 rounded-full hover:bg-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i className="ri-check-line text-[10px] text-indigo-400"></i>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div className="h-8 w-px bg-white/5 mx-2"></div>
 
