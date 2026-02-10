@@ -1,5 +1,6 @@
 const { query } = require('../db');
 const NotificationService = require('./notificationService');
+const EmailService = require('./emailService');
 
 const AutomationService = {
     async checkAndRecordSalaries(profile_id) {
@@ -102,6 +103,40 @@ const AutomationService = {
             }
         } catch (error) {
             console.error('KDV otomasyon hatası:', error);
+        }
+    },
+
+    async checkAndSendReminders(profile_id) {
+        try {
+            // Kullanıcının mail adresini bul (Profile'a bağlı ilk kullanıcı)
+            const userRes = await query(
+                `SELECT u.email FROM users u 
+                 JOIN user_profiles up ON u.id = up.user_id 
+                 WHERE up.profile_id = $1 LIMIT 1`,
+                [profile_id]
+            );
+            const userEmail = userRes.rows[0]?.email;
+            if (!userEmail) return;
+
+            // 3 gün sonra vadesi gelen taksitleri bul
+            const installments = await query(
+                `SELECT to.*, t.cari_ad, t.aciklama as plan_aciklama 
+                 FROM taksit_odemeleri to
+                 JOIN taksitler t ON to.taksit_id = t.id
+                 WHERE to.profile_id = $1 AND to.durum = 'Bekliyor'
+                 AND to.vade_tarihi = (CURRENT_DATE + INTERVAL '3 days')`,
+                [profile_id]
+            );
+
+            for (const item of installments.rows) {
+                const details = `${item.cari_ad} için ${item.tutar} TL tutarındaki ${item.plan_aciklama || 'Taksit'} ödemenizin vadesine 3 gün kalmıştır.`;
+                await EmailService.sendReminderEmail(userEmail, 'taksit', details);
+
+                // Sistem içi bildirim de oluştur
+                await NotificationService.create(profile_id, 'Ödeme Hatırlatması', details, 'warning');
+            }
+        } catch (error) {
+            console.error('Hatırlatma otomasyonu hatası:', error);
         }
     }
 };

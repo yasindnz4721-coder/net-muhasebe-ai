@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { query } = require('../db');
+const EmailService = require('../services/emailService');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
@@ -70,6 +71,10 @@ router.post('/register', async (req, res) => {
         }
 
         const primaryEmail = emails[0];
+
+        // Hoşgeldin maili gönder
+        await EmailService.sendWelcomeEmail(primaryEmail);
+
         const primaryUserQuery = await query('SELECT id, email, role FROM users WHERE email = $1', [primaryEmail]);
 
         const primaryUser = primaryUserQuery.rows[0];

@@ -13,15 +13,33 @@ export default function TaksitTakibiPage() {
         yil: new Date().getFullYear(),
         ay: new Date().getMonth() + 1
     });
+    const [viewType, setViewType] = useState<'monthly' | 'upcoming'>('upcoming');
 
     const fetchData = async () => {
         if (!selectedProfile) return;
         setLoading(true);
         try {
-            // Ödeme zamanı geldiyse otomatik öde
             await taksitApi.checkPayments(selectedProfile.id);
-            const res = await taksitApi.getTakip(selectedProfile.id, filter.yil, filter.ay);
-            if (res.data) setTakipVerisi(res.data);
+            // Eğer 'upcoming' modundaysa tüm bekleyenleri al, yoksa aylık al
+            const res = viewType === 'upcoming'
+                ? await taksitApi.getTakip(selectedProfile.id) // Query paramsız hepsi gelir
+                : await taksitApi.getTakip(selectedProfile.id, filter.yil, filter.ay);
+
+            if (res.data) {
+                let data = res.data;
+                if (viewType === 'upcoming') {
+                    // Gelecek 30 günü filtrele (veya tüm bekleyenleri göster)
+                    const today = new Date();
+                    const next30 = new Date();
+                    next30.setDate(today.getDate() + 30);
+
+                    data = data.filter(o => {
+                        const vT = new Date(o.vade_tarihi);
+                        return o.durum === 'Bekliyor' && vT <= next30;
+                    });
+                }
+                setTakipVerisi(data);
+            }
         } catch (error) {
             console.error('Takip verisi hatası:', error);
         } finally {
@@ -41,12 +59,12 @@ export default function TaksitTakibiPage() {
 
     useEffect(() => {
         fetchData();
-    }, [selectedProfile, filter]);
+    }, [selectedProfile, filter, viewType]);
 
     const isNear = (vade: string) => {
         const diff = new Date(vade).getTime() - new Date().getTime();
         const days = diff / (1000 * 60 * 60 * 24);
-        return days >= 0 && days <= 2;
+        return days >= 0 && days <= 7; // 7 güne çıkarıldı
     };
 
     return (
@@ -55,29 +73,45 @@ export default function TaksitTakibiPage() {
             <div className="flex-1 flex flex-col">
                 <Header />
                 <main className="p-10 space-y-8">
-                    <header className="flex justify-between items-end">
+                    <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                         <div>
                             <h1 className="text-4xl font-black uppercase tracking-tight">Taksit <span className="text-indigo-400 italic">Takibi.</span></h1>
-                            <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest mt-2">Aylık Ödeme Takvimi</p>
+                            <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest mt-2">{viewType === 'upcoming' ? 'Gelecek 30 Günlük Plan' : 'Aylık Ödeme Takvimi'}</p>
                         </div>
-                        <div className="flex gap-4">
-                            <select
-                                className="premium-input h-14 w-40"
-                                value={filter.ay}
-                                onChange={e => setFilter({ ...filter, ay: Number(e.target.value) })}
+                        <div className="flex items-center gap-4 bg-white/5 p-2 rounded-2xl border border-white/10">
+                            <button
+                                onClick={() => setViewType('upcoming')}
+                                className={`px-6 h-12 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'upcoming' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
                             >
-                                {Array.from({ length: 12 }, (_, i) => (
-                                    <option key={i + 1} value={i + 1}>{new Date(2000, i).toLocaleString('tr', { month: 'long' })}</option>
-                                ))}
-                            </select>
-                            <select
-                                className="premium-input h-14 w-32"
-                                value={filter.yil}
-                                onChange={e => setFilter({ ...filter, yil: Number(e.target.value) })}
+                                GELECEK 30 GÜN
+                            </button>
+                            <button
+                                onClick={() => setViewType('monthly')}
+                                className={`px-6 h-12 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'monthly' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
                             >
-                                {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
-                            </select>
+                                AY SEÇİMİ
+                            </button>
                         </div>
+                        {viewType === 'monthly' && (
+                            <div className="flex gap-4 animate-fade-in">
+                                <select
+                                    className="premium-input h-14 w-40"
+                                    value={filter.ay}
+                                    onChange={e => setFilter({ ...filter, ay: Number(e.target.value) })}
+                                >
+                                    {Array.from({ length: 12 }, (_, i) => (
+                                        <option key={i + 1} value={i + 1}>{new Date(2000, i).toLocaleString('tr', { month: 'long' })}</option>
+                                    ))}
+                                </select>
+                                <select
+                                    className="premium-input h-14 w-32"
+                                    value={filter.yil}
+                                    onChange={e => setFilter({ ...filter, yil: Number(e.target.value) })}
+                                >
+                                    {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
+                                </select>
+                            </div>
+                        )}
                     </header>
 
                     <div className="premium-card overflow-hidden">
@@ -92,10 +126,12 @@ export default function TaksitTakibiPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
-                                {takipVerisi.map(odeme => {
+                                {loading ? (
+                                    <tr><td colSpan={5} className="p-20 text-center"><div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div></td></tr>
+                                ) : takipVerisi.map(odeme => {
                                     const near = isNear(odeme.vade_tarihi) && odeme.durum === 'Bekliyor';
                                     return (
-                                        <tr key={odeme.id} className={`hover:bg-white/[0.01] transition-colors ${near ? 'bg-orange-500/[0.03]' : ''}`}>
+                                        <tr key={odeme.id} className={`hover:bg-white/[0.01] transition-colors ${near ? 'bg-orange-500/[0.05] border-l-2 border-l-orange-500' : ''}`}>
                                             <td className="px-8 py-6 font-bold text-sm">
                                                 {new Date(odeme.vade_tarihi).toLocaleDateString('tr')}
                                                 {near && <div className="text-[9px] text-orange-400 font-black uppercase mt-1 animate-pulse">Yaklaşıyor!</div>}
@@ -125,10 +161,10 @@ export default function TaksitTakibiPage() {
                                         </tr>
                                     );
                                 })}
-                                {takipVerisi.length === 0 && (
+                                {!loading && takipVerisi.length === 0 && (
                                     <tr>
-                                        <td colSpan={4} className="px-8 py-20 text-center text-slate-500 font-bold uppercase tracking-widest text-xs opacity-50">
-                                            Bu ay için planlanmış bir ödeme bulunmamaktadır.
+                                        <td colSpan={5} className="px-8 py-20 text-center text-slate-500 font-bold uppercase tracking-widest text-[10px] opacity-50 italic">
+                                            {viewType === 'upcoming' ? 'Gelecek 30 gün için bekleyen ödemeniz bulunmamaktadır.' : 'Bu ay için planlanmış bir ödeme bulunmamaktadır.'}
                                         </td>
                                     </tr>
                                 )}

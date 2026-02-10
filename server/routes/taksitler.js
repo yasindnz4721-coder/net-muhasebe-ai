@@ -43,9 +43,14 @@ router.post('/', async (req, res) => {
 
         // 2. Taksit ödemelerini oluştur
         for (let i = 0; i < taksit_sayisi; i++) {
-            const vadeTarihi = new Date(baslangic_tarihi);
-            vadeTarihi.setMonth(vadeTarihi.getMonth() + i);
-            vadeTarihi.setDate(odeme_gunu);
+            const tempDate = new Date(baslangic_tarihi);
+            tempDate.setMonth(tempDate.getMonth() + i);
+
+            // Ayın kaç gün olduğunu kontrol et
+            const daysInMonth = new Date(tempDate.getFullYear(), tempDate.getMonth() + 1, 0).getDate();
+            const actualDay = Math.min(odeme_gunu, daysInMonth);
+
+            const vadeTarihi = new Date(tempDate.getFullYear(), tempDate.getMonth(), actualDay);
 
             await query(
                 `INSERT INTO taksit_odemeleri (taksit_id, vade_tarihi, tutar, profile_id)
