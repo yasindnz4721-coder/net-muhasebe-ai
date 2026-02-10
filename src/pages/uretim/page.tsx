@@ -151,7 +151,7 @@ export default function UretimPage() {
                                             <th className="px-8 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">TARİH</th>
                                             <th className="px-8 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">ÜRÜN</th>
                                             <th className="px-8 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">MİKTAR</th>
-                                            <th className="px-8 py-4 text-[10px) font-black text-slate-500 uppercase tracking-widest">AÇIKLAMA</th>
+                                            <th className="px-8 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">AÇIKLAMA</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/5">
