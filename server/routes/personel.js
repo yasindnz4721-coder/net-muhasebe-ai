@@ -180,24 +180,30 @@ router.post('/:id/avanslar', async (req, res) => {
         const kasaResult = await query('SELECT id FROM kasalar WHERE profile_id = $1 AND is_default = TRUE', [profile_id]);
         const defaultKasaId = kasaResult.rows.length > 0 ? kasaResult.rows[0].id : null;
 
+        const bugun = new Date().toISOString().split('T')[0];
+        const isFuture = tarih > bugun;
+
         // 3. Avansı kaydet
         const result = await query(
-            `INSERT INTO personel_avanslar (personel_id, tarih, tutar, aciklama, profile_id, kasa_id)
-             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-            [id, tarih, tutar, aciklama || '', profile_id, defaultKasaId]
+            `INSERT INTO personel_avanslar (personel_id, tarih, tutar, aciklama, profile_id, kasa_id, durum)
+             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+            [id, tarih, tutar, aciklama || '', profile_id, defaultKasaId, isFuture ? 'Bekliyor' : 'Ödendi']
         );
 
-        // 4. Ödemeler defterine ekle
-        const odemeResult = await query(
-            `INSERT INTO odemeler (cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, profile_id, kasa_id)
-             VALUES ($1, 'Ödeme', $2, $3, 'Nakit', $4, $5, $6)
-             RETURNING id`,
-            [adSoyad, tutar, tarih, `Personel Avansı: ${aciklama || ''}`, profile_id, defaultKasaId]
-        );
+        // 4. Eğer bugün veya geçmişse ödemeler defterine ekle ve kasadan düş
+        if (!isFuture) {
+            const odemeResult = await query(
+                `INSERT INTO odemeler (cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, profile_id, kasa_id)
+                 VALUES ($1, 'Ödeme', $2, $3, 'Nakit', $4, $5, $6)
+                 RETURNING id`,
+                [adSoyad, tutar, tarih, `Personel Avansı: ${aciklama || ''}`, profile_id, defaultKasaId]
+            );
 
-        // 5. Kasa bakiyesini güncelle
-        if (defaultKasaId) {
-            await query('UPDATE kasalar SET bakiye = bakiye - $1, updated_at = NOW() WHERE id = $2', [tutar, defaultKasaId]);
+            await query('UPDATE personel_avanslar SET odeme_id = $1 WHERE id = $2', [odemeResult.rows[0].id, result.rows[0].id]);
+
+            if (defaultKasaId) {
+                await query('UPDATE kasalar SET bakiye = bakiye - $1, updated_at = NOW() WHERE id = $2', [tutar, defaultKasaId]);
+            }
         }
 
         res.json(result.rows[0]);

@@ -14,6 +14,8 @@ router.get('/', async (req, res) => {
         await AutomationService.checkAndRecordSalaries(profile_id);
         await AutomationService.checkAndRecordMonthlyVAT(profile_id);
         await AutomationService.checkAndSendReminders(profile_id);
+        await AutomationService.checkAndProcessInstallments(profile_id);
+        await AutomationService.checkAndProcessPersonnelAdvances(profile_id);
         await NotificationService.checkAll(profile_id);
 
         const result = await query(

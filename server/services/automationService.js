@@ -138,6 +138,105 @@ const AutomationService = {
         } catch (error) {
             console.error('Hatırlatma otomasyonu hatası:', error);
         }
+    },
+
+    async checkAndProcessInstallments(profile_id) {
+        try {
+            const bugun = new Date().toISOString().split('T')[0];
+
+            // Varsayılan kasayı bul
+            const kasaResult = await query('SELECT id FROM kasalar WHERE profile_id = $1 AND is_default = TRUE', [profile_id]);
+            const defaultKasaId = kasaResult.rows.length > 0 ? kasaResult.rows[0].id : null;
+
+            // Bugün vadesi gelmiş ve henüz ödenmemiş taksitleri bul
+            const duePayments = await query(
+                `SELECT to.*, t.cari_id, t.cari_ad, t.aciklama as plan_aciklama 
+                 FROM taksit_odemeleri to
+                 JOIN taksitler t ON to.taksit_id = t.id
+                 WHERE to.profile_id = $1 AND to.vade_tarihi <= $2 AND to.durum = 'Bekliyor'`,
+                [profile_id, bugun]
+            );
+
+            for (const payment of duePayments.rows) {
+                // 1. Kasaya (odemeler) gider olarak ekle
+                const odemeResult = await query(
+                    `INSERT INTO odemeler (cari_id, cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, profile_id, kasa_id)
+                     VALUES ($1, $2, 'Ödeme', $3, NOW(), 'Nakit', $4, $5, $6)
+                     RETURNING id`,
+                    [payment.cari_id, payment.cari_ad, payment.tutar, `Taksit Ödemesi: ${payment.plan_aciklama || ''} (Otomatik)`, profile_id, defaultKasaId]
+                );
+
+                // 2. Kasa bakiyesini güncelle
+                if (defaultKasaId) {
+                    await query('UPDATE kasalar SET bakiye = bakiye - $1, updated_at = NOW() WHERE id = $2', [payment.tutar, defaultKasaId]);
+                }
+
+                // 3. Taksit ödemesini 'Ödendi' olarak işaretle
+                await query(
+                    `UPDATE taksit_odemeleri SET durum = 'Ödendi', odeme_tarihi = NOW(), odeme_id = $1, kasa_id = $2 WHERE id = $3`,
+                    [odemeResult.rows[0].id, defaultKasaId, payment.id]
+                );
+
+                await NotificationService.create(
+                    profile_id,
+                    'Taksit Otomatik Ödendi',
+                    `${payment.cari_ad} için ${payment.tutar} TL tutarındaki taksit ödemesi kasadan düşüldü.`,
+                    'success'
+                );
+            }
+        } catch (error) {
+            console.error('Taksit otomasyon hatası:', error);
+        }
+    },
+
+    async checkAndProcessPersonnelAdvances(profile_id) {
+        try {
+            const bugun = new Date().toISOString().split('T')[0];
+
+            // Bugün vadesi gelmiş ve henüz ödenmemiş personel avanslarını bul
+            const dueAdvances = await query(
+                `SELECT pa.*, p.ad_soyad 
+                 FROM personel_avanslar pa
+                 JOIN personeller p ON pa.personel_id = p.id
+                 WHERE pa.profile_id = $1 AND pa.tarih <= $2 AND pa.durum = 'Bekliyor'`,
+                [profile_id, bugun]
+            );
+
+            for (const adv of dueAdvances.rows) {
+                // 1. Varsayılan kasayı bul (her bir işlem için güncel bakiye kontrolü için)
+                const kasaResult = await query('SELECT id FROM kasalar WHERE profile_id = $1 AND is_default = TRUE', [profile_id]);
+                const defaultKasaId = kasaResult.rows.length > 0 ? kasaResult.rows[0].id : null;
+                const targetKasaId = adv.kasa_id || defaultKasaId;
+
+                // 2. Ödemeler defterine ekle
+                const odemeResult = await query(
+                    `INSERT INTO odemeler (cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, profile_id, kasa_id)
+                     VALUES ($1, 'Ödeme', $2, $3, 'Nakit', $4, $5, $6)
+                     RETURNING id`,
+                    [adv.ad_soyad, adv.tutar, adv.tarih, `Personel Avansı: ${adv.aciklama || ''} (Otomatik)`, profile_id, targetKasaId]
+                );
+
+                // 3. Kasa bakiyesini güncelle
+                if (targetKasaId) {
+                    await query('UPDATE kasalar SET bakiye = bakiye - $1, updated_at = NOW() WHERE id = $2', [adv.tutar, targetKasaId]);
+                }
+
+                // 4. Avansı 'Ödendi' olarak işaretle
+                await query(
+                    `UPDATE personel_avanslar SET durum = 'Ödendi', odeme_id = $1 WHERE id = $2`,
+                    [odemeResult.rows[0].id, adv.id]
+                );
+
+                await NotificationService.create(
+                    profile_id,
+                    'Personel Avansı Otomatik Ödendi',
+                    `${adv.ad_soyad} için ${adv.tutar} TL tutarındaki avans ödemesi kasadan düşüldü.`,
+                    'success'
+                );
+            }
+        } catch (error) {
+            console.error('Personel avans otomasyon hatası:', error);
+        }
     }
 };
 
