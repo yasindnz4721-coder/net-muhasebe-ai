@@ -67,20 +67,15 @@ app.use('/api/giderler', giderlerRoutes);
 // Health check
 app.get('/api/health', async (req, res) => {
     try {
-        const { pool } = require('./db');
-        await pool.query('SELECT 1');
+        const { query } = require('./db');
+        await query('SELECT 1');
         res.json({
             status: 'ok',
             database: 'connected',
             timestamp: new Date().toISOString()
         });
-    } catch (err) {
-        res.status(503).json({
-            status: 'error',
-            database: 'disconnected',
-            message: err.message,
-            timestamp: new Date().toISOString()
-        });
+    } catch (error) {
+        res.status(500).json({ status: 'error', message: error.message });
     }
 });
 

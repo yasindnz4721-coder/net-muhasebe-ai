@@ -11,5 +11,5 @@ jobs:
     steps:
       - name: Send Heartbeat
         run: |
-          curl -s https://netmuhasebe.net.tr/api/ping
-          echo "Heartbeat sent to https://netmuhasebe.net.tr/api/ping"
+          curl -s https://netmuhasebe.net.tr/api/health
+          echo "Heartbeat sent to https://netmuhasebe.net.tr/api/health"
