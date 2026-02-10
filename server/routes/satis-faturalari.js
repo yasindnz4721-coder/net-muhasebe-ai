@@ -1,3 +1,4 @@
+const express = require('express');
 const { pool, query } = require('../db');
 const authMiddleware = require('../middleware/auth');
 const AuditService = require('../services/auditService');
