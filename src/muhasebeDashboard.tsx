@@ -211,9 +211,19 @@ const MuhasebeDashboard = () => {
               <h2 className="text-4xl font-black text-white tracking-tight leading-none mb-3 uppercase">Sistem <span className="text-gradient">Özeti.</span></h2>
               <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.2em] opacity-80">Finansal Verilerinizin Anlık Durumu</p>
             </div>
-            <button onClick={() => navigate('/satis-faturasi')} className="premium-button px-8 h-14 tracking-widest uppercase flex items-center gap-3">
-              <PlusCircle size={20} /> YENİ SATIŞ
-            </button>
+            <div className="flex items-center gap-4">
+              <a
+                href="/NetMuhasebe_AI_Kurulum.exe"
+                download
+                className="flex items-center gap-3 px-6 h-14 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl text-indigo-400 font-black text-xs uppercase tracking-widest hover:bg-indigo-500 hover:text-white transition-all group"
+              >
+                <Download size={20} className="group-hover:scale-110 transition-transform" />
+                MASAÜSTÜNE KUR
+              </a>
+              <button onClick={() => navigate('/satis-faturasi')} className="premium-button px-8 h-14 tracking-widest uppercase flex items-center gap-3">
+                <PlusCircle size={20} /> YENİ SATIŞ
+              </button>
+            </div>
           </header>
 
           {upcomingTaksitler.length > 0 && (
