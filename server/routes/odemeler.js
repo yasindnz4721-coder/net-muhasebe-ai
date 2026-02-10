@@ -70,7 +70,8 @@ router.post('/', async (req, res) => {
 
         // Kasa bakiyesini güncelle
         if (targetKasaId) {
-            const miktar = tip === 'Tahsilat' ? tutar : -tutar;
+            const isTahsilat = ['Tahsilat', 'Alınan Ödeme', 'Gelir'].includes(tip);
+            const miktar = isTahsilat ? tutar : -tutar;
             await query('UPDATE kasalar SET bakiye = bakiye + $1, updated_at = NOW() WHERE id = $2', [miktar, targetKasaId]);
         }
 

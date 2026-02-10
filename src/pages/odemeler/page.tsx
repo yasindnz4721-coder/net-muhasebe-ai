@@ -110,7 +110,7 @@ const OdemelerPage = () => {
               <div className="premium-card p-8 group transition-all flex items-center justify-between">
                 <div className="space-y-1">
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">KASA BAKİYESİ (ANA KASA)</span>
-                  <div className="text-4xl font-black tracking-tighter text-white">₺{Number(anaKasa?.bakiye || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
+                  <div className="text-4xl font-black tracking-tighter text-white">₺{(toplamTahsilat - toplamOdeme).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
                 </div>
                 <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400">
                   <Wallet size={24} />
