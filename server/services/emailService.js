@@ -42,10 +42,15 @@ const EmailService = {
         };
 
         try {
-            await transporter.sendMail(mailOptions);
-            console.log(`Hoşgeldin maili gönderildi: ${email}`);
+            const info = await transporter.sendMail(mailOptions);
+            console.log(`✅ Hoşgeldin maili başarıyla gönderildi: ${email} (Filtre: ${info.messageId})`);
         } catch (error) {
-            console.error('Mail gönderme hatası:', error);
+            console.error('❌ Mail gönderme hatası detayı:', {
+                to: email,
+                error: error.message,
+                code: error.code,
+                command: error.command
+            });
         }
     },
 

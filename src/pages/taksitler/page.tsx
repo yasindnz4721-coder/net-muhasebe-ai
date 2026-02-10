@@ -160,7 +160,7 @@ export default function TaksitlerPage() {
                                             setFormData({
                                                 ...formData,
                                                 taksit_sayisi: val,
-                                                taksit_tutari: (formData.toplam_tutar || 0) / val
+                                                taksit_tutari: Math.round(((formData.toplam_tutar || 0) / val) * 100) / 100
                                             });
                                         }}
                                         required

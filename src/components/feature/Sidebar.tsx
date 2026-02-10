@@ -242,21 +242,7 @@ export default function Sidebar({ mbOpen, setMbOpen }: SidebarProps) {
           </div>
         )}
 
-        <div className="p-6 mt-auto space-y-3">
-          <a
-            href="/NetMuhasebe_AI_Kurulum.exe"
-            download
-            className="flex items-center gap-3 p-4 bg-indigo-600/20 border border-indigo-500/30 rounded-2xl hover:bg-indigo-600 transition-all group"
-          >
-            <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-              <i className="ri-download-cloud-2-line text-sm"></i>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[11px] font-black text-white uppercase tracking-tighter">Masaüstüne Kur</span>
-              <span className="text-[9px] text-slate-400 group-hover:text-indigo-100 font-bold">Windows App</span>
-            </div>
-          </a>
-
+        <div className="p-6 mt-8">
           <div className="p-5 rounded-3xl bg-indigo-600/5 border border-indigo-500/10 group hover:bg-indigo-600/10 transition-colors">
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 opacity-60">Teknik Destek</p>
             <a href="tel:5347401256" className="flex items-center gap-3 text-white font-bold group-hover:translate-x-1 transition-transform">
