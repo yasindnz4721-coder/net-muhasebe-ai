@@ -31,6 +31,7 @@ import PuantajTakibiPage from '../pages/personel/puantaj';
 import TaksitlerPage from '../pages/taksitler/page';
 import TaksitTakibiPage from '../pages/taksit-takibi/page';
 import TrialExpiredPage from '../pages/TrialExpired';
+import UretimPage from '../pages/uretim/page';
 import DenetimPage from '../pages/denetim/page';
 
 // Helper to create stub routes
@@ -59,14 +60,7 @@ const routes: RouteObject[] = [
   { path: '/ai-analiz', element: <AIAnalizPage /> },
   { path: '/personel', element: <PersonelPage /> },
   { path: '/puantaj-takibi', element: <PuantajTakibiPage /> },
-
-  // New "Cari" Style Routes (Stubs)
-  { path: '/teklifler', element: stub('Teklif Yönetimi') },
-  { path: '/satis-siparis', element: stub('Satış Siparişleri') },
-  { path: '/alis-siparis', element: stub('Alış Siparişleri') },
-  { path: '/urun-varyantlari', element: stub('Ürün Varyantları') },
-  { path: '/uretim-recetesi', element: stub('Üretim Reçetesi') },
-  { path: '/uretim', element: stub('Üretim Planlama') },
+  { path: '/uretim', element: <UretimPage /> },
   { path: '/stok-transferi', element: stub('Depo Transferi') },
   { path: '/stok-karlilik', element: stub('Kârlılık Analizi') },
   { path: '/urun-ekstre', element: stub('Ürün Hareket Ekstresi') },

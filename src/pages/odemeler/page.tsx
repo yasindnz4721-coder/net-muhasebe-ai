@@ -63,8 +63,8 @@ const OdemelerPage = () => {
     return matchesSearch && matchesTip;
   });
 
-  const toplamTahsilat = odemeList.filter(o => o.tip === 'Tahsilat').reduce((acc, curr) => acc + Number(curr.tutar), 0);
-  const toplamOdeme = odemeList.filter(o => o.tip === 'Ödeme').reduce((acc, curr) => acc + Number(curr.tutar), 0);
+  const toplamTahsilat = odemeList.filter(o => ['Tahsilat', 'Alınan Ödeme', 'Gelir'].includes(o.tip)).reduce((acc, curr) => acc + Number(curr.tutar), 0);
+  const toplamOdeme = odemeList.filter(o => ['Ödeme', 'Tediye', 'Gider', 'Verilen Ödeme'].includes(o.tip)).reduce((acc, curr) => acc + Number(curr.tutar), 0);
 
   if (!selectedProfile) return null;
 

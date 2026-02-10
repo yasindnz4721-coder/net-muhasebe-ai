@@ -12,6 +12,7 @@ router.get('/', async (req, res) => {
 
         // Otomasyonları ve bildirimleri kontrol et
         await AutomationService.checkAndRecordSalaries(profile_id);
+        await AutomationService.checkAndRecordMonthlyVAT(profile_id);
         await NotificationService.checkAll(profile_id);
 
         const result = await query(

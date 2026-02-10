@@ -42,6 +42,67 @@ const AutomationService = {
         } catch (error) {
             console.error('Maaş otomasyon hatası:', error);
         }
+    },
+
+    async checkAndRecordMonthlyVAT(profile_id) {
+        try {
+            const shimbi = new Date();
+            const ay = shimbi.getMonth(); // Önceki ay
+            const yil = shimbi.getFullYear();
+
+            // Eğer Ocak ayındaysak, geçen yılın Aralık ayına bak
+            const targetAy = ay === 0 ? 12 : ay;
+            const targetYil = ay === 0 ? yil - 1 : yil;
+
+            // Kontrol: Bu ay için vergi kaydı yapılmış mı?
+            const recorded = await query(
+                `SELECT id FROM odemeler 
+                 WHERE profile_id = $1 AND aciklama LIKE $2`,
+                [profile_id, `%KDV ÖDEME YÜKÜ (${targetAy}/${targetYil})%`]
+            );
+
+            if (recorded.rows.length === 0) {
+                // KDV Farkını hesapla
+                const satisKDVRes = await query(
+                    "SELECT SUM(kdv) as total FROM satis_faturalari WHERE profile_id = $1 AND EXTRACT(MONTH FROM tarih) = $2 AND EXTRACT(YEAR FROM tarih) = $3",
+                    [profile_id, targetAy, targetYil]
+                );
+                const alisKDVRes = await query(
+                    "SELECT SUM(kdv) as total FROM alis_faturalari WHERE profile_id = $1 AND EXTRACT(MONTH FROM tarih) = $2 AND EXTRACT(YEAR FROM tarih) = $3",
+                    [profile_id, targetAy, targetYil]
+                );
+
+                const satisKDV = Number(satisKDVRes.rows[0].total || 0);
+                const alisKDV = Number(alisKDVRes.rows[0].total || 0);
+                const netKDV = satisKDV - alisKDV;
+
+                if (netKDV > 0) {
+                    // Merkez kasayı bul
+                    const kasaRes = await query("SELECT id FROM kasalar WHERE profile_id = $1 AND is_default = TRUE", [profile_id]);
+                    const kasaId = kasaRes.rows.length > 0 ? kasaRes.rows[0].id : null;
+
+                    if (kasaId) {
+                        await query(
+                            `INSERT INTO odemeler (profile_id, tip, tutar, tarih, odeme_yontemi, aciklama, kasa_id, cari_ad)
+                             VALUES ($1, 'Ödeme', $2, CURRENT_DATE, 'Nakit', $3, $4, 'VERGİ DAİRESİ')`,
+                            [profile_id, netKDV, `AYLIK KDV ÖDEME YÜKÜ (${targetAy}/${targetYil}) - OTOMATIK`, kasaId]
+                        );
+
+                        // Kasadan düş
+                        await query("UPDATE kasalar SET bakiye = bakiye - $1 WHERE id = $2", [netKDV, kasaId]);
+
+                        await NotificationService.create(
+                            profile_id,
+                            'Otomatik KDV Tahakkuku',
+                            `${targetAy}/${targetYil} dönemi için ${netKDV.toLocaleString('tr-TR')} TL KDV ödemesi kasadan düşüldü.`,
+                            'info'
+                        );
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('KDV otomasyon hatası:', error);
+        }
     }
 };
 
