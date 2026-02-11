@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   cariler as carilerApi,
   Cari
@@ -23,6 +24,7 @@ import {
 
 const CarilerPage = () => {
   const { selectedProfile } = useProfile();
+  const navigate = useNavigate();
   const [cariList, setCariList] = useState<Cari[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -193,7 +195,7 @@ const CarilerPage = () => {
                       <tr><td colSpan={5} className="px-8 py-20 text-center text-slate-500 font-bold uppercase tracking-widest text-xs italic">Kayıtlı cari bulunamadı.</td></tr>
                     ) : (
                       filteredList.map((c) => (
-                        <tr key={c.id} className="hover:bg-white/[0.02] transition-colors group/row">
+                        <tr key={c.id} className="hover:bg-white/[0.02] transition-colors group/row cursor-pointer" onClick={() => navigate(`/cari-detay/${c.id}`)}>
                           <td className="px-8 py-6">
                             <div className="flex items-center gap-4">
                               <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-black text-xl">

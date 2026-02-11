@@ -58,6 +58,16 @@ export default function TaksitlerPage() {
         fetchData();
     };
 
+    const handleDelete = async (id: string) => {
+        if (!window.confirm('Bu taksit planını silmek istediğinize emin misiniz?')) return;
+        try {
+            await taksitApi.delete(id);
+            fetchData();
+        } catch (err) {
+            console.error('Taksit silme hatası:', err);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#020617] text-white flex">
             <Sidebar />
@@ -86,6 +96,7 @@ export default function TaksitlerPage() {
                                     <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Taksit</th>
                                     <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Gün</th>
                                     <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Durum</th>
+                                    <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Aksiyon</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
@@ -100,6 +111,15 @@ export default function TaksitlerPage() {
                                         <td className="px-8 py-6 text-center font-bold text-slate-400">{plan.odeme_gunu}</td>
                                         <td className="px-8 py-6 text-center">
                                             <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-black rounded-full border border-emerald-500/20">{plan.durum}</span>
+                                        </td>
+                                        <td className="px-8 py-6 text-right">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleDelete(plan.id); }}
+                                                className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/20 transition-all flex items-center justify-center ml-auto"
+                                                title="Planı Sil"
+                                            >
+                                                <i className="ri-delete-bin-line text-lg"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}

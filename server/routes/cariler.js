@@ -7,7 +7,7 @@ const router = express.Router();
 // Tüm route'lar auth gerektiriyor
 router.use(authMiddleware);
 
-// Tüm carileri getir
+// Tüm carileri getir (bakiyeleri hesaplanmış)
 router.get('/', async (req, res) => {
     try {
         const { profile_id } = req.query;
@@ -16,12 +16,27 @@ router.get('/', async (req, res) => {
             return res.status(400).json({ error: 'profile_id gerekli' });
         }
 
+        // Carileri getir ve bakiyeyi satış/alış faturaları ve ödemelerden hesapla
         const result = await query(
-            'SELECT * FROM cariler WHERE profile_id = $1 ORDER BY created_at DESC',
+            `SELECT c.*,
+                COALESCE((SELECT SUM(toplam) FROM satis_faturalari WHERE cari_id = c.id), 0) as satis_toplam,
+                COALESCE((SELECT SUM(toplam) FROM alis_faturalari WHERE cari_id = c.id), 0) as alis_toplam,
+                COALESCE((SELECT SUM(tutar) FROM odemeler WHERE cari_id = c.id AND (tip = 'Tahsilat' OR tip = 'Ödeme Alındı' OR tip = 'Alınan Ödeme')), 0) as tahsilat_toplam,
+                COALESCE((SELECT SUM(tutar) FROM odemeler WHERE cari_id = c.id AND (tip = 'Ödeme' OR tip = 'Tediye')), 0) as odeme_toplam
+            FROM cariler c
+            WHERE c.profile_id = $1
+            ORDER BY c.created_at DESC`,
             [profile_id]
         );
 
-        res.json(result.rows);
+        // Bakiyeyi hesapla: Satış faturası = cari bize borçlu, Alış faturası = biz cariye borçluyuz
+        // Tahsilat = cari borcunu ödedi, Ödeme = biz borcumuzu ödedik
+        const rows = result.rows.map(row => ({
+            ...row,
+            bakiye: Number(row.satis_toplam) - Number(row.tahsilat_toplam) - Number(row.alis_toplam) + Number(row.odeme_toplam)
+        }));
+
+        res.json(rows);
     } catch (error) {
         console.error('Cariler getirme hatası:', error);
         res.status(500).json({ error: 'Cariler getirilemedi' });
