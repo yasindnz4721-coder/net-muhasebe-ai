@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>.</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@200;300;400&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #1f1418;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: default;
+        }
+
+        .glow {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(200, 100, 120, 0.06) 0%, transparent 70%);
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 420px;
+            width: 90vw;
+            padding: 60px 40px;
+            opacity: 0;
+            animation: fadeIn 3s ease forwards 0.5s;
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .line {
+            height: 1px;
+            width: 40px;
+            background: rgba(200, 120, 130, 0.3);
+            margin-bottom: 40px;
+            animation: lineGrow 2s ease forwards 1s;
+            opacity: 0;
+        }
+
+        @keyframes lineGrow {
+            0% {
+                width: 0;
+                opacity: 0;
+            }
+
+            100% {
+                width: 40px;
+                opacity: 1;
+            }
+        }
+
+        .name {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+            font-size: 42px;
+            color: rgba(220, 130, 140, 0.9);
+            letter-spacing: 6px;
+            text-transform: lowercase;
+            margin-bottom: 50px;
+            opacity: 0;
+            animation: textReveal 2s ease forwards 1.5s;
+        }
+
+        @keyframes textReveal {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .msg {
+            font-family: 'Inter', sans-serif;
+            font-weight: 200;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.4);
+            line-height: 2.4;
+            letter-spacing: 0.3px;
+            margin-bottom: 50px;
+            opacity: 0;
+            animation: textReveal 2.5s ease forwards 2.5s;
+        }
+
+        .msg span {
+            color: rgba(220, 120, 130, 0.85);
+            font-weight: 300;
+        }
+
+        .end {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-weight: 300;
+            font-size: 15px;
+            color: rgba(220, 130, 140, 0.35);
+            opacity: 0;
+            animation: textReveal 2s ease forwards 4s;
+            margin-bottom: 40px;
+        }
+
+        /* Buttons */
+        .buttons {
+            display: flex;
+            gap: 20px;
+            opacity: 0;
+            animation: textReveal 2s ease forwards 5s;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 0;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: lowercase;
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .btn-yes {
+            background: rgba(220, 120, 130, 0.15);
+            color: rgba(220, 130, 140, 0.9);
+            border: 1px solid rgba(220, 120, 130, 0.2);
+        }
+
+        .btn-yes:hover {
+            background: rgba(220, 120, 130, 0.25);
+            border-color: rgba(220, 120, 130, 0.4);
+        }
+
+        .btn-no {
+            background: rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .btn-no:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Response pages */
+        .response {
+            display: none;
+            text-align: center;
+            padding: 60px 40px;
+            max-width: 420px;
+            width: 90vw;
+            position: relative;
+            z-index: 2;
+        }
+
+        .response.active {
+            display: block;
+            animation: fadeIn 2s ease forwards;
+        }
+
+        .response-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+            font-size: 28px;
+            line-height: 1.8;
+            color: rgba(220, 130, 140, 0.9);
+        }
+
+        .response-sub {
+            font-family: 'Inter', sans-serif;
+            font-weight: 200;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 30px;
+            letter-spacing: 1px;
+        }
+
+        .subtle-dot {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            background: rgba(200, 120, 130, 0.06);
+            border-radius: 50%;
+            animation: drift 20s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes drift {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            25% {
+                transform: translate(30px, -40px);
+            }
+
+            50% {
+                transform: translate(-20px, -80px);
+            }
+
+            75% {
+                transform: translate(10px, -30px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="glow"></div>
+
+    <div class="container" id="mainContent">
+        <div class="line"></div>
+        <h1 class="name">irem.</h1>
+        <p class="msg">
+            bunu söylemenin en cesur yolunu aradım,<br>
+            sanırım benim için <span>en doğru yol buydu.</span><br><br>
+            seni tanıdıkça fark ettim ki<br>
+            <span>bazı insanlar kalabalığın içinde bile fark edilir.</span><br><br>
+            eğer bir gün kahve içmek istersen,<br>
+            <span>ben hazırım.</span>
+        </p>
+        <p class="end">— senden biri</p>
+        <div class="buttons">
+            <button class="btn btn-yes" onclick="answer('evet')">evet, olur</button>
+            <button class="btn btn-no" onclick="answer('hayir')">hayır, olmaz</button>
+        </div>
+    </div>
+
+    <div class="response" id="yesResponse">
+        <p class="response-text">
+            bu cevabı bekliyordum. ☕<br><br>
+            seni mutlu etmek için<br>
+            elimden geleni yapacağım.
+        </p>
+        <p class="response-sub">— en kısa zamanda</p>
+    </div>
+
+    <div class="response" id="noResponse">
+        <p class="response-text">
+            anlıyorum.<br><br>
+            ama bunu söylemeye<br>
+            değerdi.
+        </p>
+        <p class="response-sub">— yine de teşekkürler</p>
+    </div>
+
+    <script>
+        // Subtle dots
+        for (let i = 0; i < 5; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'subtle-dot';
+            dot.style.left = Math.random() * 100 + '%';
+            dot.style.top = Math.random() * 100 + '%';
+            dot.style.animationDelay = (Math.random() * 10) + 's';
+            dot.style.animationDuration = (15 + Math.random() * 15) + 's';
+            document.body.appendChild(dot);
+        }
+
+        // Auto-start piano on first interaction (browser requirement)
+        let audioCtx = null;
+        let isPlaying = false;
+
+        const melody = [
+            { note: 523.25, time: 0 },
+            { note: 659.25, time: 1.2 },
+            { note: 783.99, time: 2.4 },
+            { note: 659.25, time: 3.6 },
+            { note: 523.25, time: 4.8 },
+            { note: 392.00, time: 6.0 },
+            { note: 440.00, time: 7.2 },
+            { note: 523.25, time: 8.4 },
+            { note: 659.25, time: 9.6 },
+            { note: 587.33, time: 10.8 },
+            { note: 523.25, time: 12.0 },
+            { note: 440.00, time: 13.2 },
+            { note: 392.00, time: 14.4 },
+            { note: 349.23, time: 15.6 },
+            { note: 392.00, time: 16.8 },
+            { note: 523.25, time: 18.0 },
+        ];
+
+        function playNote(freq, startTime, duration = 2.5) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+
+            const osc2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.value = freq * 2;
+            gain2.gain.setValueAtTime(0.015, startTime);
+            gain2.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+            filter.type = 'lowpass';
+            filter.frequency.value = 2000;
+
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.06, startTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+            osc2.start(startTime);
+            osc2.stop(startTime + duration);
+        }
+
+        function playMelody() {
+            const now = audioCtx.currentTime;
+            melody.forEach(n => playNote(n.note, now + n.time));
+            setTimeout(() => { if (isPlaying) playMelody(); }, (melody.length * 1200) + 2000);
+        }
+
+        function startMusic() {
+            if (isPlaying) return;
+            isPlaying = true;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            playMelody();
+        }
+
+        // Start music on ANY first click/touch
+        document.addEventListener('click', startMusic, { once: true });
+        document.addEventListener('touchstart', startMusic, { once: true });
+
+        // Button handler - save answer
+        function answer(choice) {
+            document.getElementById('mainContent').style.display = 'none';
+
+            if (choice === 'evet') {
+                document.getElementById('yesResponse').classList.add('active');
+            } else {
+                document.getElementById('noResponse').classList.add('active');
+            }
+
+            // Save the answer so you can check later
+            localStorage.setItem('irem_cevap', choice);
+            localStorage.setItem('irem_cevap_tarih', new Date().toLocaleString('tr-TR'));
+
+            // Also update the page title so it's visible in browser tab
+            document.title = choice === 'evet' ? '💖' : '🤍';
+        }
+    </script>
+</body>
+
+</html>
