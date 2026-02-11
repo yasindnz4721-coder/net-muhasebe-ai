@@ -84,11 +84,6 @@ app.get('/api/ping', (req, res) => {
     res.status(200).send('pong');
 });
 
-// İrem sayfası
-app.get('/irem', (req, res) => {
-    res.sendFile(path.join(__dirname, '../irem.html'));
-});
-
 // Error handler
 app.use((err, req, res, next) => {
     console.error('Server Error:', err);
