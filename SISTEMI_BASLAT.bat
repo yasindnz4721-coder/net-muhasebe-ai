@@ -32,3 +32,13 @@ echo   Lütfen açılan siyah pencereleri kapatmayın.
 echo   Pencerelerden birinde hata varsa, lütfen bana bildirin.
 echo ===================================================
 timeout /t 10
+echo    Sunucu çalışıyor
+echo    SUNUCUSU sorunu
+timeout /t 10
+echo    start   sorunu
+timeout /t 10
+echo        sorunu gider    
+
+echo    eksik node_modules sorunu
+timeout /t 10
+echo        sorunu gider    

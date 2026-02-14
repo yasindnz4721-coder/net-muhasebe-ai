@@ -1,4 +1,4 @@
-# 🌐 Render.com Üzerinden Yayına Alma Rehberi
+![alt text](image.png)# 🌐 Render.com Üzerinden Yayına Alma Rehberi
 
 Net Muhasebe AI uygulamanızı Render.com üzerinde ücretsiz veya düşük maliyetli olarak yayına almak için bu adımları takip edin.
 

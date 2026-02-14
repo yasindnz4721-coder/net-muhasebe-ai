@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '../../contexts/ProfileContext';
-import { taksitler as taksitApi, cariler as cariApi, TaksitPlan, Cari } from '../../lib/api';
+import { taksitler as taksitApi, cariler as cariApi, kasalar as kasaApi, TaksitPlan, Cari, Kasa } from '../../lib/api';
 import Sidebar from '../../components/feature/Sidebar';
 import Header from '../../components/feature/Header';
 
@@ -10,6 +10,7 @@ export default function TaksitlerPage() {
     const navigate = useNavigate();
     const [taksitler, setTaksitler] = useState<TaksitPlan[]>([]);
     const [cariler, setCariler] = useState<Cari[]>([]);
+    const [kasalar, setKasalar] = useState<Kasa[]>([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState<Partial<TaksitPlan>>({
@@ -25,12 +26,14 @@ export default function TaksitlerPage() {
         if (!selectedProfile) return;
         setLoading(true);
         try {
-            const [tRes, cRes] = await Promise.all([
+            const [tRes, cRes, kRes] = await Promise.all([
                 taksitApi.getAll(selectedProfile.id),
-                cariApi.getAll(selectedProfile.id)
+                cariApi.getAll(selectedProfile.id),
+                kasaApi.getAll(selectedProfile.id)
             ]);
             if (tRes.data) setTaksitler(tRes.data);
             if (cRes.data) setCariler(cRes.data);
+            if (kRes.data) setKasalar(kRes.data);
         } catch (error) {
             console.error('Veri çekme hatası:', error);
         } finally {
@@ -80,7 +83,11 @@ export default function TaksitlerPage() {
                             <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest mt-2">Ödeme Planlarınızı Yönetin</p>
                         </div>
                         <button
-                            onClick={() => setShowModal(true)}
+                            onClick={() => {
+                                const defaultKasa = kasalar.find(k => k.is_default);
+                                setFormData(prev => ({ ...prev, kasa_id: defaultKasa?.id || '' }));
+                                setShowModal(true);
+                            }}
                             className="premium-button px-8 h-14"
                         >
                             <i className="ri-add-line"></i> YENİ PLAN OLUŞTUR
@@ -144,12 +151,23 @@ export default function TaksitlerPage() {
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">İLGİLİ CARİ</label>
                                     <select
                                         className="premium-input h-14"
-                                        value={formData.cari_id}
+                                        value={formData.cari_id || ''}
                                         onChange={e => setFormData({ ...formData, cari_id: e.target.value })}
+                                    >
+                                        <option value="">Cari Seçin (Opsiyonel)...</option>
+                                        {cariler.map(c => <option key={c.id} value={c.id}>{c.ad}</option>)}
+                                    </select>
+                                </div>
+                                <div className="col-span-2 space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">HEDEF KASA</label>
+                                    <select
+                                        className="premium-input h-14"
+                                        value={(formData as any).kasa_id || ''}
+                                        onChange={e => setFormData({ ...formData, kasa_id: e.target.value } as any)}
                                         required
                                     >
-                                        <option value="">Cari Seçin...</option>
-                                        {cariler.map(c => <option key={c.id} value={c.id}>{c.ad}</option>)}
+                                        <option value="">Kasa Seçin...</option>
+                                        {kasalar.map(k => <option key={k.id} value={k.id}>{k.ad} {k.is_default ? '(Ana Kasa)' : ''}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-2">

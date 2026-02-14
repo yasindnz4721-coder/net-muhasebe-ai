@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Net Muhasebe - 3D Reklam</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* Play overlay */
+        .play-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a1a, #1a1a2e);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: opacity 1s ease;
+        }
+
+        .play-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .play-btn {
+            width: 110px;
+            height: 110px;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 80px rgba(99, 102, 241, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .play-btn::after {
+            content: '';
+            border-style: solid;
+            border-width: 20px 0 20px 36px;
+            border-color: transparent transparent transparent white;
+            margin-left: 8px;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 60px rgba(99, 102, 241, 0.3);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 100px rgba(99, 102, 241, 0.5);
+            }
+        }
+
+        .play-overlay h2 {
+            color: #e2e8f0;
+            font-size: 32px;
+            font-weight: 300;
+            margin-top: 35px;
+            letter-spacing: 4px;
+        }
+
+        .play-overlay p {
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 12px;
+        }
+
+        /* Cinema bars */
+        .cbar {
+            position: fixed;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: #000;
+            z-index: 500;
+        }
+
+        .cbar-t {
+            top: 0;
+        }
+
+        .cbar-b {
+            bottom: 0;
+        }
+
+        /* Subtitle */
+        .sub {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 600;
+            background: rgba(0, 0, 0, 0.88);
+            padding: 14px 40px;
+            border-radius: 10px;
+            max-width: 80%;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.4s;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .sub.visible {
+            opacity: 1;
+        }
+
+        .sub .spk {
+            color: #60a5fa;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .sub .txt {
+            color: #f1f5f9;
+            font-size: 20px;
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        /* Progress */
+        .prog {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #6366f1, #8b5cf6);
+            z-index: 700;
+            transition: width 0.2s linear;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+
+        /* Scene label */
+        .scene-label {
+            position: fixed;
+            top: 60px;
+            left: 30px;
+            z-index: 600;
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            transition: opacity 0.5s;
+        }
+
+        /* Closing overlay */
+        .closing-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 400;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 1.5s;
+            pointer-events: none;
+            background: linear-gradient(135deg, rgba(2, 6, 23, 0.95), rgba(15, 23, 42, 0.95), rgba(30, 27, 75, 0.95));
+        }
+
+        .closing-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .cl-content {
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .closing-overlay.visible .cl-content {
+            transform: scale(1);
+        }
+
+        .cl-logo {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #3b82f6, #6366f1, #8b5cf6);
+            border-radius: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            font-size: 44px;
+            font-weight: 900;
+            color: white;
+            box-shadow: 0 15px 50px rgba(99, 102, 241, 0.4);
+        }
+
+        .cl-name {
+            font-size: 60px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #e0e7ff, #c7d2fe, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cl-tags {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 18px;
+        }
+
+        .cl-tags span {
+            color: #94a3b8;
+            font-size: 18px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .cl-tags .dot {
+            color: #6366f1;
+            font-weight: 800;
+        }
+
+        .cl-cta {
+            margin-top: 40px;
+        }
+
+        .cl-cta p {
+            color: #cbd5e1;
+            font-size: 22px;
+            font-weight: 300;
+            line-height: 1.7;
+        }
+
+        .cl-cta em {
+            color: #a5b4fc;
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        .cl-founder {
+            color: #475569;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 20px;
+        }
+
+        /* Replay */
+        .replay {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 800;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            color: #a5b4fc;
+            padding: 14px 35px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.5s;
+            font-family: 'Inter';
+            letter-spacing: 1px;
+        }
+
+        .replay.show {
+            opacity: 1;
+        }
+
+        .replay:hover {
+            background: rgba(99, 102, 241, 0.35);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="play-overlay" id="playOverlay">
+        <div class="play-btn"></div>
+        <h2>NET MUHASEBE</h2>
+        <p>3D Reklam — Tıklayın ve izleyin</p>
+    </div>
+
+    <div class="cbar cbar-t"></div>
+    <div class="cbar cbar-b"></div>
+
+    <div class="sub" id="sub">
+        <div class="spk" id="spk"></div>
+        <div class="txt" id="txt"></div>
+    </div>
+
+    <div class="prog" id="prog"></div>
+    <div class="scene-label" id="sceneLabel"></div>
+
+    <div class="closing-overlay" id="closingOverlay">
+        <div class="cl-content">
+            <div class="cl-logo">N</div>
+            <div class="cl-name">NET MUHASEBE</div>
+            <div class="cl-tags">
+                <span>Basit</span><span class="dot">•</span>
+                <span>Hızlı</span><span class="dot">•</span>
+                <span>Güvenli</span>
+            </div>
+            <div class="cl-cta">
+                <p>"İşini kolaylaştır,<br><em>kafanı rahatlat.</em>"</p>
+                <div class="cl-founder">Kurucu: Yasin Deniz</div>
+            </div>
+        </div>
+    </div>
+
+    <button class="replay" id="replayBtn" onclick="location.reload()">↻ Tekrar İzle</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // =============== THREE.JS SETUP ===============
+        const W = window.innerWidth, H = window.innerHeight;
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setSize(W, H);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        document.body.prepend(renderer.domElement);
+
+        // Resize
+        window.addEventListener('resize', () => {
+            const w = window.innerWidth, h = window.innerHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        });
+
+        // =============== LIGHTING ===============
+        const ambientLight = new THREE.AmbientLight(0xffeedd, 0.4);
+        scene.add(ambientLight);
+
+        const mainLight = new THREE.DirectionalLight(0xfff5e0, 0.8);
+        mainLight.position.set(5, 8, 5);
+        mainLight.castShadow = true;
+        mainLight.shadow.mapSize.set(1024, 1024);
+        scene.add(mainLight);
+
+        const fillLight = new THREE.PointLight(0xffa54f, 0.5, 15);
+        fillLight.position.set(-3, 4, 2);
+        scene.add(fillLight);
+
+        const backLight = new THREE.PointLight(0x4488ff, 0.3, 15);
+        backLight.position.set(0, 3, -5);
+        scene.add(backLight);
+
+        // =============== MATERIALS ===============
+        const skinMat = new THREE.MeshStandardMaterial({ color: 0xd4a574, roughness: 0.7, metalness: 0 });
+        const skinMat2 = new THREE.MeshStandardMaterial({ color: 0xc8956a, roughness: 0.7, metalness: 0 });
+        const hairDark = new THREE.MeshStandardMaterial({ color: 0x1a1008, roughness: 0.9 });
+        const hairBlack = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
+        const eyeMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.3 });
+        const mouthMat = new THREE.MeshStandardMaterial({ color: 0xcc4433, roughness: 0.5 });
+        const greenShirt = new THREE.MeshStandardMaterial({ color: 0x4a7a4a, roughness: 0.8 });
+        const blueShirt = new THREE.MeshStandardMaterial({ color: 0x3a5a9a, roughness: 0.8 });
+        const apronMat = new THREE.MeshStandardMaterial({ color: 0xe8e0d0, roughness: 0.7 });
+        const pantsMat = new THREE.MeshStandardMaterial({ color: 0x333344, roughness: 0.8 });
+        const shoeMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x8B7355, roughness: 0.9 });
+        const wallMat = new THREE.MeshStandardMaterial({ color: 0xd4c5a9, roughness: 0.95 });
+        const counterMat = new THREE.MeshStandardMaterial({ color: 0x6b4226, roughness: 0.7, metalness: 0.1 });
+        const shelfMat = new THREE.MeshStandardMaterial({ color: 0x5c3a1e, roughness: 0.8 });
+        const paperMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e5, roughness: 0.6 });
+        const phoneMat = new THREE.MeshStandardMaterial({ color: 0x111122, roughness: 0.2, metalness: 0.8 });
+        const screenMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.1, emissive: 0x3b82f6, emissiveIntensity: 0.5 });
+        const teaMat = new THREE.MeshStandardMaterial({ color: 0xaa3311, roughness: 0.3, metalness: 0.1 });
+        const glassMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.1, transparent: true, opacity: 0.3 });
+        const laptopMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.3, metalness: 0.5 });
+
+        // =============== BUILD 3D HUMAN ===============
+        function createHuman(skinM, shirtM, hairM, isSmiling = false) {
+            const group = new THREE.Group();
+
+            // Head
+            const headGeo = new THREE.SphereGeometry(0.28, 16, 16);
+            const head = new THREE.Mesh(headGeo, skinM);
+            head.position.y = 1.75;
+            head.scale.set(1, 1.1, 0.95);
+            head.castShadow = true;
+            head.name = 'head';
+            group.add(head);
+
+            // Hair
+            const hairGeo = new THREE.SphereGeometry(0.30, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.55);
+            const hair = new THREE.Mesh(hairGeo, hairM);
+            hair.position.y = 1.78;
+            hair.scale.set(1, 1, 0.95);
+            group.add(hair);
+
+            // Eyes
+            const eyeGeo = new THREE.SphereGeometry(0.04, 8, 8);
+            const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+            leftEye.position.set(-0.1, 1.76, 0.25);
+            group.add(leftEye);
+            const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+            rightEye.position.set(0.1, 1.76, 0.25);
+            group.add(rightEye);
+
+            // Eyebrows
+            const browGeo = new THREE.BoxGeometry(0.1, 0.02, 0.02);
+            const leftBrow = new THREE.Mesh(browGeo, hairM);
+            leftBrow.position.set(-0.1, 1.83, 0.26);
+            leftBrow.name = 'leftBrow';
+            group.add(leftBrow);
+            const rightBrow = new THREE.Mesh(browGeo, hairM);
+            rightBrow.position.set(0.1, 1.83, 0.26);
+            rightBrow.name = 'rightBrow';
+            group.add(rightBrow);
+
+            // Nose
+            const noseGeo = new THREE.ConeGeometry(0.03, 0.08, 6);
+            const nose = new THREE.Mesh(noseGeo, skinM);
+            nose.position.set(0, 1.72, 0.28);
+            nose.rotation.x = -0.3;
+            group.add(nose);
+
+            // Mouth
+            const mouthGeo = new THREE.TorusGeometry(0.05, 0.015, 8, 12, Math.PI);
+            const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+            mouth.position.set(0, 1.65, 0.25);
+            if (isSmiling) {
+                mouth.rotation.z = Math.PI;
+            }
+            mouth.name = 'mouth';
+            group.add(mouth);
+
+            // Neck
+            const neckGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.1, 8);
+            const neck = new THREE.Mesh(neckGeo, skinM);
+            neck.position.y = 1.5;
+            group.add(neck);
+
+            // Torso
+            const torsoGeo = new THREE.BoxGeometry(0.55, 0.65, 0.3);
+            torsoGeo.translate(0, 0, 0);
+            const torso = new THREE.Mesh(torsoGeo, shirtM);
+            torso.position.y = 1.12;
+            torso.castShadow = true;
+            group.add(torso);
+
+            // Arms
+            const armGeo = new THREE.CylinderGeometry(0.06, 0.055, 0.55, 8);
+            const leftArm = new THREE.Mesh(armGeo, shirtM);
+            leftArm.position.set(-0.35, 1.15, 0);
+            leftArm.name = 'leftArm';
+            leftArm.castShadow = true;
+            group.add(leftArm);
+            const rightArm = new THREE.Mesh(armGeo, shirtM);
+            rightArm.position.set(0.35, 1.15, 0);
+            rightArm.name = 'rightArm';
+            rightArm.castShadow = true;
+            group.add(rightArm);
+
+            // Hands
+            const handGeo = new THREE.SphereGeometry(0.06, 8, 8);
+            const leftHand = new THREE.Mesh(handGeo, skinM);
+            leftHand.position.set(-0.35, 0.85, 0);
+            leftHand.name = 'leftHand';
+            group.add(leftHand);
+            const rightHand = new THREE.Mesh(handGeo, skinM);
+            rightHand.position.set(0.35, 0.85, 0);
+            rightHand.name = 'rightHand';
+            group.add(rightHand);
+
+            // Legs
+            const legGeo = new THREE.CylinderGeometry(0.07, 0.06, 0.7, 8);
+            const leftLeg = new THREE.Mesh(legGeo, pantsMat);
+            leftLeg.position.set(-0.12, 0.45, 0);
+            leftLeg.castShadow = true;
+            group.add(leftLeg);
+            const rightLeg = new THREE.Mesh(legGeo, pantsMat);
+            rightLeg.position.set(0.12, 0.45, 0);
+            rightLeg.castShadow = true;
+            group.add(rightLeg);
+
+            // Shoes
+            const shoeGeo = new THREE.BoxGeometry(0.1, 0.06, 0.18);
+            const leftShoe = new THREE.Mesh(shoeGeo, shoeMat);
+            leftShoe.position.set(-0.12, 0.08, 0.03);
+            group.add(leftShoe);
+            const rightShoe = new THREE.Mesh(shoeGeo, shoeMat);
+            rightShoe.position.set(0.12, 0.08, 0.03);
+            group.add(rightShoe);
+
+            group.castShadow = true;
+            return group;
+        }
+
+        // =============== BUILD MARKET ===============
+        function buildMarket() {
+            const market = new THREE.Group();
+
+            // Floor
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 10), floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            market.add(floor);
+
+            // Back wall
+            const wall = new THREE.Mesh(new THREE.PlaneGeometry(12, 5), wallMat);
+            wall.position.set(0, 2.5, -5);
+            market.add(wall);
+
+            // Left wall
+            const wallL = new THREE.Mesh(new THREE.PlaneGeometry(10, 5), wallMat);
+            wallL.position.set(-6, 2.5, 0);
+            wallL.rotation.y = Math.PI / 2;
+            market.add(wallL);
+
+            // Right wall
+            const wallR = new THREE.Mesh(new THREE.PlaneGeometry(10, 5), wallMat);
+            wallR.position.set(6, 2.5, 0);
+            wallR.rotation.y = -Math.PI / 2;
+            market.add(wallR);
+
+            // Counter
+            const counterGeo = new THREE.BoxGeometry(3.5, 0.9, 0.7);
+            const counter = new THREE.Mesh(counterGeo, counterMat);
+            counter.position.set(0, 0.45, -1);
+            counter.castShadow = true;
+            counter.receiveShadow = true;
+            market.add(counter);
+
+            // Counter top
+            const topGeo = new THREE.BoxGeometry(3.7, 0.06, 0.8);
+            const topMat = new THREE.MeshStandardMaterial({ color: 0x8B6914, roughness: 0.5, metalness: 0.1 });
+            const counterTop = new THREE.Mesh(topGeo, topMat);
+            counterTop.position.set(0, 0.93, -1);
+            market.add(counterTop);
+
+            // Shelves (left)
+            for (let i = 0; i < 3; i++) {
+                const shelf = new THREE.Mesh(new THREE.BoxGeometry(2, 0.06, 0.4), shelfMat);
+                shelf.position.set(-4.5, 1.2 + i * 0.8, -4.7);
+                market.add(shelf);
+
+                // Products on shelf
+                for (let j = 0; j < 5; j++) {
+                    const colors = [0xe74c3c, 0xf39c12, 0x27ae60, 0x3498db, 0x9b59b6];
+                    const prodGeo = new THREE.BoxGeometry(0.15 + Math.random() * 0.1, 0.25 + Math.random() * 0.15, 0.12);
+                    const prodMat = new THREE.MeshStandardMaterial({ color: colors[j], roughness: 0.7 });
+                    const prod = new THREE.Mesh(prodGeo, prodMat);
+                    prod.position.set(-5.2 + j * 0.35, 1.35 + i * 0.8, -4.7);
+                    market.add(prod);
+                }
+            }
+
+            // Shelves (right)
+            for (let i = 0; i < 3; i++) {
+                const shelf = new THREE.Mesh(new THREE.BoxGeometry(2, 0.06, 0.4), shelfMat);
+                shelf.position.set(4.5, 1.2 + i * 0.8, -4.7);
+                market.add(shelf);
+
+                for (let j = 0; j < 5; j++) {
+                    const colors = [0xf1c40f, 0xe67e22, 0x1abc9c, 0xe74c3c, 0x2ecc71];
+                    const prodGeo = new THREE.BoxGeometry(0.15 + Math.random() * 0.1, 0.25 + Math.random() * 0.15, 0.12);
+                    const prodMat = new THREE.MeshStandardMaterial({ color: colors[j], roughness: 0.7 });
+                    const prod = new THREE.Mesh(prodGeo, prodMat);
+                    prod.position.set(3.8 + j * 0.35, 1.35 + i * 0.8, -4.7);
+                    market.add(prod);
+                }
+            }
+
+            // Ceiling light
+            const lightBulb = new THREE.Mesh(
+                new THREE.SphereGeometry(0.15, 8, 8),
+                new THREE.MeshStandardMaterial({ color: 0xffffcc, emissive: 0xffffaa, emissiveIntensity: 2 })
+            );
+            lightBulb.position.set(0, 4.5, -1);
+            market.add(lightBulb);
+
+            const wire = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.01, 0.01, 0.5, 4),
+                new THREE.MeshStandardMaterial({ color: 0x333333 })
+            );
+            wire.position.set(0, 4.75, -1);
+            market.add(wire);
+
+            return market;
+        }
+
+        // =============== SCATTER PAPERS ON COUNTER ===============
+        function createPapers() {
+            const papers = new THREE.Group();
+            for (let i = 0; i < 8; i++) {
+                const p = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.25 + Math.random() * 0.15, 0.005, 0.3 + Math.random() * 0.1),
+                    paperMat
+                );
+                p.position.set(
+                    -0.8 + Math.random() * 1.6,
+                    0.97 + i * 0.005,
+                    -1 + (Math.random() - 0.5) * 0.4
+                );
+                p.rotation.y = (Math.random() - 0.5) * 0.8;
+                p.castShadow = true;
+                papers.add(p);
+            }
+            return papers;
+        }
+
+        // =============== PHONE 3D ===============
+        function createPhone() {
+            const phone = new THREE.Group();
+            const body = new THREE.Mesh(
+                new THREE.BoxGeometry(0.12, 0.22, 0.015),
+                phoneMat
+            );
+            body.castShadow = true;
+            phone.add(body);
+
+            const screen = new THREE.Mesh(
+                new THREE.PlaneGeometry(0.1, 0.18),
+                screenMat
+            );
+            screen.position.z = 0.009;
+            phone.add(screen);
+
+            return phone;
+        }
+
+        // =============== TEA GLASS 3D ===============
+        function createTeaGlass() {
+            const tea = new THREE.Group();
+            const glass = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.04, 0.03, 0.1, 8),
+                glassMat
+            );
+            tea.add(glass);
+            const liquid = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.035, 0.025, 0.08, 8),
+                teaMat
+            );
+            liquid.position.y = -0.005;
+            tea.add(liquid);
+            // Saucer
+            const saucer = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.06, 0.06, 0.01, 12),
+                new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 })
+            );
+            saucer.position.y = -0.055;
+            tea.add(saucer);
+            return tea;
+        }
+
+        // =============== LAPTOP 3D ===============
+        function createLaptop() {
+            const laptop = new THREE.Group();
+            // Base
+            const base = new THREE.Mesh(
+                new THREE.BoxGeometry(0.5, 0.02, 0.35),
+                laptopMat
+            );
+            laptop.add(base);
+            // Screen
+            const screenBack = new THREE.Mesh(
+                new THREE.BoxGeometry(0.48, 0.32, 0.01),
+                laptopMat
+            );
+            screenBack.position.set(0, 0.17, -0.17);
+            screenBack.rotation.x = -0.15;
+            laptop.add(screenBack);
+            // Screen display
+            const screenDisp = new THREE.Mesh(
+                new THREE.PlaneGeometry(0.44, 0.28),
+                screenMat
+            );
+            screenDisp.position.set(0, 0.17, -0.162);
+            screenDisp.rotation.x = -0.15;
+            laptop.add(screenDisp);
+
+            return laptop;
+        }
+
+        // =============== CREATE SCENE OBJECTS ===============
+        const market = buildMarket();
+        scene.add(market);
+
+        const papers = createPapers();
+        scene.add(papers);
+
+        // Mehmet (marketçi - yeşil önlük)
+        const mehmet = createHuman(skinMat, greenShirt, hairDark, false);
+        mehmet.position.set(0, 0, -0.3);
+        // Add apron
+        const apron = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.05), apronMat);
+        apron.position.y = 1.05;
+        apron.position.z = 0.15;
+        mehmet.add(apron);
+        scene.add(mehmet);
+
+        // Mustache for Mehmet
+        const mustacheGeo = new THREE.BoxGeometry(0.12, 0.025, 0.03);
+        const mustache = new THREE.Mesh(mustacheGeo, hairDark);
+        mustache.position.set(0, 1.67, 0.26);
+        mehmet.add(mustache);
+
+        // Ali (komşu - mavi gömlek) — başta gizli
+        const ali = createHuman(skinMat2, blueShirt, hairBlack, true);
+        ali.position.set(4, 0, 1);
+        ali.rotation.y = -0.5;
+        ali.visible = false;
+        scene.add(ali);
+
+        // Beard for Ali
+        const beardGeo = new THREE.SphereGeometry(0.18, 8, 8, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.5);
+        const beard = new THREE.Mesh(beardGeo, hairBlack);
+        beard.position.set(0, 1.65, 0.12);
+        beard.scale.set(1, 0.6, 0.8);
+        ali.add(beard);
+
+        // Phone for Ali
+        const phone = createPhone();
+        phone.position.set(0.4, 1.2, 0.2);
+        phone.rotation.set(0, -0.3, 0.2);
+        phone.visible = false;
+        ali.add(phone);
+
+        // Tea glass
+        const teaGlass = createTeaGlass();
+        teaGlass.position.set(0.8, 0.99, -1);
+        teaGlass.visible = false;
+        scene.add(teaGlass);
+
+        // Laptop
+        const laptop = createLaptop();
+        laptop.position.set(-0.3, 0.96, -0.9);
+        laptop.visible = false;
+        scene.add(laptop);
+
+        // Camera initial position
+        camera.position.set(0, 2.5, 4);
+        camera.lookAt(0, 1.3, 0);
+
+        // =============== ANIMATION STATE ===============
+        let animTime = 0;
+        let currentCamTarget = { x: 0, y: 2.5, z: 4, lookX: 0, lookY: 1.3, lookZ: 0 };
+        let targetCam = { ...currentCamTarget };
+
+        function lerpCam(speed) {
+            const s = speed;
+            currentCamTarget.x += (targetCam.x - currentCamTarget.x) * s;
+            currentCamTarget.y += (targetCam.y - currentCamTarget.y) * s;
+            currentCamTarget.z += (targetCam.z - currentCamTarget.z) * s;
+            currentCamTarget.lookX += (targetCam.lookX - currentCamTarget.lookX) * s;
+            currentCamTarget.lookY += (targetCam.lookY - currentCamTarget.lookY) * s;
+            currentCamTarget.lookZ += (targetCam.lookZ - currentCamTarget.lookZ) * s;
+            camera.position.set(currentCamTarget.x, currentCamTarget.y, currentCamTarget.z);
+            camera.lookAt(currentCamTarget.lookX, currentCamTarget.lookY, currentCamTarget.lookZ);
+        }
+
+        // Head bob / talk animation
+        let talkingChar = null;
+        function animateChar(char, time) {
+            const head = char.getObjectByName('head');
+            if (head && char === talkingChar) {
+                head.rotation.x = Math.sin(time * 5) * 0.05;
+                head.rotation.z = Math.sin(time * 3) * 0.03;
+            }
+            // Idle breathing
+            const la = char.getObjectByName('leftArm');
+            const ra = char.getObjectByName('rightArm');
+            if (la) la.rotation.z = Math.sin(time * 1.5) * 0.03 + 0.05;
+            if (ra) ra.rotation.z = -Math.sin(time * 1.5) * 0.03 - 0.05;
+        }
+
+        // Stress animation for Mehmet
+        let mehmetStressed = true;
+        function animateStress(time) {
+            if (!mehmetStressed) return;
+            const head = mehmet.getObjectByName('head');
+            if (head) {
+                head.position.x = Math.sin(time * 4) * 0.02;
+            }
+            const lb = mehmet.getObjectByName('leftBrow');
+            const rb = mehmet.getObjectByName('rightBrow');
+            if (lb) lb.rotation.z = 0.2;
+            if (rb) rb.rotation.z = -0.2;
+        }
+
+        // =============== RENDER LOOP ===============
+        function animate() {
+            requestAnimationFrame(animate);
+            animTime += 0.016;
+
+            lerpCam(0.02);
+            animateChar(mehmet, animTime);
+            animateChar(ali, animTime);
+            if (mehmetStressed) animateStress(animTime);
+
+            // Tea steam particle
+            if (teaGlass.visible) {
+                teaGlass.rotation.y = animTime * 0.3;
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // =============== TTS ===============
+        let ttsVoice = null;
+        function loadVoices() {
+            const v = speechSynthesis.getVoices();
+            ttsVoice = v.find(x => x.lang.startsWith('tr'));
+            if (!ttsVoice) ttsVoice = v.find(x => x.lang.includes('tr'));
+            if (!ttsVoice && v.length) ttsVoice = v[0];
+        }
+        speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+
+        function speak(text, rate = 0.95, pitch = 1.0) {
+            return new Promise(resolve => {
+                speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'tr-TR';
+                if (ttsVoice) u.voice = ttsVoice;
+                u.rate = rate; u.pitch = pitch; u.volume = 1;
+                u.onend = resolve; u.onerror = resolve;
+                speechSynthesis.speak(u);
+            });
+        }
+
+        // =============== SUBTITLE ===============
+        const subEl = document.getElementById('sub');
+        const spkEl = document.getElementById('spk');
+        const txtEl = document.getElementById('txt');
+        const labelEl = document.getElementById('sceneLabel');
+
+        function showSub(s, t) { spkEl.textContent = s; txtEl.textContent = t; subEl.classList.add('visible'); }
+        function hideSub() { subEl.classList.remove('visible'); }
+
+        // =============== PROGRESS ===============
+        const progEl = document.getElementById('prog');
+        let totalMS = 0;
+        const TOTAL_DUR = 50000;
+        let progI;
+        function startProg() {
+            totalMS = 0;
+            progI = setInterval(() => { totalMS += 100; progEl.style.width = Math.min((totalMS / TOTAL_DUR) * 100, 100) + '%'; }, 100);
+        }
+
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        // =============== CAMERA PRESETS ===============
+        function camWide() { targetCam = { x: 0, y: 2.5, z: 5, lookX: 0, lookY: 1.3, lookZ: -1 }; }
+        function camMehmetClose() { targetCam = { x: 0.3, y: 1.8, z: 2.2, lookX: 0, lookY: 1.7, lookZ: -0.3 }; }
+        function camTwoShot() { targetCam = { x: 1.5, y: 2, z: 3.5, lookX: 1, lookY: 1.4, lookZ: -0.5 }; }
+        function camAliClose() { targetCam = { x: 2, y: 1.8, z: 2.5, lookX: 2.5, lookY: 1.6, lookZ: 0 }; }
+        function camPhone() { targetCam = { x: 2.8, y: 1.5, z: 1.5, lookX: 2.8, lookY: 1.2, lookZ: 0.2 }; }
+        function camCounter() { targetCam = { x: 0, y: 1.5, z: 1.5, lookX: 0, lookY: 1, lookZ: -1 }; }
+        function camHappy() { targetCam = { x: 0, y: 2, z: 3, lookX: 0, lookY: 1.5, lookZ: -0.5 }; }
+
+        // =============== PLAY AD ===============
+        async function playAd() {
+            startProg();
+
+            // ===== SAHNE 1: KAOS =====
+            labelEl.textContent = 'SAHNE 1 — KAOS';
+            camWide();
+            await sleep(1500);
+
+            camMehmetClose();
+            talkingChar = mehmet;
+            await sleep(800);
+
+            showSub('MEHMET (MARKETÇİ)', 'Abi vallahi kafam çok karıştı...');
+            await speak('Abi vallahi kafam çok karıştı.', 0.9, 0.85);
+            await sleep(300);
+
+            camCounter();
+            showSub('MEHMET', 'Veresiye defteri ayrı, taksit ayrı, kasa ayrı...');
+            await speak('Veresiye defteri ayrı, taksit ayrı, kasa ayrı.', 0.9, 0.85);
+            await sleep(300);
+
+            camMehmetClose();
+            showSub('MEHMET', 'Kim ne kadar borçlu, kim ödeme yaptı... karışıyor!');
+            await speak('Kim ne kadar borçlu, kim ödeme yaptı, hepsi karışıyor!', 0.9, 0.85);
+            await sleep(300);
+
+            showSub('MEHMET', 'Akşam eve gidince bile hesap düşünüyorum...');
+            await speak('Akşam eve gidince bile hesap düşünüyorum.', 0.85, 0.8);
+            talkingChar = null;
+            await sleep(800);
+            hideSub();
+
+            // ===== SAHNE 2: KOMŞU ALİ GELİYOR =====
+            labelEl.textContent = 'SAHNE 2 — KOMŞU';
+            ali.visible = true;
+            ali.position.set(4, 0, 1.5);
+            camWide();
+            await sleep(500);
+
+            // Ali yürüyerek gelsin
+            const walkStart = Date.now();
+            await new Promise(resolve => {
+                const walkInterval = setInterval(() => {
+                    const elapsed = (Date.now() - walkStart) / 1000;
+                    const t = Math.min(elapsed / 2, 1);
+                    ali.position.x = 4 - t * 2;
+                    ali.position.z = 1.5 - t * 0.5;
+                    ali.rotation.y = -0.5 + t * 0.2;
+                    if (t >= 1) { clearInterval(walkInterval); resolve(); }
+                }, 16);
+            });
+
+            camTwoShot();
+            await sleep(500);
+
+            talkingChar = ali;
+            showSub('ALİ (KOMŞU)', 'Mehmet abi, yine mi defterlere gömülmüşsün?');
+            await speak('Mehmet abi, yine mi defterlere gömülmüşsün?', 1.0, 1.15);
+            talkingChar = null;
+            await sleep(400);
+
+            camMehmetClose();
+            talkingChar = mehmet;
+            showSub('MEHMET', 'Ne yapayım Ali, işler karıştı...');
+            await speak('Ne yapayım Ali, işler karıştı.', 0.9, 0.85);
+            talkingChar = null;
+            await sleep(300);
+
+            camAliClose();
+            talkingChar = ali;
+            showSub('ALİ', 'Bak sana bir şey göstereyim. Ben de senin gibiydim...');
+            await speak('Bak sana bir şey göstereyim. Ben de senin gibiydim.', 1.0, 1.15);
+            await sleep(200);
+
+            phone.visible = true;
+            showSub('ALİ', 'Sonra Net Muhasebe diye bir uygulama buldum. Hayatım değişti!');
+            await speak('Sonra Net Muhasebe diye bir uygulama buldum. Hayatım değişti!', 1.0, 1.15);
+            talkingChar = null;
+            await sleep(300);
+
+            camMehmetClose();
+            talkingChar = mehmet;
+            showSub('MEHMET', 'Net Muhasebe mi? Nasıl bir şey?');
+            await speak('Net Muhasebe mi? Nasıl bir şey?', 0.95, 0.85);
+            talkingChar = null;
+            await sleep(300);
+
+            camPhone();
+            talkingChar = ali;
+            showSub('ALİ', 'Bak telefondan göstereyim...');
+            await speak('Bak telefondan göstereyim.', 1.0, 1.15);
+            await sleep(500);
+
+            // ===== SAHNE 3: UYGULAMA GÖSTERİMİ =====
+            labelEl.textContent = 'SAHNE 3 — UYGULAMA';
+
+            showSub('ALİ', 'Bak, günlük cironu buradan görüyorsun...');
+            await speak('Bak, günlük cironu buradan görüyorsun.', 1.0, 1.15);
+            await sleep(400);
+
+            showSub('ALİ', 'Kim ne kadar veresiye almış, taksitler ne zaman, hepsi burada!');
+            await speak('Kim ne kadar veresiye almış, taksitler ne zaman bitiyor, hepsi burada!', 0.95, 1.15);
+            await sleep(300);
+
+            camTwoShot();
+            showSub('ALİ', 'Kasa hesabı otomatik! Personel maaşı bile takip edebiliyorsun!');
+            await speak('Kasa hesabı otomatik çıkıyor! Personel maaşı bile takip edebiliyorsun!', 0.95, 1.15);
+            talkingChar = null;
+            await sleep(300);
+
+            talkingChar = mehmet;
+            showSub('MEHMET', 'Ciddi misin? Hepsini tek yerden mi?');
+            await speak('Ciddi misin? Hepsini tek yerden mi takip ediyorsun?', 0.95, 0.85);
+            talkingChar = null;
+            await sleep(300);
+
+            talkingChar = ali;
+            showSub('ALİ', 'Aynen! Hem telefondan hem bilgisayardan. Çok basit, çok hızlı!');
+            await speak('Aynen! Hem telefondan hem bilgisayardan. Çok basit, çok hızlı!', 1.0, 1.15);
+            talkingChar = null;
+            await sleep(600);
+            hideSub();
+
+            // ===== SAHNE 4: MUTLU MEHMET =====
+            labelEl.textContent = 'SAHNE 4 — RAHATLIK';
+            mehmetStressed = false;
+
+            // Mehmet brow'ları düzelt
+            const lb = mehmet.getObjectByName('leftBrow');
+            const rb = mehmet.getObjectByName('rightBrow');
+            if (lb) lb.rotation.z = 0;
+            if (rb) rb.rotation.z = 0;
+
+            // Mouth'u gülümsemeye çevir
+            const mouth = mehmet.getObjectByName('mouth');
+            if (mouth) mouth.rotation.z = Math.PI;
+
+            // Kağıtları kaldır
+            papers.visible = false;
+
+            // Laptop ve çay koy
+            laptop.visible = true;
+            teaGlass.visible = true;
+
+            // Ali'yi geri çek
+            ali.visible = false;
+            phone.visible = false;
+
+            camHappy();
+            await sleep(1500);
+
+            talkingChar = mehmet;
+            showSub('MEHMET', 'Şimdi her şey elimde! Vallahi kafam rahatladı.');
+            await speak('Şimdi her şey elimde! Vallahi kafam rahatladı.', 0.9, 1.0);
+            await sleep(300);
+
+            showSub('MEHMET', 'Kim borçlu görüyorum, taksitleri takip ediyorum...');
+            await speak('Kim borçlu görüyorum, taksitleri takip ediyorum, kasa hesabı otomatik çıkıyor.', 0.9, 1.0);
+            await sleep(300);
+
+            camMehmetClose();
+            showSub('MEHMET', 'Personel maaşı bile sistemde! Çayımı içiyorum rahat rahat.');
+            await speak('Personel maaşı bile sistemde! Artık çayımı içiyorum rahat rahat.', 0.9, 1.0);
+            talkingChar = null;
+            await sleep(800);
+            hideSub();
+
+            // ===== SAHNE 5: KAPANIŞ =====
+            labelEl.textContent = '';
+            await sleep(500);
+
+            document.getElementById('closingOverlay').classList.add('visible');
+            await sleep(1500);
+
+            showSub('', 'Net Muhasebe — İşini kolaylaştır, kafanı rahatlat.');
+            await speak('Net Muhasebe. İşini kolaylaştır, kafanı rahatlat.', 0.85, 1.0);
+            await sleep(400);
+
+            showSub('', 'Basit. Hızlı. Güvenli.');
+            await speak('Basit. Hızlı. Güvenli.', 0.8, 1.0);
+            await sleep(1500);
+            hideSub();
+
+            clearInterval(progI);
+            progEl.style.width = '100%';
+            document.getElementById('replayBtn').classList.add('show');
+        }
+
+        // =============== START ===============
+        document.getElementById('playOverlay').addEventListener('click', () => {
+            document.getElementById('playOverlay').classList.add('hidden');
+            playAd();
+        });
+    </script>
+</body>
+
+</html>

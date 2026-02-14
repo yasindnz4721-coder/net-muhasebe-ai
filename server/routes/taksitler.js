@@ -121,7 +121,18 @@ router.post('/check-payments', async (req, res) => {
             [profile_id, bugun]
         );
 
-        const processed = [];
+        // "Taksit Ödemesi" gider kategorisini bul veya oluştur
+        let katResult = await query(
+            "SELECT id FROM gider_kategorileri WHERE profile_id = $1 AND ad = 'Taksit Ödemesi'",
+            [profile_id]
+        );
+        if (katResult.rows.length === 0) {
+            katResult = await query(
+                "INSERT INTO gider_kategorileri (profile_id, ad, ikon, renk) VALUES ($1, 'Taksit Ödemesi', 'ri-calendar-check-line', '#6366f1') RETURNING id",
+                [profile_id]
+            );
+        }
+        const taksitKategoriId = katResult.rows[0].id;
 
         for (const payment of duePayments.rows) {
             // 1. Kasaya (odemeler) gider olarak ekle
@@ -141,6 +152,13 @@ router.post('/check-payments', async (req, res) => {
             await query(
                 `UPDATE taksit_odemeleri SET durum = 'Ödendi', odeme_tarihi = NOW(), odeme_id = $1, kasa_id = $2 WHERE id = $3`,
                 [odemeResult.rows[0].id, defaultKasaId, payment.id]
+            );
+
+            // 4. Otomatik gider kaydı oluştur (raporlama için — kasadan düşme yok, zaten yukarıda düşüldü)
+            await query(
+                `INSERT INTO giderler (profile_id, kategori_id, tutar, tarih, kasa_id, odeme_yontemi, aciklama)
+                 VALUES ($1, $2, $3, NOW(), $4, 'Nakit', $5)`,
+                [profile_id, taksitKategoriId, payment.tutar, defaultKasaId, `Taksit Ödemesi: ${payment.cari_ad || ''} - ${payment.plan_aciklama || ''}`]
             );
 
             processed.push(payment.id);

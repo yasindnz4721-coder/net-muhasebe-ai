@@ -204,6 +204,27 @@ router.post('/:id/avanslar', async (req, res) => {
             if (defaultKasaId) {
                 await query('UPDATE kasalar SET bakiye = bakiye - $1, updated_at = NOW() WHERE id = $2', [tutar, defaultKasaId]);
             }
+
+            // 5. Otomatik gider kaydı oluştur (Ana Kasa raporlaması için)
+            // "Personel Avansı" kategorisini bul veya oluştur
+            let katResult = await query(
+                "SELECT id FROM gider_kategorileri WHERE profile_id = $1 AND ad = 'Personel Avansı'",
+                [profile_id]
+            );
+            if (katResult.rows.length === 0) {
+                katResult = await query(
+                    "INSERT INTO gider_kategorileri (profile_id, ad, ikon, renk) VALUES ($1, 'Personel Avansı', 'ri-hand-coin-line', '#f59e0b') RETURNING id",
+                    [profile_id]
+                );
+            }
+            const kategoriId = katResult.rows[0].id;
+
+            // Gideri kaydet (kasadan düşme yok — zaten yukarıda düşüldü)
+            await query(
+                `INSERT INTO giderler (profile_id, kategori_id, tutar, tarih, kasa_id, odeme_yontemi, aciklama, kullanici_email)
+                 VALUES ($1, $2, $3, $4, $5, 'Nakit', $6, $7)`,
+                [profile_id, kategoriId, tutar, tarih, defaultKasaId, `Personel Avansı: ${adSoyad} - ${aciklama || ''}`, req.user.email]
+            );
         }
 
         res.json(result.rows[0]);
