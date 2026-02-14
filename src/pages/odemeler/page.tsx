@@ -30,6 +30,16 @@ const OdemelerPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTip, setFilterTip] = useState('all');
   const [anaKasa, setAnaKasa] = useState<Kasa | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [cariler, setCariler] = useState<Cari[]>([]);
+  const [kasalar, setKasalar] = useState<Kasa[]>([]);
+  const [formData, setFormData] = useState<Partial<Odeme>>({
+    tip: 'Tahsilat',
+    tutar: 0,
+    tarih: new Date().toISOString().split('T')[0],
+    odeme_yontemi: 'Nakit',
+    aciklama: ''
+  });
 
   useEffect(() => {
     if (selectedProfile) {
@@ -40,20 +50,51 @@ const OdemelerPage = () => {
   const loadOdemeler = async () => {
     try {
       setLoading(true);
-      const [odemelerRes, kasalarRes] = await Promise.all([
+      const [odemelerRes, kasalarRes, carilerRes] = await Promise.all([
         odemelerApi.getAll(selectedProfile!.id),
-        kasalarApi.getAll(selectedProfile!.id)
+        kasalarApi.getAll(selectedProfile!.id),
+        carilerApi.getAll(selectedProfile!.id)
       ]);
 
       if (odemelerRes.data) setOdemeList(odemelerRes.data);
       if (kasalarRes.data) {
+        setKasalar(kasalarRes.data);
         const defaultKasa = kasalarRes.data.find(k => k.is_default) || kasalarRes.data[0];
         setAnaKasa(defaultKasa);
       }
+      if (carilerRes.data) setCariler(carilerRes.data);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (!selectedProfile) return;
+      const selectedCari = cariler.find(c => c.id === formData.cari_id);
+
+      const res = await odemelerApi.create({
+        ...formData,
+        cari_ad: selectedCari?.ad || 'Genel',
+        profile_id: selectedProfile.id
+      } as any);
+
+      if (res.data) {
+        setShowModal(false);
+        loadOdemeler();
+        setFormData({
+          tip: 'Tahsilat',
+          tutar: 0,
+          tarih: new Date().toISOString().split('T')[0],
+          odeme_yontemi: 'Nakit',
+          aciklama: ''
+        });
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -96,10 +137,22 @@ const OdemelerPage = () => {
               </div>
 
               <div className="flex gap-4">
-                <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-16 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-600/20 flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setFormData({ ...formData, tip: 'Tahsilat', kasa_id: anaKasa?.id || '' });
+                    setShowModal(true);
+                  }}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-16 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-600/20 flex items-center gap-3"
+                >
                   <ArrowUpRight size={20} /> TAHSİLAT EKLE
                 </button>
-                <button className="bg-rose-600 hover:bg-rose-700 text-white px-8 h-16 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-rose-600/20 flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setFormData({ ...formData, tip: 'Ödeme', kasa_id: anaKasa?.id || '' });
+                    setShowModal(true);
+                  }}
+                  className="bg-rose-600 hover:bg-rose-700 text-white px-8 h-16 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-rose-600/20 flex items-center gap-3"
+                >
                   <ArrowDownLeft size={20} /> ÖDEME EKLE
                 </button>
               </div>
@@ -222,6 +275,111 @@ const OdemelerPage = () => {
           </main>
         </div>
       </div>
+
+      {showModal && (
+        <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fade-in">
+          <div className="premium-card p-0 w-full max-w-2xl animate-slide-up border-white/10 relative overflow-hidden">
+            <div className="px-10 py-10 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+              <div className="space-y-1">
+                <h3 className="text-3xl font-black tracking-tight text-white uppercase leading-none">
+                  {formData.tip === 'Tahsilat' ? 'Yeni Tahsilat' : 'Yeni Ödeme'}
+                </h3>
+                <p className="text-slate-500 font-bold text-sm uppercase tracking-widest">Kasa hareketini sisteme kaydedin.</p>
+              </div>
+              <button onClick={() => setShowModal(false)} className="w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                <Plus size={24} className="rotate-45" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreate} className="p-10 space-y-8">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">İLGİLİ CARİ</label>
+                <select
+                  required
+                  value={formData.cari_id || ''}
+                  onChange={e => setFormData({ ...formData, cari_id: e.target.value })}
+                  className="premium-input h-14"
+                >
+                  <option value="">Cari Seçin...</option>
+                  {cariler.map(c => <option key={c.id} value={c.id}>{c.ad}</option>)}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">TUTAR (₺)</label>
+                  <input
+                    type="number"
+                    required
+                    value={formData.tutar || ''}
+                    onChange={e => setFormData({ ...formData, tutar: Number(e.target.value) })}
+                    className="premium-input h-14"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">TARİH</label>
+                  <input
+                    type="date"
+                    required
+                    value={formData.tarih}
+                    onChange={e => setFormData({ ...formData, tarih: e.target.value })}
+                    className="premium-input h-14"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">ÖDEME YÖNTEMİ</label>
+                  <select
+                    value={formData.odeme_yontemi}
+                    onChange={e => setFormData({ ...formData, odeme_yontemi: e.target.value })}
+                    className="premium-input h-14"
+                  >
+                    <option value="Nakit">NAKİT</option>
+                    <option value="Banka">BANKA TRANSFERİ</option>
+                    <option value="Kredi Kartı">KREDİ KARTI</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">KASA</label>
+                  <select
+                    required
+                    value={formData.kasa_id || ''}
+                    onChange={e => setFormData({ ...formData, kasa_id: e.target.value })}
+                    className="premium-input h-14"
+                  >
+                    <option value="">Kasa Seçin...</option>
+                    {kasalar.map(k => <option key={k.id} value={k.id}>{k.ad}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">AÇIKLAMA</label>
+                <input
+                  type="text"
+                  value={formData.aciklama}
+                  onChange={e => setFormData({ ...formData, aciklama: e.target.value })}
+                  className="premium-input h-14"
+                  placeholder="Ödeme açıklaması..."
+                />
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button type="button" onClick={() => setShowModal(false)} className="flex-1 h-14 border border-white/10 rounded-2xl text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-all">İPTAL</button>
+                <button
+                  type="submit"
+                  className={`flex-1 h-14 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl transition-all ${formData.tip === 'Tahsilat' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20'}`}
+                >
+                  {formData.tip === 'Tahsilat' ? 'TAHSİLAT KAYDET' : 'ÖDEME KAYDET'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

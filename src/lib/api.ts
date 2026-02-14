@@ -486,6 +486,7 @@ export interface Odeme {
     odeme_yontemi: string;
     aciklama?: string;
     profile_id?: string;
+    kasa_id?: string;
     created_at?: string;
 }
 
@@ -616,6 +617,7 @@ export interface TaksitPlan {
     aciklama?: string;
     durum: string;
     profile_id: string;
+    kasa_id?: string;
     created_at?: string;
 }
 
