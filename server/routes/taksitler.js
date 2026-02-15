@@ -81,10 +81,9 @@ router.get('/takip', async (req, res) => {
         const params = [profile_id];
 
         if (upcoming === 'true') {
-            const startDate = new Date().toISOString().split('T')[0];
             const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-            sql += ` AND to.vade_tarihi >= $2 AND to.vade_tarihi <= $3 AND to.durum = 'Bekliyor'`;
-            params.push(startDate, endDate);
+            sql += ` AND to.vade_tarihi <= $2 AND to.durum = 'Bekliyor'`;
+            params.push(endDate);
         } else if (yil && ay) {
             sql += ` AND EXTRACT(YEAR FROM to.vade_tarihi) = $2 AND EXTRACT(MONTH FROM to.vade_tarihi) = $3`;
             params.push(yil, ay);
@@ -133,6 +132,7 @@ router.post('/check-payments', async (req, res) => {
             );
         }
         const taksitKategoriId = katResult.rows[0].id;
+        const processed = [];
 
         for (const payment of duePayments.rows) {
             // 1. Kasaya (odemeler) gider olarak ekle
