@@ -158,10 +158,10 @@ export default function GiderlerPage() {
                                 <h3 className="text-xl font-black uppercase tracking-tighter">Son Gider Hareketleri</h3>
                             </div>
 
-                            <div className="overflow-x-auto">
+                            <div className="overflow-x-auto max-h-[calc(100vh-420px)] overflow-y-auto custom-scrollbar">
                                 <table className="w-full text-left">
-                                    <thead>
-                                        <tr className="bg-white/5">
+                                    <thead className="sticky top-0 z-10">
+                                        <tr className="bg-[#0f172a] shadow-sm">
                                             <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">TARİH</th>
                                             <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">KATEGORİ</th>
                                             <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest">AÇIKLAMA</th>

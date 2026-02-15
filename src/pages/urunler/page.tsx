@@ -201,10 +201,10 @@ const UrunlerPage = () => {
                 </select>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-h-[calc(100vh-420px)] overflow-y-auto custom-scrollbar">
                 <table className="w-full text-left">
-                  <thead>
-                    <tr className="bg-[#0f172a]/50">
+                  <thead className="sticky top-0 z-10">
+                    <tr className="bg-[#0f172a] shadow-sm">
                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ÜRÜN DETAYI</th>
                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">KATEGORİ</th>
                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">STOK</th>
