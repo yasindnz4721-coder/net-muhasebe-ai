@@ -87,13 +87,25 @@ router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
-        const result = await query('DELETE FROM odemeler WHERE id = $1 RETURNING id', [id]);
-
-        if (result.rows.length === 0) {
+        // Önce ödemeyi bulalım (kasa iadesi için)
+        const checkResult = await query('SELECT * FROM odemeler WHERE id = $1', [id]);
+        if (checkResult.rows.length === 0) {
             return res.status(404).json({ error: 'Ödeme bulunamadı' });
         }
+        const odeme = checkResult.rows[0];
 
-        res.json({ message: 'Ödeme silindi', id });
+        // 1. Kasa bakiyesini iade et
+        if (odeme.kasa_id) {
+            const isTahsilat = ['Tahsilat', 'Alınan Ödeme', 'Gelir'].includes(odeme.tip);
+            // Tahsilat siliniyorsa bakiye azalır, Ödeme siliniyorsa bakiye artar
+            const miktar = isTahsilat ? -odeme.tutar : odeme.tutar;
+            await query('UPDATE kasalar SET bakiye = bakiye + $1, updated_at = NOW() WHERE id = $2', [miktar, odeme.kasa_id]);
+        }
+
+        // 2. Ödemeyi sil
+        await query('DELETE FROM odemeler WHERE id = $1', [id]);
+
+        res.json({ message: 'Ödeme silindi ve kasa bakiyesi güncellendi', id });
     } catch (error) {
         console.error('Ödeme silme hatası:', error);
         res.status(500).json({ error: 'Ödeme silinemedi' });
