@@ -9,6 +9,7 @@ export default function GiderlerPage() {
     const [expenses, setExpenses] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
     const [kasalar, setKasalar] = useState<any[]>([]);
+    const [anaKasa, setAnaKasa] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
 
@@ -41,8 +42,11 @@ export default function GiderlerPage() {
             if (catRes.data) setCategories(catRes.data);
             if (kasaRes.data) {
                 setKasalar(kasaRes.data);
-                const defaultKasa = kasaRes.data.find((k: any) => k.is_default);
-                if (defaultKasa) setNewExpense(prev => ({ ...prev, kasa_id: defaultKasa.id }));
+                const defaultKasa = kasaRes.data.find((k: any) => k.is_default) || kasaRes.data[0];
+                if (defaultKasa) {
+                    setAnaKasa(defaultKasa);
+                    setNewExpense(prev => ({ ...prev, kasa_id: defaultKasa.id }));
+                }
             }
         } catch (error) {
             console.error('Veri yükleme hatası:', error);
@@ -124,8 +128,9 @@ export default function GiderlerPage() {
                         </div>
 
                         {/* Gider Kartları Özeti */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                             {[
+                                { label: 'ANA KASA BAKİYESİ', value: anaKasa?.bakiye || 0, icon: 'ri-wallet-3-line', color: 'indigo' },
                                 { label: 'TOPLAM GİDER', value: expenses.reduce((sum, e) => sum + Number(e.tutar), 0), icon: 'ri-money-dollar-circle-line', color: 'rose' },
                                 { label: 'AYLIK ORTALAMA', value: expenses.reduce((sum, e) => sum + Number(e.tutar), 0) / Math.max(1, new Set(expenses.map(e => e.tarih.substring(0, 7))).size), icon: 'ri-calendar-line', color: 'indigo' },
                                 { label: 'EN YÜKSEK KALEM', value: Math.max(0, ...expenses.map(e => Number(e.tutar))), icon: 'ri-arrow-up-circle-line', color: 'orange' },
