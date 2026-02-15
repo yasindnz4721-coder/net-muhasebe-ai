@@ -71,7 +71,9 @@ router.post('/', async (req, res) => {
         // Kasa bakiyesini güncelle
         if (targetKasaId) {
             const isTahsilat = ['Tahsilat', 'Alınan Ödeme', 'Gelir'].includes(tip);
-            const miktar = isTahsilat ? tutar : -tutar;
+            const isOdeme = ['Ödeme', 'Gider', 'Tediye', 'Personel Avansı', 'Taksit Ödemesi'].includes(tip);
+
+            const miktar = isTahsilat ? tutar : (isOdeme ? -tutar : -tutar); // Varsayılan olarak gider say
             await query('UPDATE kasalar SET bakiye = bakiye + $1, updated_at = NOW() WHERE id = $2', [miktar, targetKasaId]);
         }
 
@@ -97,8 +99,10 @@ router.delete('/:id', async (req, res) => {
         // 1. Kasa bakiyesini iade et
         if (odeme.kasa_id) {
             const isTahsilat = ['Tahsilat', 'Alınan Ödeme', 'Gelir'].includes(odeme.tip);
+            const isOdeme = ['Ödeme', 'Gider', 'Tediye', 'Personel Avansı', 'Taksit Ödemesi'].includes(odeme.tip);
+
             // Tahsilat siliniyorsa bakiye azalır, Ödeme siliniyorsa bakiye artar
-            const miktar = isTahsilat ? -odeme.tutar : odeme.tutar;
+            const miktar = isTahsilat ? -odeme.tutar : (isOdeme ? odeme.tutar : odeme.tutar);
             await query('UPDATE kasalar SET bakiye = bakiye + $1, updated_at = NOW() WHERE id = $2', [miktar, odeme.kasa_id]);
         }
 
