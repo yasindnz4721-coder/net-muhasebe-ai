@@ -73,23 +73,23 @@ router.get('/takip', async (req, res) => {
         if (!profile_id) return res.status(400).json({ error: 'profile_id gerekli' });
 
         let sql = `
-            SELECT to.*, t.cari_ad, t.aciklama as plan_aciklama 
-            FROM taksit_odemeleri to
-            JOIN taksitler t ON to.taksit_id = t.id
-            WHERE to.profile_id = $1
+            SELECT tod.*, t.cari_ad, t.aciklama as plan_aciklama 
+            FROM taksit_odemeleri tod
+            JOIN taksitler t ON tod.taksit_id = t.id
+            WHERE tod.profile_id = $1
         `;
         const params = [profile_id];
 
         if (upcoming === 'true') {
             const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-            sql += ` AND to.vade_tarihi <= $2 AND to.durum = 'Bekliyor'`;
+            sql += ` AND tod.vade_tarihi <= $2 AND tod.durum = 'Bekliyor'`;
             params.push(endDate);
         } else if (yil && ay) {
-            sql += ` AND EXTRACT(YEAR FROM to.vade_tarihi) = $2 AND EXTRACT(MONTH FROM to.vade_tarihi) = $3`;
+            sql += ` AND EXTRACT(YEAR FROM tod.vade_tarihi) = $2 AND EXTRACT(MONTH FROM tod.vade_tarihi) = $3`;
             params.push(yil, ay);
         }
 
-        sql += ` ORDER BY to.vade_tarihi ASC`;
+        sql += ` ORDER BY tod.vade_tarihi ASC`;
 
         const result = await query(sql, params);
         res.json(result.rows);
@@ -113,10 +113,10 @@ router.post('/check-payments', async (req, res) => {
 
         // Bugün vadesi gelmiş ve henüz ödenmemiş taksitleri bul
         const duePayments = await query(
-            `SELECT to.*, t.cari_id, t.cari_ad, t.aciklama as plan_aciklama 
-             FROM taksit_odemeleri to
-             JOIN taksitler t ON to.taksit_id = t.id
-             WHERE to.profile_id = $1 AND to.vade_tarihi <= $2 AND to.durum = 'Bekliyor'`,
+            `SELECT tod.*, t.cari_id, t.cari_ad, t.aciklama as plan_aciklama 
+             FROM taksit_odemeleri tod
+             JOIN taksitler t ON tod.taksit_id = t.id
+             WHERE tod.profile_id = $1 AND tod.vade_tarihi <= $2 AND tod.durum = 'Bekliyor'`,
             [profile_id, bugun]
         );
 
