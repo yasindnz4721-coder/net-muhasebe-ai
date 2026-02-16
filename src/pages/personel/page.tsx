@@ -383,11 +383,12 @@ const PersonelPage = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-6 p-6 bg-white/[0.02] rounded-2xl border border-white/5">
-                                <div className="space-y-2">
+                            <div className="space-y-8 p-8 bg-white/[0.02] rounded-[2.5rem] border border-white/5">
+                                {/* Devamsızlık Alanı */}
+                                <div className="space-y-3">
                                     <label className="text-[10px] font-black text-rose-500 uppercase tracking-widest italic flex items-center gap-2 ml-2">
-                                        <i className="ri-error-warning-line"></i>
-                                        YENİ DEVAMSIZLIK (HIZLI)
+                                        <i className="ri-error-warning-line text-lg"></i>
+                                        HIZLI DEVAMSIZLIK KAYDI (GELMEDİ)
                                     </label>
                                     <input
                                         type="date"
@@ -396,27 +397,31 @@ const PersonelPage = () => {
                                         className="premium-input h-14 border-rose-500/20 focus:border-rose-500/50 text-white"
                                     />
                                 </div>
-                                <div className="space-y-2">
+
+                                <div className="w-full h-px bg-white/5"></div>
+
+                                {/* Avans Alanı */}
+                                <div className="space-y-4">
                                     <label className="text-[10px] font-black text-orange-500 uppercase tracking-widest italic flex items-center gap-2 ml-2">
-                                        <i className="ri-money-dollar-circle-line"></i>
+                                        <i className="ri-money-dollar-circle-line text-lg"></i>
                                         YENİ AVANS EKLE
                                     </label>
-                                    <div className="grid grid-cols-[1.5fr,1fr] gap-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="relative group">
                                             <input
                                                 type="number"
                                                 value={formData.advanceAmount || ''}
                                                 onChange={e => setFormData({ ...formData, advanceAmount: Number(e.target.value) })}
-                                                className="premium-input h-14 border-orange-500/30 focus:border-orange-500 focus:bg-orange-500/5 text-orange-400 font-black text-xl pl-12"
-                                                placeholder="0"
+                                                className="premium-input h-16 border-orange-500/30 focus:border-orange-500 focus:bg-orange-500/5 text-orange-400 font-black text-2xl pl-14"
+                                                placeholder="0.00"
                                             />
-                                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-orange-500 font-black text-lg">₺</span>
+                                            <span className="absolute left-6 top-1/2 -translate-y-1/2 text-orange-500 font-black text-xl">₺</span>
                                         </div>
                                         <input
                                             type="date"
                                             value={formData.advanceDate}
                                             onChange={e => setFormData({ ...formData, advanceDate: e.target.value })}
-                                            className="premium-input h-14 border-orange-500/20 focus:border-orange-500/50 text-white font-bold w-full"
+                                            className="premium-input h-16 border-orange-500/20 focus:border-orange-500/50 text-white font-bold w-full"
                                         />
                                     </div>
                                 </div>
