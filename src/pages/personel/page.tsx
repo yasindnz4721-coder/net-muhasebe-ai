@@ -401,22 +401,22 @@ const PersonelPage = () => {
                                         <i className="ri-money-dollar-circle-line"></i>
                                         YENİ AVANS EKLE
                                     </label>
-                                    <div className="flex gap-3">
-                                        <div className="flex-[1.5] relative group">
+                                    <div className="grid grid-cols-[1.5fr,1fr] gap-3">
+                                        <div className="relative group">
                                             <input
                                                 type="number"
                                                 value={formData.advanceAmount || ''}
                                                 onChange={e => setFormData({ ...formData, advanceAmount: Number(e.target.value) })}
                                                 className="premium-input h-14 border-orange-500/30 focus:border-orange-500 focus:bg-orange-500/5 text-orange-400 font-black text-xl pl-12"
-                                                placeholder="0.00"
+                                                placeholder="0"
                                             />
-                                            <span className="absolute left-6 top-1/2 -translate-y-1/2 text-orange-500 font-black text-lg">₺</span>
+                                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-orange-500 font-black text-lg">₺</span>
                                         </div>
                                         <input
                                             type="date"
                                             value={formData.advanceDate}
                                             onChange={e => setFormData({ ...formData, advanceDate: e.target.value })}
-                                            className="premium-input h-14 border-orange-500/20 focus:border-orange-500/50 flex-1 text-white font-bold"
+                                            className="premium-input h-14 border-orange-500/20 focus:border-orange-500/50 text-white font-bold w-full"
                                         />
                                     </div>
                                 </div>
