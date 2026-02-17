@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   satisFaturalari as satisApi,
@@ -70,6 +70,16 @@ export default function SatisFaturasi() {
   const [odemeler, setOdemeler] = useState<any[]>([]);
   const location = useLocation();
   const [stateProcessed, setStateProcessed] = useState(false);
+
+  const cariOptions = useMemo(() =>
+    cariler.map(c => ({ id: c.id, name: c.ad, subText: c.vergi_no })),
+    [cariler]
+  );
+
+  const urunOptions = useMemo(() =>
+    urunler.map(u => ({ id: u.id, name: u.ad, subText: `STOK: ${u.stok_miktari}` })),
+    [urunler]
+  );
 
   useEffect(() => {
     if (selectedProfile) {
@@ -582,7 +592,7 @@ export default function SatisFaturasi() {
 
       {/* Add Full-Screen Modern Panel */}
       {showModal && (
-        <div className="fixed inset-0 bg-[#020617]/95 backdrop-blur-xl flex items-center justify-center z-[100] p-0 md:p-4 animate-fade-in">
+        <div className="fixed inset-0 bg-[#020617]/95 backdrop-blur-md flex items-center justify-center z-[100] p-0 md:p-4 animate-fade-in">
           <div className="premium-card p-0 w-full h-full md:h-[98vh] md:max-w-[98vw] flex flex-col animate-slide-up border-white/10 relative overflow-hidden shadow-2xl shadow-indigo-500/10">
             {/* Profesyonel Header */}
             <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.02]">
@@ -622,7 +632,7 @@ export default function SatisFaturasi() {
                     <div className="space-y-2">
                       <SearchableSelect
                         label="MÜŞTERİ / CARİ SEÇİMİ *"
-                        options={cariler.map(c => ({ id: c.id, name: c.ad, subText: c.vergi_no }))}
+                        options={cariOptions}
                         value={formData.cari_id}
                         onChange={(value) => handleCariChange(value)}
                         placeholder="BİR CARİ SEÇİN VEYA ARAYIN..."
@@ -717,7 +727,7 @@ export default function SatisFaturasi() {
                         <div className="md:col-span-5 space-y-2">
                           <SearchableSelect
                             label="ÜRÜN / HİZMET ADI"
-                            options={urunler.map(u => ({ id: u.id, name: u.ad, subText: `STOK: ${u.stok_miktari}` }))}
+                            options={urunOptions}
                             value={urun.urun_id}
                             onChange={(value) => handleUrunChange(index, 'urun_id', value)}
                             placeholder="ÜRÜN SEÇİN..."
