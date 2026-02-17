@@ -217,9 +217,9 @@ const OdemelerPage = () => {
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-h-[calc(100vh-450px)] overflow-y-auto custom-scrollbar">
                 <table className="w-full text-left border-separate border-spacing-0">
-                  <thead>
+                  <thead className="sticky top-0 z-10 bg-[#0f172a]">
                     <tr className="bg-[#0f172a]/50">
                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">İŞLEM TİPİ</th>
                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">CARİ / MÜŞTERİ</th>

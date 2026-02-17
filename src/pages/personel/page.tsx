@@ -333,8 +333,8 @@ const PersonelPage = () => {
             {/* Modal UI */}
             {showModal && (
                 <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fade-in">
-                    <div className="premium-card p-0 w-full max-w-2xl animate-slide-up border-white/10 relative overflow-hidden">
-                        <div className="px-10 py-10 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.01]">
+                    <div className="premium-card p-0 w-full max-w-2xl max-h-[90vh] flex flex-col animate-slide-up border-white/10 relative overflow-hidden">
+                        <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.01]">
                             <div className="space-y-1">
                                 <h3 className="text-3xl font-black tracking-tight text-white uppercase leading-none">
                                     {isEditing ? 'Personel Güncelle' : 'Yeni Personel'}
@@ -346,7 +346,7 @@ const PersonelPage = () => {
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="p-10 space-y-8">
+                        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar">
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">AD SOYAD *</label>
