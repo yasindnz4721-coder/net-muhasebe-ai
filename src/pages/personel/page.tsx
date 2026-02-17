@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import {
     personel as personelApi,
     Personel,
@@ -98,6 +100,35 @@ const PersonelPage = () => {
         XLSX.writeFile(wb, `Personel_Maas_Listesi_${new Date().toLocaleDateString('tr-TR')}.xlsx`);
     };
 
+    const handlePdfExport = () => {
+        const doc = new jsPDF();
+        doc.setFontSize(18);
+        doc.text('PERSONEL MAAS LISTESI', 14, 22);
+        doc.setFontSize(10);
+        doc.text(`Tarih: ${new Date().toLocaleDateString('tr-TR')}`, 14, 30);
+
+        const data = personelList.map(p => {
+            const ozet = maasOzetleri[p.id] || {};
+            return [
+                p.ad_soyad,
+                p.unvan || '-',
+                (Number(p.maas || 0)).toLocaleString('tr-TR') + ' TL',
+                (ozet.toplam_avans || 0).toLocaleString('tr-TR') + ' TL',
+                (ozet.odenecek_maas || p.maas || 0).toLocaleString('tr-TR') + ' TL'
+            ];
+        });
+
+        autoTable(doc, {
+            startY: 40,
+            head: [['Ad Soyad', 'Unvan', 'Brut Maas', 'Avanslar', 'Net Odenecek']],
+            body: data,
+            theme: 'striped',
+            headStyles: { fillColor: [79, 70, 229] }
+        });
+
+        doc.save(`Personel_Maas_Listesi_${new Date().toLocaleDateString('tr-TR')}.pdf`);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -184,6 +215,12 @@ const PersonelPage = () => {
                             </div>
 
                             <div className="flex gap-4">
+                                <button
+                                    onClick={handlePdfExport}
+                                    className="bg-rose-600 hover:bg-rose-700 text-white px-8 h-16 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-rose-600/20 flex items-center gap-3"
+                                >
+                                    <i className="ri-file-pdf-line text-xl"></i> PDF'E AKTAR
+                                </button>
                                 <button
                                     onClick={handleExcelExport}
                                     className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-16 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-600/20 flex items-center gap-3"

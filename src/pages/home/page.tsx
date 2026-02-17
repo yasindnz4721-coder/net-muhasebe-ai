@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '../../contexts/ProfileContext';
 import Header from '../../components/feature/Header';
@@ -76,6 +78,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showExcelModal, setShowExcelModal] = useState(false);
+  const [exportType, setExportType] = useState<'excel' | 'pdf'>('excel');
   const [excelDates, setExcelDates] = useState({
     startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0]
@@ -370,6 +373,99 @@ export default function HomePage() {
     }
   };
 
+  const handlePdfExport = async () => {
+    if (!selectedProfile) return;
+    try {
+      setExporting(true);
+      const start = new Date(excelDates.startDate);
+      const end = new Date(excelDates.endDate);
+      end.setHours(23, 59, 59, 999);
+
+      const [
+        { data: satislar },
+        { data: alislar },
+        { data: giderler },
+        { data: odemeler },
+        { data: stokHareketi },
+        { data: personeller }
+      ] = await Promise.all([
+        api.satisFaturalari.getAll(selectedProfile.id),
+        api.alisFaturalari.getAll(selectedProfile.id),
+        api.giderler.getAll(selectedProfile.id),
+        api.odemeler.getAll(selectedProfile.id),
+        api.stokHareketleri.getAll(selectedProfile.id),
+        api.personel.getAll(selectedProfile.id)
+      ]);
+
+      const dateFilter = (item: any) => {
+        const d = new Date(item.tarih);
+        return d >= start && d <= end;
+      };
+
+      const fSatislar = (satislar || []).filter(dateFilter);
+      const fAlislar = (alislar || []).filter(dateFilter);
+      const fGiderler = (giderler || []).filter(dateFilter);
+      const fOdemeler = (odemeler || []).filter(dateFilter);
+      const fUretim = (stokHareketi || []).filter(h => h.hareket_tipi === 'Üretim' && dateFilter(h));
+
+      const doc = new jsPDF();
+
+      // Title
+      doc.setFontSize(18);
+      doc.text('NET MUHASEBE AI - FINANSAL RAPOR', 14, 22);
+      doc.setFontSize(11);
+      doc.setTextColor(100);
+      doc.text(`Donem: ${excelDates.startDate} - ${excelDates.endDate}`, 14, 30);
+      doc.text(`Olusturulma Tarihi: ${new Date().toLocaleString('tr-TR')}`, 14, 37);
+
+      // Summary Table
+      const toplamSatis = fSatislar.reduce((sum, f) => sum + Number(f.toplam), 0);
+      const toplamAlis = fAlislar.reduce((sum, f) => sum + Number(f.toplam), 0);
+      const toplamGider = fGiderler.reduce((sum, g) => sum + Number(g.tutar), 0);
+      const toplamPersonel = (personeller || []).reduce((sum, p) => sum + Number(p.maas || 0), 0);
+      const netKar = toplamSatis - (toplamAlis + toplamGider + toplamPersonel);
+
+      autoTable(doc, {
+        startY: 45,
+        head: [['KALEM', 'TUTAR (TL)']],
+        body: [
+          ['TOPLAM SATIS', toplamSatis.toLocaleString('tr-TR') + ' TL'],
+          ['TOPLAM ALIS', toplamAlis.toLocaleString('tr-TR') + ' TL'],
+          ['TOPLAM GIDER', toplamGider.toLocaleString('tr-TR') + ' TL'],
+          ['PERSONEL MALIYETI', toplamPersonel.toLocaleString('tr-TR') + ' TL'],
+          [{ content: 'NET KAR / ZARAR', styles: { fontStyle: 'bold' } }, { content: netKar.toLocaleString('tr-TR') + ' TL', styles: { fontStyle: 'bold', textColor: netKar >= 0 ? [0, 150, 0] : [200, 0, 0] } }]
+        ],
+        theme: 'striped',
+        headStyles: { fillColor: [79, 70, 229] }
+      });
+
+      // Satislar Detail
+      doc.addPage();
+      doc.text('SATIS FATURALARI DETAYI', 14, 22);
+      autoTable(doc, {
+        startY: 30,
+        head: [['Fatura No', 'Cari', 'Tarih', 'Toplam']],
+        body: fSatislar.map(f => [f.fatura_no, f.cari_ad, new Date(f.tarih).toLocaleDateString('tr-TR'), f.toplam.toLocaleString('tr-TR') + ' TL']),
+      });
+
+      doc.save(`Net_Muhasebe_Rapor_${excelDates.startDate}_${excelDates.endDate}.pdf`);
+      setShowExcelModal(false);
+    } catch (err) {
+      console.error('PDF export error:', err);
+      alert('Rapor oluşturulurken bir hata oluştu.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleExport = () => {
+    if (exportType === 'excel') {
+      handleExcelExport();
+    } else {
+      handlePdfExport();
+    }
+  };
+
   if (!selectedProfile) {
     return (
       <div className="flex h-screen bg-gray-50">
@@ -468,10 +564,6 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="flex flex-col md:flex-row gap-4 shrink-0">
-                  <button onClick={() => setShowExcelModal(true)} className="group px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black text-sm transition-all hover:scale-105 active:scale-95 shadow-xl cursor-pointer flex items-center gap-2">
-                    <i className="ri-file-excel-2-line text-xl"></i>
-                    EXCEL'E AKTAR
-                  </button>
                   <button onClick={() => navigate('/ai-analiz')} className="group px-8 py-4 bg-white text-slate-900 rounded-2xl font-black text-sm transition-all hover:scale-105 active:scale-95 shadow-xl cursor-pointer">
                     STRATEJİ RAPORU
                   </button>
@@ -483,6 +575,24 @@ export default function HomePage() {
 
           {/* Quick Actions */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+            <button
+              onClick={() => { setExportType('excel'); setShowExcelModal(true); }}
+              className="flex flex-col items-center gap-3 p-4 bg-emerald-600 rounded-2xl border border-emerald-500 shadow-lg hover:bg-emerald-700 transition-all group cursor-pointer"
+            >
+              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <i className="ri-file-excel-2-line text-2xl"></i>
+              </div>
+              <span className="text-[10px] font-black text-white uppercase tracking-tighter">Excel Raporu</span>
+            </button>
+            <button
+              onClick={() => { setExportType('pdf'); setShowExcelModal(true); }}
+              className="flex flex-col items-center gap-3 p-4 bg-rose-600 rounded-2xl border border-rose-500 shadow-lg hover:bg-rose-700 transition-all group cursor-pointer"
+            >
+              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                <i className="ri-file-pdf-line text-2xl"></i>
+              </div>
+              <span className="text-[10px] font-black text-white uppercase tracking-tighter">PDF Raporu</span>
+            </button>
             <button
               onClick={() => {
                 const link = document.createElement('a');
@@ -669,7 +779,7 @@ export default function HomePage() {
         <div className="fixed inset-0 bg-[#020617]/80 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
           <div className="bg-white rounded-[32px] p-8 w-full max-w-md shadow-2xl animate-slide-up">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Excel Raporu Oluştur</h3>
+              <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">{exportType === 'excel' ? 'Excel' : 'PDF'} Raporu Oluştur</h3>
               <button onClick={() => setShowExcelModal(false)} className="text-gray-400 hover:text-gray-600">
                 <i className="ri-close-line text-2xl"></i>
               </button>
@@ -681,7 +791,7 @@ export default function HomePage() {
                   type="date"
                   value={excelDates.startDate}
                   onChange={(e) => setExcelDates({ ...excelDates, startDate: e.target.value })}
-                  className="w-full h-14 bg-gray-50 border border-gray-100 rounded-2xl px-6 font-bold text-gray-900 outline-none focus:border-emerald-500 transition-colors"
+                  className="w-full h-14 bg-gray-50 border border-gray-100 rounded-2xl px-6 font-bold text-gray-900 outline-none focus:border-indigo-500 transition-colors"
                 />
               </div>
               <div>
@@ -690,13 +800,13 @@ export default function HomePage() {
                   type="date"
                   value={excelDates.endDate}
                   onChange={(e) => setExcelDates({ ...excelDates, endDate: e.target.value })}
-                  className="w-full h-14 bg-gray-50 border border-gray-100 rounded-2xl px-6 font-bold text-gray-900 outline-none focus:border-emerald-500 transition-colors"
+                  className="w-full h-14 bg-gray-50 border border-gray-100 rounded-2xl px-6 font-bold text-gray-900 outline-none focus:border-indigo-500 transition-colors"
                 />
               </div>
               <button
-                onClick={handleExcelExport}
+                onClick={handleExport}
                 disabled={exporting}
-                className="w-full h-16 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest mt-4 shadow-xl shadow-emerald-600/20 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                className={`w-full h-16 ${exportType === 'excel' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20'} text-white rounded-2xl font-black uppercase tracking-widest mt-4 shadow-xl transition-all flex items-center justify-center gap-3 disabled:opacity-50`}
               >
                 {exporting ? (
                   <>
@@ -705,7 +815,7 @@ export default function HomePage() {
                   </>
                 ) : (
                   <>
-                    <i className="ri-file-excel-2-line text-xl"></i>
+                    <i className={exportType === 'excel' ? 'ri-file-excel-2-line text-xl' : 'ri-file-pdf-line text-xl'}></i>
                     RAPORU İNDİR
                   </>
                 )}
