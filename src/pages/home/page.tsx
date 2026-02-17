@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import * as XLSX from 'xlsx';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '../../contexts/ProfileContext';
 import Header from '../../components/feature/Header';
@@ -74,6 +75,12 @@ export default function HomePage() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showExcelModal, setShowExcelModal] = useState(false);
+  const [excelDates, setExcelDates] = useState({
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0]
+  });
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     if (selectedProfile) {
@@ -249,6 +256,120 @@ export default function HomePage() {
     }
   };
 
+  const handleExcelExport = async () => {
+    if (!selectedProfile) return;
+    try {
+      setExporting(true);
+      const start = new Date(excelDates.startDate);
+      const end = new Date(excelDates.endDate);
+      end.setHours(23, 59, 59, 999);
+
+      const [
+        { data: satislar },
+        { data: alislar },
+        { data: giderler },
+        { data: odemeler },
+        { data: stokHareketi },
+        { data: personeller }
+      ] = await Promise.all([
+        api.satisFaturalari.getAll(selectedProfile.id),
+        api.alisFaturalari.getAll(selectedProfile.id),
+        api.giderler.getAll(selectedProfile.id),
+        api.odemeler.getAll(selectedProfile.id),
+        api.stokHareketleri.getAll(selectedProfile.id),
+        api.personel.getAll(selectedProfile.id)
+      ]);
+
+      const dateFilter = (item: any) => {
+        const d = new Date(item.tarih);
+        return d >= start && d <= end;
+      };
+
+      const fSatislar = (satislar || []).filter(dateFilter);
+      const fAlislar = (alislar || []).filter(dateFilter);
+      const fGiderler = (giderler || []).filter(dateFilter);
+      const fOdemeler = (odemeler || []).filter(dateFilter);
+      const fUretim = (stokHareketi || []).filter(h => h.hareket_tipi === 'Üretim' && dateFilter(h));
+
+      const toplamSatis = fSatislar.reduce((sum, f) => sum + Number(f.toplam), 0);
+      const toplamAlis = fAlislar.reduce((sum, f) => sum + Number(f.toplam), 0);
+      const toplamGider = fGiderler.reduce((sum, g) => sum + Number(g.tutar), 0);
+      const toplamPersonel = (personeller || []).reduce((sum, p) => sum + Number(p.maas || 0), 0);
+
+      const netKar = toplamSatis - (toplamAlis + toplamGider + toplamPersonel);
+
+      // Sheets data
+      const ozetData = [
+        ['Net Kar Raporu', `${excelDates.startDate} - ${excelDates.endDate}`],
+        [],
+        ['KALEM', 'TUTAR (TL)'],
+        ['TOPLAM SATIŞ', toplamSatis],
+        ['TOPLAM ALIŞ', toplamAlis],
+        ['TOPLAM GİDER', toplamGider],
+        ['PERSONEL MALİYETİ', toplamPersonel],
+        [],
+        ['NET KÂR / ZARAR', netKar]
+      ];
+
+      const satislarSheet = fSatislar.map(f => ({
+        'Fatura No': f.fatura_no,
+        'Cari': f.cari_ad,
+        'Tarih': new Date(f.tarih).toLocaleDateString('tr-TR'),
+        'Tutar': f.tutar,
+        'KDV': f.kdv,
+        'Toplam': f.toplam
+      }));
+
+      const alislarSheet = fAlislar.map(f => ({
+        'Fatura No': f.fatura_no,
+        'Cari': f.cari_ad,
+        'Tarih': new Date(f.tarih).toLocaleDateString('tr-TR'),
+        'Tutar': f.tutar,
+        'KDV': f.kdv,
+        'Toplam': f.toplam
+      }));
+
+      const giderlerSheet = fGiderler.map(g => ({
+        'Kategori': g.kategori_ad,
+        'Açıklama': g.aciklama,
+        'Tarih': new Date(g.tarih).toLocaleDateString('tr-TR'),
+        'Tutar': g.tutar
+      }));
+
+      const uretimSheet = fUretim.map(u => ({
+        'Ürün': u.urun_ad,
+        'Miktar': u.miktar,
+        'Tarih': new Date(u.tarih).toLocaleDateString('tr-TR'),
+        'Açıklama': u.aciklama
+      }));
+
+      const odemelerSheet = fOdemeler.map(o => ({
+        'Tip': o.tip,
+        'Cari': o.cari_ad,
+        'Tarih': new Date(o.tarih).toLocaleDateString('tr-TR'),
+        'Tutar': o.tutar,
+        'Yöntem': o.odeme_yontemi,
+        'Açıklama': o.aciklama
+      }));
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ozetData), 'Özet');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(satislarSheet), 'Satışlar');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(alislarSheet), 'Alışlar');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(giderlerSheet), 'Giderler');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(uretimSheet), 'Üretim');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(odemelerSheet), 'Ödemeler');
+
+      XLSX.writeFile(wb, `Net_Muhasebe_Rapor_${excelDates.startDate}_${excelDates.endDate}.xlsx`);
+      setShowExcelModal(false);
+    } catch (err) {
+      console.error('Excel export error:', err);
+      alert('Rapor oluşturulurken bir hata oluştu.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (!selectedProfile) {
     return (
       <div className="flex h-screen bg-gray-50">
@@ -346,9 +467,15 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-                <button onClick={() => navigate('/ai-analiz')} className="group px-8 py-4 bg-white text-slate-900 rounded-2xl font-black text-sm transition-all hover:scale-105 active:scale-95 shrink-0 shadow-xl cursor-pointer">
-                  STRATEJİ RAPORU
-                </button>
+                <div className="flex flex-col md:flex-row gap-4 shrink-0">
+                  <button onClick={() => setShowExcelModal(true)} className="group px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black text-sm transition-all hover:scale-105 active:scale-95 shadow-xl cursor-pointer flex items-center gap-2">
+                    <i className="ri-file-excel-2-line text-xl"></i>
+                    EXCEL'E AKTAR
+                  </button>
+                  <button onClick={() => navigate('/ai-analiz')} className="group px-8 py-4 bg-white text-slate-900 rounded-2xl font-black text-sm transition-all hover:scale-105 active:scale-95 shadow-xl cursor-pointer">
+                    STRATEJİ RAPORU
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -480,9 +607,9 @@ export default function HomePage() {
                 <h2 className="text-lg font-bold text-gray-900">Son İşlemler</h2>
                 <button onClick={() => navigate('/tum-islemler')} className="text-xs font-bold text-indigo-600 hover:text-indigo-700">TÜMÜNÜ GÖR</button>
               </div>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-h-[400px] overflow-y-auto custom-scrollbar">
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50/50">
+                  <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
                     <tr>
                       <th className="px-6 py-4 text-left font-bold text-gray-400 uppercase text-[10px]">İşlem</th>
                       <th className="px-6 py-4 text-left font-bold text-gray-400 uppercase text-[10px]">Cari</th>
@@ -536,6 +663,57 @@ export default function HomePage() {
           </div>
         </main>
       </div>
+
+      {/* Excel Tarih Seçim Modalı */}
+      {showExcelModal && (
+        <div className="fixed inset-0 bg-[#020617]/80 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
+          <div className="bg-white rounded-[32px] p-8 w-full max-w-md shadow-2xl animate-slide-up">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Excel Raporu Oluştur</h3>
+              <button onClick={() => setShowExcelModal(false)} className="text-gray-400 hover:text-gray-600">
+                <i className="ri-close-line text-2xl"></i>
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-1 block">BAŞLANGIÇ TARİHİ</label>
+                <input
+                  type="date"
+                  value={excelDates.startDate}
+                  onChange={(e) => setExcelDates({ ...excelDates, startDate: e.target.value })}
+                  className="w-full h-14 bg-gray-50 border border-gray-100 rounded-2xl px-6 font-bold text-gray-900 outline-none focus:border-emerald-500 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-1 block">BİTİŞ TARİHİ</label>
+                <input
+                  type="date"
+                  value={excelDates.endDate}
+                  onChange={(e) => setExcelDates({ ...excelDates, endDate: e.target.value })}
+                  className="w-full h-14 bg-gray-50 border border-gray-100 rounded-2xl px-6 font-bold text-gray-900 outline-none focus:border-emerald-500 transition-colors"
+                />
+              </div>
+              <button
+                onClick={handleExcelExport}
+                disabled={exporting}
+                className="w-full h-16 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest mt-4 shadow-xl shadow-emerald-600/20 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+              >
+                {exporting ? (
+                  <>
+                    <div className="w-5 h-5 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+                    HAZIRLANIYOR...
+                  </>
+                ) : (
+                  <>
+                    <i className="ri-file-excel-2-line text-xl"></i>
+                    RAPORU İNDİR
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

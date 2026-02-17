@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import * as XLSX from 'xlsx';
 import {
     personel as personelApi,
     Personel,
@@ -75,6 +76,26 @@ const PersonelPage = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleExcelExport = () => {
+        const data = personelList.map(p => {
+            const ozet = maasOzetleri[p.id] || {};
+            return {
+                'Ad Soyad': p.ad_soyad,
+                'Ünvan': p.unvan,
+                'Maaş': p.maas,
+                'Gelmediği Gün': ozet.eksik_gun || 0,
+                'Kesinti': ozet.kesinti || 0,
+                'Toplam Avans': ozet.toplam_avans || 0,
+                'Net Ödenecek Maaş': ozet.odenecek_maas || p.maas
+            };
+        });
+
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Personel Maaş Listesi');
+        XLSX.writeFile(wb, `Personel_Maas_Listesi_${new Date().toLocaleDateString('tr-TR')}.xlsx`);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -163,6 +184,12 @@ const PersonelPage = () => {
                             </div>
 
                             <div className="flex gap-4">
+                                <button
+                                    onClick={handleExcelExport}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-16 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-600/20 flex items-center gap-3"
+                                >
+                                    <i className="ri-file-excel-2-line text-xl"></i> EXCEL'E AKTAR
+                                </button>
                                 <button
                                     onClick={() => {
                                         setFormData({ ad_soyad: '', unvan: '', tckn: '', telefon: '', email: '', maas: 0, durum: 'Aktif', absentDate: '', advanceAmount: 0, advanceDate: new Date().toISOString().split('T')[0] });
