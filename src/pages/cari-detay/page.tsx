@@ -273,6 +273,7 @@ export default function CariDetay() {
                     <thead>
                       <tr className="bg-white/5">
                         <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">İŞLEM TARİHİ</th>
+                        <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">SAAT</th>
                         <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">HESAP HAREKETİ</th>
                         <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">AÇIKLAMA / BELGE NO</th>
                         <th className="px-10 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TUTAR (TL)</th>
@@ -284,6 +285,13 @@ export default function CariDetay() {
                         <tr key={idx} className="hover:bg-white/[0.01] transition-colors group">
                           <td className="px-10 py-8 font-black text-slate-400 uppercase tracking-tighter italic">
                             {new Date(islem.tarih).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                          </td>
+                          <td className="px-10 py-8 font-black text-slate-500 text-[10px] uppercase tracking-widest italic">
+                            {(() => {
+                              const d = new Date(islem.tarih);
+                              if (d.getHours() === 3 && d.getMinutes() === 0 && d.getSeconds() === 0) return "--:--";
+                              return d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+                            })()}
                           </td>
                           <td className="px-10 py-8">
                             <div className={`inline-flex px-4 py-2 rounded-xl text-[8px] font-black tracking-[0.2em] uppercase border ${islem.tip === 'Satış Faturası' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :

@@ -78,6 +78,7 @@ const OdemelerPage = () => {
 
       const res = await odemelerApi.create({
         ...formData,
+        tarih: formData.tarih === new Date().toISOString().split('T')[0] ? new Date().toISOString() : new Date(formData.tarih!).toISOString(),
         cari_ad: selectedCari?.ad || 'Genel',
         profile_id: selectedProfile.id
       } as any);

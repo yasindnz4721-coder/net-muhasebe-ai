@@ -61,6 +61,7 @@ export default function GiderlerPage() {
         try {
             const { data, error } = await giderApi.add({
                 ...newExpense,
+                tarih: newExpense.tarih === new Date().toISOString().split('T')[0] ? new Date().toISOString() : new Date(newExpense.tarih).toISOString(),
                 profile_id: selectedProfile.id,
                 tutar: parseFloat(newExpense.tutar)
             });

@@ -272,7 +272,7 @@ export default function AlisFaturasi() {
         cari_id: formData.cari_id,
         cari_ad: formData.cari_ad,
         fatura_no: faturaNo,
-        tarih: formData.tarih,
+        tarih: formData.tarih === new Date().toISOString().split('T')[0] ? new Date().toISOString() : new Date(formData.tarih).toISOString(),
         tutar: Number(araToplam.toFixed(2)),
         aciklama: formData.aciklama || undefined,
         urunler: formData.urunler.map(u => ({

@@ -199,6 +199,7 @@ export default function TumIslemler() {
                     <thead className="sticky top-0 z-10">
                       <tr className="bg-[#0f172a] shadow-sm">
                         <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TARİH</th>
+                        <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">SAAT</th>
                         <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TÜR</th>
                         <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">CARİ HESAP</th>
                         <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">DETAYLAR</th>
@@ -229,8 +230,15 @@ export default function TumIslemler() {
 
                         return (
                           <tr key={`${islem.tip}-${islem.id}-${index}`} className="hover:bg-white/[0.01] transition-colors group">
-                            <td className="px-10 py-8 font-black text-slate-400 uppercase tracking-tighter italic">
+                            <td className="px-10 py-8 font-black text-slate-400 uppercase tracking-tighter italic whitespace-nowrap">
                               {new Date(islem.tarih).toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                            </td>
+                            <td className="px-10 py-8 font-black text-slate-500 text-[10px] uppercase tracking-widest italic">
+                              {(() => {
+                                const d = new Date(islem.tarih);
+                                if (d.getHours() === 3 && d.getMinutes() === 0 && d.getSeconds() === 0) return "--:--";
+                                return d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+                              })()}
                             </td>
                             <td className="px-10 py-8">
                               <span className={`inline-flex px-4 py-2 rounded-xl text-[8px] font-black tracking-[0.2em] uppercase border ${islem.tip === 'Satış Faturası' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :

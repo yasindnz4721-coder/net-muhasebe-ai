@@ -294,7 +294,14 @@ const MuhasebeDashboard = () => {
                           </span>
                         </td>
                         <td className="px-10 py-6 text-right font-black text-slate-500 text-[10px] uppercase tracking-widest">
-                          {new Date(islem.tarih).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                          {(() => {
+                            const d = new Date(islem.tarih);
+                            // TR saatiyle tam 03:00:00 ise (UTC 00:00:00), bu muhtemelen saat bilgisi girilmemiş eski bir kayıttır.
+                            if (d.getHours() === 3 && d.getMinutes() === 0 && d.getSeconds() === 0) {
+                              return "--:--";
+                            }
+                            return d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+                          })()}
                         </td>
                       </tr>
                     ))

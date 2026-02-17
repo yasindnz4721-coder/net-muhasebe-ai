@@ -722,6 +722,7 @@ export default function HomePage() {
                   <thead className="sticky top-0 z-10 bg-gray-50 shadow-sm">
                     <tr>
                       <th className="px-6 py-4 text-left font-bold text-gray-400 uppercase text-[10px]">İşlem</th>
+                      <th className="px-6 py-4 text-left font-bold text-gray-400 uppercase text-[10px]">Saat</th>
                       <th className="px-6 py-4 text-left font-bold text-gray-400 uppercase text-[10px]">Cari</th>
                       <th className="px-6 py-4 text-right font-bold text-gray-400 uppercase text-[10px]">Tutar</th>
                     </tr>
@@ -734,6 +735,13 @@ export default function HomePage() {
                             <div className={`w-8 h-8 ${islem.bg} ${islem.renk} rounded-lg flex items-center justify-center`}><i className={islem.simge}></i></div>
                             <span className="font-semibold text-gray-700">{islem.tur}</span>
                           </div>
+                        </td>
+                        <td className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                          {(() => {
+                            const d = new Date(islem.tarih);
+                            if (d.getHours() === 3 && d.getMinutes() === 0 && d.getSeconds() === 0) return "--:--";
+                            return d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+                          })()}
                         </td>
                         <td className="px-6 py-4 text-gray-500 uppercase text-xs">{islem.cari_ad}</td>
                         <td className={`px-6 py-4 text-right font-bold ${islem.renk}`}>{islem.toplam.toLocaleString('tr-TR')} ₺</td>
