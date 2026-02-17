@@ -198,12 +198,12 @@ const MuhasebeDashboard = () => {
         ['Net Kar Raporu', `${excelDates.startDate} - ${excelDates.endDate}`],
         [],
         ['KALEM', 'TUTAR (TL)'],
-        ['TOPLAM SATIS', toplamSatis],
-        ['TOPLAM ALIS', toplamAlis],
-        ['TOPLAM GIDER', toplamGider],
-        ['PERSONEL MALIYETI', toplamPersonel],
+        ['TOPLAM SATIŞ', toplamSatis],
+        ['TOPLAM ALIŞ', toplamAlis],
+        ['TOPLAM GİDER', toplamGider],
+        ['PERSONEL MALİYETİ', toplamPersonel],
         [],
-        ['NET KAR / ZARAR', netKar]
+        ['NET KÂR / ZARAR', netKar]
       ];
 
       const satislarSheet = fSatislar.map(f => ({
@@ -226,16 +226,16 @@ const MuhasebeDashboard = () => {
 
       const giderlerSheet = fGiderler.map(g => ({
         'Kategori': g.kategori_ad,
-        'Aciklama': g.aciklama,
+        'Açıklama': g.aciklama,
         'Tarih': new Date(g.tarih).toLocaleDateString('tr-TR'),
         'Tutar': g.tutar
       }));
 
       const uretimSheet = fUretim.map(u => ({
-        'Urun': u.urun_ad,
+        'Ürün': u.urun_ad,
         'Miktar': u.miktar,
         'Tarih': new Date(u.tarih).toLocaleDateString('tr-TR'),
-        'Aciklama': u.aciklama
+        'Açıklama': u.aciklama
       }));
 
       const odemelerSheet = fOdemeler.map(o => ({
@@ -243,17 +243,17 @@ const MuhasebeDashboard = () => {
         'Cari': o.cari_ad,
         'Tarih': new Date(o.tarih).toLocaleDateString('tr-TR'),
         'Tutar': o.tutar,
-        'Yontem': o.odeme_yontemi,
-        'Aciklama': o.aciklama
+        'Yöntem': o.odeme_yontemi,
+        'Açıklama': o.aciklama
       }));
 
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ozetData), 'Ozet');
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(satislarSheet), 'Satislar');
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(alislarSheet), 'Alislar');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ozetData), 'Özet');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(satislarSheet), 'Satışlar');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(alislarSheet), 'Alışlar');
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(giderlerSheet), 'Giderler');
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(uretimSheet), 'Uretim');
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(odemelerSheet), 'Odemeler');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(uretimSheet), 'Üretim');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(odemelerSheet), 'Ödemeler');
 
       XLSX.writeFile(wb, `Net_Muhasebe_Rapor_${excelDates.startDate}_${excelDates.endDate}.xlsx`);
       setShowExcelModal(false);
@@ -314,18 +314,18 @@ const MuhasebeDashboard = () => {
         startY: 40,
         head: [['KALEM', 'TUTAR (TL)']],
         body: [
-          ['TOPLAM SATIS', toplamSatis.toLocaleString('tr-TR') + ' TL'],
-          ['TOPLAM ALIS', toplamAlis.toLocaleString('tr-TR') + ' TL'],
-          ['TOPLAM GIDER', toplamGider.toLocaleString('tr-TR') + ' TL'],
-          ['PERSONEL MALIYETI', toplamPersonel.toLocaleString('tr-TR') + ' TL'],
-          ['NET KAR / ZARAR', netKar.toLocaleString('tr-TR') + ' TL']
+          ['TOPLAM SATIŞ', toplamSatis.toLocaleString('tr-TR') + ' TL'],
+          ['TOPLAM ALIŞ', toplamAlis.toLocaleString('tr-TR') + ' TL'],
+          ['TOPLAM GİDER', toplamGider.toLocaleString('tr-TR') + ' TL'],
+          ['PERSONEL MALİYETİ', toplamPersonel.toLocaleString('tr-TR') + ' TL'],
+          ['NET KÂR / ZARAR', netKar.toLocaleString('tr-TR') + ' TL']
         ],
         theme: 'striped',
         headStyles: { fillColor: [79, 70, 229] }
       });
 
       doc.addPage();
-      doc.text('SATIS FATURALARI DETAYI', 14, 22);
+      doc.text('SATIŞ FATURALARI DETAYI', 14, 22);
       autoTable(doc, {
         startY: 30,
         head: [['Fatura No', 'Cari', 'Tarih', 'Toplam']],
