@@ -5,6 +5,10 @@ import {
   LayoutDashboard, Users, FileText, CreditCard,
   PlusCircle, LogOut, Settings, BarChart2, Download
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as api from './lib/api';
 import {
   cariler as carilerApi,
   satisFaturalari as satisApi,
@@ -38,6 +42,13 @@ const MuhasebeDashboard = () => {
   const [hata, setHata] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, mins: 0, secs: 0 });
   const [upcomingTaksitler, setUpcomingTaksitler] = useState<TaksitOdeme[]>([]);
+  const [showExcelModal, setShowExcelModal] = useState(false);
+  const [exportType, setExportType] = useState<'excel' | 'pdf'>('excel');
+  const [excelDates, setExcelDates] = useState({
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0]
+  });
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     if (!currentUser?.created_at) return;
@@ -141,6 +152,196 @@ const MuhasebeDashboard = () => {
     veriGetir();
   }, [selectedProfile]);
 
+  const handleExcelExport = async () => {
+    if (!selectedProfile) return;
+    try {
+      setExporting(true);
+      const start = new Date(excelDates.startDate);
+      const end = new Date(excelDates.endDate);
+      end.setHours(23, 59, 59, 999);
+
+      const [
+        { data: satislar },
+        { data: alislar },
+        { data: giderler },
+        { data: odemeler },
+        { data: stokHareketi },
+        { data: personeller }
+      ] = await Promise.all([
+        api.satisFaturalari.getAll(selectedProfile.id),
+        api.alisFaturalari.getAll(selectedProfile.id),
+        api.giderler.getAll(selectedProfile.id),
+        api.odemeler.getAll(selectedProfile.id),
+        api.stokHareketleri.getAll(selectedProfile.id),
+        api.personel.getAll(selectedProfile.id)
+      ]);
+
+      const dateFilter = (item: any) => {
+        const d = new Date(item.tarih);
+        return d >= start && d <= end;
+      };
+
+      const fSatislar = (satislar || []).filter(dateFilter);
+      const fAlislar = (alislar || []).filter(dateFilter);
+      const fGiderler = (giderler || []).filter(dateFilter);
+      const fOdemeler = (odemeler || []).filter(dateFilter);
+      const fUretim = (stokHareketi || []).filter(h => h.hareket_tipi === 'Üretim' && dateFilter(h));
+
+      const toplamSatis = fSatislar.reduce((sum, f) => sum + Number(f.toplam), 0);
+      const toplamAlis = fAlislar.reduce((sum, f) => sum + Number(f.toplam), 0);
+      const toplamGider = fGiderler.reduce((sum, g) => sum + Number(g.tutar), 0);
+      const toplamPersonel = (personeller || []).reduce((sum, p) => sum + Number(p.maas || 0), 0);
+
+      const netKar = toplamSatis - (toplamAlis + toplamGider + toplamPersonel);
+
+      const ozetData = [
+        ['Net Kar Raporu', `${excelDates.startDate} - ${excelDates.endDate}`],
+        [],
+        ['KALEM', 'TUTAR (TL)'],
+        ['TOPLAM SATIS', toplamSatis],
+        ['TOPLAM ALIS', toplamAlis],
+        ['TOPLAM GIDER', toplamGider],
+        ['PERSONEL MALIYETI', toplamPersonel],
+        [],
+        ['NET KAR / ZARAR', netKar]
+      ];
+
+      const satislarSheet = fSatislar.map(f => ({
+        'Fatura No': f.fatura_no,
+        'Cari': f.cari_ad,
+        'Tarih': new Date(f.tarih).toLocaleDateString('tr-TR'),
+        'Tutar': f.tutar,
+        'KDV': f.kdv,
+        'Toplam': f.toplam
+      }));
+
+      const alislarSheet = fAlislar.map(f => ({
+        'Fatura No': f.fatura_no,
+        'Cari': f.cari_ad,
+        'Tarih': new Date(f.tarih).toLocaleDateString('tr-TR'),
+        'Tutar': f.tutar,
+        'KDV': f.kdv,
+        'Toplam': f.toplam
+      }));
+
+      const giderlerSheet = fGiderler.map(g => ({
+        'Kategori': g.kategori_ad,
+        'Aciklama': g.aciklama,
+        'Tarih': new Date(g.tarih).toLocaleDateString('tr-TR'),
+        'Tutar': g.tutar
+      }));
+
+      const uretimSheet = fUretim.map(u => ({
+        'Urun': u.urun_ad,
+        'Miktar': u.miktar,
+        'Tarih': new Date(u.tarih).toLocaleDateString('tr-TR'),
+        'Aciklama': u.aciklama
+      }));
+
+      const odemelerSheet = fOdemeler.map(o => ({
+        'Tip': o.tip,
+        'Cari': o.cari_ad,
+        'Tarih': new Date(o.tarih).toLocaleDateString('tr-TR'),
+        'Tutar': o.tutar,
+        'Yontem': o.odeme_yontemi,
+        'Aciklama': o.aciklama
+      }));
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ozetData), 'Ozet');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(satislarSheet), 'Satislar');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(alislarSheet), 'Alislar');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(giderlerSheet), 'Giderler');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(uretimSheet), 'Uretim');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(odemelerSheet), 'Odemeler');
+
+      XLSX.writeFile(wb, `Net_Muhasebe_Rapor_${excelDates.startDate}_${excelDates.endDate}.xlsx`);
+      setShowExcelModal(false);
+    } catch (err) {
+      console.error('Excel export error:', err);
+      alert('Rapor olusturulurken bir hata olustu.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handlePdfExport = async () => {
+    if (!selectedProfile) return;
+    try {
+      setExporting(true);
+      const start = new Date(excelDates.startDate);
+      const end = new Date(excelDates.endDate);
+      end.setHours(23, 59, 59, 999);
+
+      const [
+        { data: satislar },
+        { data: alislar },
+        { data: giderler },
+        { data: odemeler },
+        { data: stokHareketi },
+        { data: personeller }
+      ] = await Promise.all([
+        api.satisFaturalari.getAll(selectedProfile.id),
+        api.alisFaturalari.getAll(selectedProfile.id),
+        api.giderler.getAll(selectedProfile.id),
+        api.odemeler.getAll(selectedProfile.id),
+        api.stokHareketleri.getAll(selectedProfile.id),
+        api.personel.getAll(selectedProfile.id)
+      ]);
+
+      const dateFilter = (item: any) => {
+        const d = new Date(item.tarih);
+        return d >= start && d <= end;
+      };
+
+      const fSatislar = (satislar || []).filter(dateFilter);
+      const fAlislar = (alislar || []).filter(dateFilter);
+      const fGiderler = (giderler || []).filter(dateFilter);
+
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text('NET MUHASEBE AI - FINANSAL RAPOR', 14, 22);
+      doc.setFontSize(11);
+      doc.text(`Donem: ${excelDates.startDate} - ${excelDates.endDate}`, 14, 30);
+
+      const toplamSatis = fSatislar.reduce((sum, f) => sum + Number(f.toplam), 0);
+      const toplamAlis = fAlislar.reduce((sum, f) => sum + Number(f.toplam), 0);
+      const toplamGider = fGiderler.reduce((sum, g) => sum + Number(g.tutar), 0);
+      const toplamPersonel = (personeller || []).reduce((sum, p) => sum + Number(p.maas || 0), 0);
+      const netKar = toplamSatis - (toplamAlis + toplamGider + toplamPersonel);
+
+      autoTable(doc, {
+        startY: 40,
+        head: [['KALEM', 'TUTAR (TL)']],
+        body: [
+          ['TOPLAM SATIS', toplamSatis.toLocaleString('tr-TR') + ' TL'],
+          ['TOPLAM ALIS', toplamAlis.toLocaleString('tr-TR') + ' TL'],
+          ['TOPLAM GIDER', toplamGider.toLocaleString('tr-TR') + ' TL'],
+          ['PERSONEL MALIYETI', toplamPersonel.toLocaleString('tr-TR') + ' TL'],
+          ['NET KAR / ZARAR', netKar.toLocaleString('tr-TR') + ' TL']
+        ],
+        theme: 'striped',
+        headStyles: { fillColor: [79, 70, 229] }
+      });
+
+      doc.addPage();
+      doc.text('SATIS FATURALARI DETAYI', 14, 22);
+      autoTable(doc, {
+        startY: 30,
+        head: [['Fatura No', 'Cari', 'Tarih', 'Toplam']],
+        body: fSatislar.map(f => [f.fatura_no, f.cari_ad, new Date(f.tarih).toLocaleDateString('tr-TR'), f.toplam.toLocaleString('tr-TR') + ' TL']),
+      });
+
+      doc.save(`Net_Muhasebe_Rapor_${excelDates.startDate}_${excelDates.endDate}.pdf`);
+      setShowExcelModal(false);
+    } catch (err) {
+      console.error('PDF export error:', err);
+      alert('Rapor olusturulurken bir hata olustu.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const StatCardSkeleton = () => (
     <div className="premium-card p-10 animate-skeleton h-[180px]">
       <div className="h-4 w-24 bg-white/10 rounded mb-4"></div>
@@ -211,9 +412,23 @@ const MuhasebeDashboard = () => {
               <h2 className="text-4xl font-black text-white tracking-tight leading-none mb-3 uppercase">Sistem <span className="text-gradient">Özeti.</span></h2>
               <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.2em] opacity-80">Finansal Verilerinizin Anlık Durumu</p>
             </div>
-            <button onClick={() => navigate('/satis-faturasi')} className="premium-button px-8 h-14 tracking-widest uppercase flex items-center gap-3">
-              <PlusCircle size={20} /> YENİ SATIŞ
-            </button>
+            <div className="flex gap-4">
+              <button
+                onClick={() => { setExportType('excel'); setShowExcelModal(true); }}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-14 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-600/20 flex items-center gap-3"
+              >
+                <i className="ri-file-excel-2-line text-xl"></i> EXCEL
+              </button>
+              <button
+                onClick={() => { setExportType('pdf'); setShowExcelModal(true); }}
+                className="bg-rose-600 hover:bg-rose-700 text-white px-8 h-14 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-rose-600/20 flex items-center gap-3"
+              >
+                <i className="ri-file-pdf-line text-xl"></i> PDF
+              </button>
+              <button onClick={() => navigate('/satis-faturasi')} className="premium-button px-8 h-14 tracking-widest uppercase flex items-center gap-3">
+                <PlusCircle size={20} /> YENİ SATIŞ
+              </button>
+            </div>
           </header>
 
           {upcomingTaksitler.length > 0 && (
@@ -312,6 +527,61 @@ const MuhasebeDashboard = () => {
           </div>
         </div>
       </div>
+      {showExcelModal && (
+        <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-xl z-[999] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-[32px] p-8 md:p-12 w-full max-w-xl shadow-2xl animate-scale shadow-indigo-500/10">
+            <div className="flex justify-between items-start mb-8">
+              <div>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase mb-2">Rapor Oluştur</h3>
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Tarih aralığı seçerek {exportType.toUpperCase()} raporunuzu indirin.</p>
+              </div>
+              <button onClick={() => setShowExcelModal(false)} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-rose-500 transition-all">
+                <PlusCircle className="rotate-45" size={24} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1">Başlangıç Tarihi</label>
+                <input
+                  type="date"
+                  value={excelDates.startDate}
+                  onChange={(e) => setExcelDates({ ...excelDates, startDate: e.target.value })}
+                  className="w-full h-14 bg-slate-50 border border-slate-100 rounded-2xl px-6 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1">Bitiş Tarihi</label>
+                <input
+                  type="date"
+                  value={excelDates.endDate}
+                  onChange={(e) => setExcelDates({ ...excelDates, endDate: e.target.value })}
+                  className="w-full h-14 bg-slate-50 border border-slate-100 rounded-2xl px-6 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={exportType === 'excel' ? handleExcelExport : handlePdfExport}
+              disabled={exporting}
+              className={`w-full h-16 rounded-2xl font-black text-[10px] tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-3 shadow-xl ${exportType === 'excel' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/20'
+                } text-white disabled:opacity-50`}
+            >
+              {exporting ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                  HAZIRLANIYOR...
+                </>
+              ) : (
+                <>
+                  <i className={exportType === 'excel' ? 'ri-file-excel-2-line text-xl' : 'ri-file-pdf-line text-xl'}></i>
+                  RAPORU İNDİR
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
