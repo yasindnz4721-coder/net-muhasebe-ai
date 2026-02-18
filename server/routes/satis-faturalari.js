@@ -101,6 +101,17 @@ router.post('/', async (req, res) => {
         }
 
         await client.query('COMMIT');
+
+        // Denetim kaydı
+        await AuditService.log(
+            profile_id,
+            'EKLEME',
+            'satis_faturalari',
+            fatura.id,
+            `Yeni satış faturası eklendi: ${fatura.fatura_no} (${fatura.cari_ad})`,
+            req.user.email
+        );
+
         res.status(201).json(fatura);
     } catch (error) {
         await client.query('ROLLBACK');
@@ -176,7 +187,19 @@ router.put('/:id', async (req, res) => {
         }
 
         await client.query('COMMIT');
-        res.json(result.rows[0]);
+        const fatura = result.rows[0];
+
+        // Denetim kaydı
+        await AuditService.log(
+            profile_id,
+            'GÜNCELLEME',
+            'satis_faturalari',
+            fatura.id,
+            `Satış faturası güncellendi: ${fatura.fatura_no} (${fatura.cari_ad})`,
+            req.user.email
+        );
+
+        res.json(fatura);
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Satış faturası güncelleme hatası:', error);

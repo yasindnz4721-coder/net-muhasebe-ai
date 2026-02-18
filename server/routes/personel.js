@@ -42,7 +42,19 @@ router.post('/', async (req, res) => {
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
             [ad_soyad, unvan || '', tckn || '', telefon || '', email || '', adres || '', ise_giris_tarihi || new Date(), maas || 0, iban || '', profile_id]
         );
-        res.status(201).json(result.rows[0]);
+        const personel = result.rows[0];
+
+        // Denetim kaydı
+        await AuditService.log(
+            profile_id,
+            'EKLEME',
+            'personeller',
+            personel.id,
+            `Yeni personel eklendi: ${personel.ad_soyad}`,
+            req.user.email
+        );
+
+        res.status(201).json(personel);
     } catch (error) {
         console.error('Personel ekleme hatası:', error);
         res.status(500).json({ error: 'Personel eklenemedi' });
@@ -68,7 +80,19 @@ router.put('/:id', async (req, res) => {
         );
 
         if (result.rows.length === 0) return res.status(404).json({ error: 'Personel bulunamadı' });
-        res.json(result.rows[0]);
+        const personel = result.rows[0];
+
+        // Denetim kaydı
+        await AuditService.log(
+            personel.profile_id,
+            'GÜNCELLEME',
+            'personeller',
+            personel.id,
+            `Personel bilgileri güncellendi: ${personel.ad_soyad}`,
+            req.user.email
+        );
+
+        res.json(personel);
     } catch (error) {
         console.error('Personel güncelleme hatası:', error);
         res.status(500).json({ error: 'Personel güncellenemedi' });

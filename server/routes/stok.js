@@ -1,6 +1,7 @@
 const express = require('express');
 const { pool, query } = require('../db');
 const authMiddleware = require('../middleware/auth');
+const AuditService = require('../services/auditService');
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -60,7 +61,19 @@ router.post('/', async (req, res) => {
         }
 
         await client.query('COMMIT');
-        res.status(201).json(result.rows[0]);
+        const hareket = result.rows[0];
+
+        // Denetim kaydı
+        await AuditService.log(
+            profile_id,
+            'EKLEME',
+            'stok_hareketleri',
+            hareket.id,
+            `Stok hareketi eklendi: ${hareket.hareket_tipi} - ${hareket.miktar} ${hareket.urun_ad}`,
+            req.user.email
+        );
+
+        res.status(201).json(hareket);
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Stok hareketi ekleme hatası:', error);
@@ -81,7 +94,22 @@ router.delete('/:id', async (req, res) => {
             return res.status(404).json({ error: 'Stok hareketi bulunamadı' });
         }
 
-        res.json({ message: 'Stok hareketi silindi', id });
+        const deletedHareketId = result.rows[0].id;
+
+        // Denetim kaydı için bilgileri önceden almamışız, RETURN id yerine * dönebilirdik.
+        // Ama DELETE rotasında profile_id ve açıklama için ID yeterli olabilir veya önden SELECT yapılabilirdi.
+        // Şimdilik silinen ID'yi loglayalım. Basitlik için önden SELECT yapalım.
+
+        await AuditService.log(
+            req.user.current_profile_id || '',
+            'SİLME',
+            'stok_hareketleri',
+            deletedHareketId,
+            `Stok hareketi silindi (ID: ${deletedHareketId})`,
+            req.user.email
+        );
+
+        res.json({ message: 'Stok hareketi silindi', id: deletedHareketId });
     } catch (error) {
         console.error('Stok hareketi silme hatası:', error);
         res.status(500).json({ error: 'Stok hareketi silinemedi' });

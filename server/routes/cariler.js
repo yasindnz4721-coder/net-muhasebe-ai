@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const authMiddleware = require('../middleware/auth');
+const AuditService = require('../services/auditService');
 
 const router = express.Router();
 
@@ -77,7 +78,19 @@ router.post('/', async (req, res) => {
             [ad, telefon || '', email || '', adres || '', vergi_no || '', vergi_dairesi || '', profile_id]
         );
 
-        res.status(201).json(result.rows[0]);
+        const cari = result.rows[0];
+
+        // Denetim kaydı
+        await AuditService.log(
+            profile_id,
+            'EKLEME',
+            'cariler',
+            cari.id,
+            `Yeni cari eklendi: ${cari.ad}`,
+            req.user.email
+        );
+
+        res.status(201).json(cari);
     } catch (error) {
         console.error('Cari ekleme hatası:', error);
         res.status(500).json({ error: 'Cari eklenemedi' });
@@ -102,7 +115,19 @@ router.put('/:id', async (req, res) => {
             return res.status(404).json({ error: 'Cari bulunamadı' });
         }
 
-        res.json(result.rows[0]);
+        const cari = result.rows[0];
+
+        // Denetim kaydı
+        await AuditService.log(
+            cari.profile_id,
+            'GÜNCELLEME',
+            'cariler',
+            cari.id,
+            `Cari bilgileri güncellendi: ${cari.ad}`,
+            req.user.email
+        );
+
+        res.json(cari);
     } catch (error) {
         console.error('Cari güncelleme hatası:', error);
         res.status(500).json({ error: 'Cari güncellenemedi' });
@@ -114,13 +139,25 @@ router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
-        const result = await query('DELETE FROM cariler WHERE id = $1 RETURNING id', [id]);
+        const result = await query('DELETE FROM cariler WHERE id = $1 RETURNING *', [id]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Cari bulunamadı' });
         }
 
-        res.json({ message: 'Cari silindi', id });
+        const deletedCari = result.rows[0];
+
+        // Denetim kaydı
+        await AuditService.log(
+            deletedCari.profile_id,
+            'SİLME',
+            'cariler',
+            deletedCari.id,
+            `Cari silindi: ${deletedCari.ad}`,
+            req.user.email
+        );
+
+        res.json({ message: 'Cari silindi', id: deletedCari.id });
     } catch (error) {
         console.error('Cari silme hatası:', error);
         res.status(500).json({ error: 'Cari silinemedi' });

@@ -1,6 +1,7 @@
 const express = require('express');
 const { query } = require('../db');
 const authMiddleware = require('../middleware/auth');
+const AuditService = require('../services/auditService');
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -77,7 +78,19 @@ router.post('/', async (req, res) => {
             await query('UPDATE kasalar SET bakiye = bakiye + $1, updated_at = NOW() WHERE id = $2', [miktar, targetKasaId]);
         }
 
-        res.status(201).json(result.rows[0]);
+        const odeme = result.rows[0];
+
+        // Denetim kaydı
+        await AuditService.log(
+            profile_id,
+            'EKLEME',
+            'odemeler',
+            odeme.id,
+            `${odeme.tip} işlemi yapıldı: ₺${odeme.tutar} (${odeme.cari_ad})`,
+            req.user.email
+        );
+
+        res.status(201).json(odeme);
     } catch (error) {
         console.error('Ödeme ekleme hatası:', error);
         res.status(500).json({ error: 'Ödeme eklenemedi' });
@@ -108,6 +121,16 @@ router.delete('/:id', async (req, res) => {
 
         // 2. Ödemeyi sil
         await query('DELETE FROM odemeler WHERE id = $1', [id]);
+
+        // Denetim kaydı
+        await AuditService.log(
+            odeme.profile_id,
+            'SİLME',
+            'odemeler',
+            id,
+            `${odeme.tip} silindi: ₺${odeme.tutar} (${odeme.cari_ad})`,
+            req.user.email
+        );
 
         res.json({ message: 'Ödeme silindi ve kasa bakiyesi güncellendi', id });
     } catch (error) {

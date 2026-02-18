@@ -1,6 +1,7 @@
 const express = require('express');
 const { pool, query } = require('../db');
 const authMiddleware = require('../middleware/auth');
+const AuditService = require('../services/auditService');
 
 const router = express.Router();
 router.use(authMiddleware);
@@ -100,6 +101,17 @@ router.post('/', async (req, res) => {
         }
 
         await client.query('COMMIT');
+
+        // Denetim kaydı
+        await AuditService.log(
+            profile_id,
+            'EKLEME',
+            'alis_faturalari',
+            fatura.id,
+            `Yeni alış faturası eklendi: ${fatura.fatura_no} (${fatura.cari_ad})`,
+            req.user.email
+        );
+
         res.status(201).json(fatura);
     } catch (error) {
         await client.query('ROLLBACK');
@@ -175,7 +187,19 @@ router.put('/:id', async (req, res) => {
         }
 
         await client.query('COMMIT');
-        res.json(result.rows[0]);
+        const fatura = result.rows[0];
+
+        // Denetim kaydı
+        await AuditService.log(
+            profile_id,
+            'GÜNCELLEME',
+            'alis_faturalari',
+            fatura.id,
+            `Alış faturası güncellendi: ${fatura.fatura_no} (${fatura.cari_ad})`,
+            req.user.email
+        );
+
+        res.json(fatura);
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Alış faturası güncelleme hatası:', error);
@@ -220,9 +244,25 @@ router.delete('/:id', async (req, res) => {
         }
 
         // 3. Faturayı sil
+        const deleteResult = await client.query('SELECT fatura_no, cari_ad, profile_id FROM alis_faturalari WHERE id = $1', [id]);
+        const deletedFatura = deleteResult.rows[0];
+
         await client.query('DELETE FROM alis_faturalari WHERE id = $1', [id]);
 
         await client.query('COMMIT');
+
+        // Denetim kaydı
+        if (deletedFatura) {
+            await AuditService.log(
+                deletedFatura.profile_id,
+                'SİLME',
+                'alis_faturalari',
+                id,
+                `Alış faturası silindi: ${deletedFatura.fatura_no} (${deletedFatura.cari_ad})`,
+                req.user.email
+            );
+        }
+
         res.json({ message: 'Fatura silindi', id });
     } catch (error) {
         await client.query('ROLLBACK');

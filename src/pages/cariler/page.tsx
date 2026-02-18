@@ -245,7 +245,107 @@ const CarilerPage = () => {
         </div>
       </div>
 
-      {/* Modal is missing here but the main goal is theme normalization of the list */}
+      {showModal && (
+        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[999] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-[32px] p-8 md:p-12 w-full max-w-xl shadow-2xl animate-scale shadow-indigo-500/10">
+            <div className="flex justify-between items-start mb-8">
+              <div>
+                <h3 className="text-3xl font-black text-slate-900 tracking-tighter uppercase mb-2">
+                  {isEditing ? 'CARİ GÜNCELLE' : 'YENİ CARİ EKLE'}
+                </h3>
+                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest italic">
+                  Lütfen bilgileri eksiksiz doldurunuz.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-rose-500 transition-all shadow-sm"
+              >
+                <Plus size={24} className="rotate-45" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1 italic">MURAHAS / UNVAN</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.ad}
+                    onChange={(e) => setFormData({ ...formData, ad: e.target.value.toUpperCase() })}
+                    className="w-full h-14 bg-slate-50 border border-slate-100 rounded-2xl px-6 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all uppercase placeholder:italic"
+                    placeholder="MÜŞTERİ VEYA ŞİRKET ADI..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1 italic">TELEFON</label>
+                    <input
+                      type="text"
+                      value={formData.telefon}
+                      onChange={(e) => setFormData({ ...formData, telefon: e.target.value })}
+                      className="w-full h-14 bg-slate-50 border border-slate-100 rounded-2xl px-6 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+                      placeholder="05XX XXX XX XX"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1 italic">E-POSTA</label>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value.toLowerCase() })}
+                      className="w-full h-14 bg-slate-50 border border-slate-100 rounded-2xl px-6 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+                      placeholder="ornek@mail.com"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1 italic">VERGİ NO</label>
+                    <input
+                      type="text"
+                      value={formData.vergi_no}
+                      onChange={(e) => setFormData({ ...formData, vergi_no: e.target.value })}
+                      className="w-full h-14 bg-slate-50 border border-slate-100 rounded-2xl px-6 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+                      placeholder="10 HANELİ NUMARA..."
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1 italic">VERGİ DAİRESİ</label>
+                    <input
+                      type="text"
+                      value={formData.vergi_dairesi}
+                      onChange={(e) => setFormData({ ...formData, vergi_dairesi: e.target.value.toUpperCase() })}
+                      className="w-full h-14 bg-slate-50 border border-slate-100 rounded-2xl px-6 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+                      placeholder="DAİRE ADI..."
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1 italic">ADRES</label>
+                  <textarea
+                    value={formData.adres}
+                    onChange={(e) => setFormData({ ...formData, adres: e.target.value.toUpperCase() })}
+                    className="w-full h-24 bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all resize-none uppercase"
+                    placeholder="TAM ADRES BİLGİSİ..."
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full h-16 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-[10px] tracking-[0.2em] uppercase transition-all shadow-xl shadow-indigo-600/20 mt-4 active:scale-95"
+              >
+                {isEditing ? 'GÜNCELLEMEYİ KAYDET' : 'CARİYİ SİSTEME EKLE'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
