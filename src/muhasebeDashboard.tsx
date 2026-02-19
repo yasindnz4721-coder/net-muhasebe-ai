@@ -412,14 +412,7 @@ const MuhasebeDashboard = () => {
               <h2 className="text-4xl font-black text-white tracking-tight leading-none mb-3 uppercase">Sistem <span className="text-gradient">Özeti.</span></h2>
               <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.2em] opacity-80">Finansal Verilerinizin Anlık Durumu</p>
             </div>
-            <div className="flex gap-4 flex-wrap">
-              <a
-                href="/NetMuhasebe_AI_Kurulum.exe"
-                download="Net Muhasebe.exe"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 h-14 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-indigo-600/20 flex items-center gap-3 no-underline"
-              >
-                <Download size={18} /> MASAÜSTÜNE KUR
-              </a>
+            <div className="flex gap-4">
               <button
                 onClick={() => { setExportType('excel'); setShowExcelModal(true); }}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-14 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-600/20 flex items-center gap-3"
