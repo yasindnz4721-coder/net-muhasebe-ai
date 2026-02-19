@@ -13,23 +13,17 @@ function createWindow() {
       contextIsolation: true,
       webSecurity: true
     },
-    title: 'NetMuhasebe.ai - Masaüstü Uygulaması',
+    title: 'Net Muhasebe - Yapay Zeka Destekli Finansal Çözümler',
     autoHideMenuBar: true,
     icon: path.join(__dirname, 'icon.png')
   });
 
-  // Genel .exe sürümü doğrudan canlı API ve siteyi kullanır
-  // Ancak paketlenmiş dosyaları yerel olarak yüklemek daha hızlıdır.
+  // Paketlenmiş modda doğrudan canlı siteye yönlendir
+  // Bu sayede her zaman en güncel versiyonu kullanır
   if (!app.isPackaged) {
     mainWindow.loadURL('http://localhost:3000');
   } else {
-    const indexPath = path.join(app.getAppPath(), 'out', 'index.html');
-    if (fs.existsSync(indexPath)) {
-      mainWindow.loadFile(indexPath);
-    } else {
-      // Eğer yerel dosya bulunamazsa doğrudan canlı siteye yönlendir (failback)
-      mainWindow.loadURL('https://netmuhasebe.net.tr');
-    }
+    mainWindow.loadURL('https://netmuhasebe.net.tr');
   }
 
   // Dış bağlantıları (WhatsApp vb.) varsayılan tarayıcıda aç
