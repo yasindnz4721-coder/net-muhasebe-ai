@@ -262,48 +262,77 @@ export default function Stok() {
                   <p className="text-slate-500 font-bold max-w-sm mx-auto uppercase tracking-widest text-[10px]">Deponuz henüz bir işlem görmemiş veya kriterlerinize uygun kayıt yok.</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto max-h-[calc(100vh-420px)] overflow-y-auto custom-scrollbar">
-                  <table className="w-full text-left">
-                    <thead className="sticky top-0 z-10">
-                      <tr className="bg-[#0f172a] shadow-sm">
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TARİH</th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ÜRÜN TANIMI</th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">KAYNAK / HEDEF</th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">MİKTAR</th>
-                        <th className="px-8 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TÜR</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5 text-sm">
-                      {filteredHareketler.map((hareket) => (
-                        <tr key={hareket.id} className="hover:bg-white/[0.02] transition-colors group">
-                          <td className="px-8 py-6 font-bold text-slate-400">
-                            {new Date(hareket.tarih).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' })}
-                          </td>
-                          <td className="px-8 py-6">
-                            <div className="font-black text-slate-200 tracking-tight text-lg leading-none">{hareket.urun_ad}</div>
-                            <div className="text-[10px] font-black text-slate-600 mt-1 uppercase tracking-widest italic truncate max-w-[200px]">{hareket.aciklama || 'SİSTEM KAYDI'}</div>
-                          </td>
-                          <td className="px-8 py-6">
-                            <span className="font-bold text-slate-300">
-                              {hareket.cari_ad || <span className="text-slate-600 italic">Dahili İşlem</span>}
-                            </span>
-                          </td>
-                          <td className={`px-8 py-6 font-black text-xl tracking-tighter ${hareket.hareket_tipi === 'Çıkış' ? 'text-rose-500' : 'text-emerald-500'}`}>
-                            {hareket.hareket_tipi === 'Çıkış' ? '-' : '+'}{hareket.miktar.toLocaleString()}
-                          </td>
-                          <td className="px-8 py-6 text-right">
-                            <span className={`inline-flex px-3 py-1 rounded-lg text-[10px] font-black tracking-widest uppercase ${hareket.hareket_tipi === 'Giriş' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                              hareket.hareket_tipi === 'Üretim' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' :
-                                'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                              }`}>
-                              {hareket.hareket_tipi}
-                            </span>
-                          </td>
+                <>
+                  <div className="hidden md:block overflow-x-auto max-h-[calc(100vh-420px)] overflow-y-auto custom-scrollbar">
+                    <table className="w-full text-left">
+                      <thead className="sticky top-0 z-10">
+                        <tr className="bg-[#0f172a] shadow-sm">
+                          <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TARİH</th>
+                          <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ÜRÜN TANIMI</th>
+                          <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">KAYNAK / HEDEF</th>
+                          <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">MİKTAR</th>
+                          <th className="px-8 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TÜR</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 text-sm">
+                        {filteredHareketler.map((hareket) => (
+                          <tr key={hareket.id} className="hover:bg-white/[0.02] transition-colors group">
+                            <td className="px-8 py-6 font-bold text-slate-400">
+                              {new Date(hareket.tarih).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            </td>
+                            <td className="px-8 py-6">
+                              <div className="font-black text-slate-200 tracking-tight text-lg leading-none">{hareket.urun_ad}</div>
+                              <div className="text-[10px] font-black text-slate-600 mt-1 uppercase tracking-widest italic truncate max-w-[200px]">{hareket.aciklama || 'SİSTEM KAYDI'}</div>
+                            </td>
+                            <td className="px-8 py-6">
+                              <span className="font-bold text-slate-300">
+                                {hareket.cari_ad || <span className="text-slate-600 italic">Dahili İşlem</span>}
+                              </span>
+                            </td>
+                            <td className={`px-8 py-6 font-black text-xl tracking-tighter ${hareket.hareket_tipi === 'Çıkış' ? 'text-rose-500' : 'text-emerald-500'}`}>
+                              {hareket.hareket_tipi === 'Çıkış' ? '-' : '+'}{hareket.miktar.toLocaleString()}
+                            </td>
+                            <td className="px-8 py-6 text-right">
+                              <span className={`inline-flex px-3 py-1 rounded-lg text-[10px] font-black tracking-widest uppercase ${hareket.hareket_tipi === 'Giriş' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                hareket.hareket_tipi === 'Üretim' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' :
+                                  'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                                }`}>
+                                {hareket.hareket_tipi}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile Card List */}
+                  <div className="md:hidden p-4 space-y-3 max-h-[calc(100vh-420px)] overflow-y-auto custom-scrollbar">
+                    {filteredHareketler.map((hareket) => (
+                      <div key={hareket.id} className="mobile-card">
+                        <div className="flex items-center justify-between">
+                          <div className="font-black text-slate-200 text-sm tracking-tight">{hareket.urun_ad}</div>
+                          <span className={`inline-flex px-2 py-1 rounded text-[8px] font-black tracking-widest uppercase ${hareket.hareket_tipi === 'Giriş' ? 'bg-emerald-500/10 text-emerald-400' :
+                            hareket.hareket_tipi === 'Üretim' ? 'bg-indigo-500/10 text-indigo-400' :
+                              'bg-rose-500/10 text-rose-400'
+                            }`}>
+                            {hareket.hareket_tipi}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-slate-500 font-bold">{hareket.cari_ad || 'Dahili İşlem'}</span>
+                          <span className={`text-lg font-black tracking-tighter ${hareket.hareket_tipi === 'Çıkış' ? 'text-rose-500' : 'text-emerald-500'}`}>
+                            {hareket.hareket_tipi === 'Çıkış' ? '-' : '+'}{hareket.miktar.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                          <span className="text-[10px] text-slate-500 font-bold">{new Date(hareket.tarih).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                          <span className="text-[9px] text-slate-600 font-bold truncate max-w-[150px]">{hareket.aciklama || 'SİSTEM KAYDI'}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           </main>
@@ -312,12 +341,12 @@ export default function Stok() {
 
       {/* Production Entry Modal */}
       {showUretimModal && (
-        <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fade-in">
-          <div className="premium-card p-0 w-full max-w-lg flex flex-col animate-slide-up border-white/10 relative overflow-hidden">
-            <div className="px-10 py-10 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.01]">
+        <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-end md:items-center justify-center z-[100] p-0 md:p-4 animate-fade-in">
+          <div className="premium-card p-0 w-full h-[95vh] md:h-auto md:max-w-lg flex flex-col animate-slide-up border-white/10 relative overflow-hidden rounded-t-[32px] md:rounded-[2.5rem]">
+            <div className="px-6 md:px-10 py-8 md:py-10 border-b border-white/5 flex items-center justify-between shrink-0 bg-white/[0.01]">
               <div className="space-y-1">
-                <h3 className="text-3xl font-black tracking-tight text-white uppercase leading-none">Üretim Kaydı</h3>
-                <p className="text-slate-500 font-bold text-sm">Üretilen ürünleri stoğa dahil edin.</p>
+                <h3 className="text-2xl md:text-3xl font-black tracking-tight text-white uppercase leading-none">Üretim Kaydı</h3>
+                <p className="text-slate-500 font-bold text-xs md:text-sm">Üretilen ürünleri stoğa dahil edin.</p>
               </div>
               <button
                 onClick={() => setShowUretimModal(false)}
@@ -327,7 +356,7 @@ export default function Stok() {
               </button>
             </div>
 
-            <form onSubmit={handleUretimSubmit} className="p-10 space-y-8">
+            <form onSubmit={handleUretimSubmit} className="p-6 md:p-10 space-y-6 md:space-y-8 overflow-y-auto flex-1">
               <div className="space-y-2">
                 <SearchableSelect
                   label="HEDEF ÜRÜN *"
@@ -339,7 +368,7 @@ export default function Stok() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2">ÜRETİM MİKTARI *</label>
                   <input

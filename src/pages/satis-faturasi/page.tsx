@@ -522,68 +522,113 @@ export default function SatisFaturasi() {
                   <p className="text-slate-500 font-bold max-w-sm mx-auto uppercase tracking-widest text-[10px]">Henüz bir satış faturası kesilmemiş veya arama kriterine uygun kayıt yok.</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto max-h-[calc(100vh-420px)] overflow-y-auto custom-scrollbar">
-                  <table className="w-full text-left relative border-separate border-spacing-0">
-                    <thead className="sticky top-0 z-10">
-                      <tr className="bg-[#0f172a] shadow-sm">
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">FATURA NO</th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">CARİ / MÜŞTERİ</th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TARİH</th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TOPLAM TUTAR</th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">DURUM</th>
-                        <th className="px-8 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">AKSİYON</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5 text-sm">
-                      {filteredFaturalar.map((fatura) => (
-                        <tr key={fatura.id} className="hover:bg-white/[0.02] transition-colors group/row">
-                          <td className="px-8 py-6 font-black text-slate-200 tracking-wider">
-                            {fatura.fatura_no}
-                          </td>
-                          <td className="px-8 py-6">
-                            <div className="font-bold text-slate-300">{fatura.cari_ad}</div>
-                          </td>
-                          <td className="px-8 py-6 text-slate-500 font-bold">
-                            {new Date(fatura.tarih).toLocaleDateString('tr-TR')}
-                          </td>
-                          <td className="px-8 py-6">
-                            <div className="text-lg font-black tracking-tighter text-emerald-500">
-                              ₺{Number(fatura.toplam).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </div>
-                          </td>
-                          <td className="px-8 py-6">
-                            <span className={`inline-flex px-3 py-1 rounded-lg text-[10px] font-black tracking-widest uppercase ${fatura.durum === 'Onaylandı' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                              }`}>
-                              {fatura.durum}
-                            </span>
-                          </td>
-                          <td className="px-8 py-6 text-right">
-                            <div className="flex items-center justify-end gap-3 opacity-0 group-hover/row:opacity-100 transition-all translate-x-4 group-hover/row:translate-x-0">
-                              <button
-                                onClick={() => openPrintModal(fatura)}
-                                className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all"
-                              >
-                                <i className="ri-printer-line"></i>
-                              </button>
-                              <button
-                                onClick={() => handleEdit(fatura)}
-                                className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all"
-                              >
-                                <i className="ri-edit-line"></i>
-                              </button>
-                              <button
-                                onClick={() => { setSelectedFatura(fatura); setShowDeleteModal(true); }}
-                                className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 hover:bg-red-600 hover:text-white transition-all"
-                              >
-                                <i className="ri-delete-bin-line"></i>
-                              </button>
-                            </div>
-                          </td>
+                <>
+                  <div className="hidden md:block overflow-x-auto max-h-[calc(100vh-420px)] overflow-y-auto custom-scrollbar">
+                    <table className="w-full text-left relative border-separate border-spacing-0">
+                      <thead className="sticky top-0 z-10">
+                        <tr className="bg-[#0f172a] shadow-sm">
+                          <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">FATURA NO</th>
+                          <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">CARİ / MÜŞTERİ</th>
+                          <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TARİH</th>
+                          <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TOPLAM TUTAR</th>
+                          <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">DURUM</th>
+                          <th className="px-8 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">AKSİYON</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 text-sm">
+                        {filteredFaturalar.map((fatura) => (
+                          <tr key={fatura.id} className="hover:bg-white/[0.02] transition-colors group/row">
+                            <td className="px-8 py-6 font-black text-slate-200 tracking-wider">
+                              {fatura.fatura_no}
+                            </td>
+                            <td className="px-8 py-6">
+                              <div className="font-bold text-slate-300">{fatura.cari_ad}</div>
+                            </td>
+                            <td className="px-8 py-6 text-slate-500 font-bold">
+                              {new Date(fatura.tarih).toLocaleDateString('tr-TR')}
+                            </td>
+                            <td className="px-8 py-6">
+                              <div className="text-lg font-black tracking-tighter text-emerald-500">
+                                ₺{Number(fatura.toplam).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </div>
+                            </td>
+                            <td className="px-8 py-6">
+                              <span className={`inline-flex px-3 py-1 rounded-lg text-[10px] font-black tracking-widest uppercase ${fatura.durum === 'Onaylandı' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                }`}>
+                                {fatura.durum}
+                              </span>
+                            </td>
+                            <td className="px-8 py-6 text-right">
+                              <div className="flex items-center justify-end gap-3 opacity-0 group-hover/row:opacity-100 transition-all translate-x-4 group-hover/row:translate-x-0">
+                                <button
+                                  onClick={() => openPrintModal(fatura)}
+                                  className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all"
+                                >
+                                  <i className="ri-printer-line"></i>
+                                </button>
+                                <button
+                                  onClick={() => handleEdit(fatura)}
+                                  className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all"
+                                >
+                                  <i className="ri-edit-line"></i>
+                                </button>
+                                <button
+                                  onClick={() => { setSelectedFatura(fatura); setShowDeleteModal(true); }}
+                                  className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 hover:bg-red-600 hover:text-white transition-all"
+                                >
+                                  <i className="ri-delete-bin-line"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile Card List */}
+                  <div className="md:hidden p-4 space-y-3 max-h-[calc(100vh-420px)] overflow-y-auto custom-scrollbar">
+                    {filteredFaturalar.map((fatura) => (
+                      <div key={fatura.id} className="mobile-card">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-black text-indigo-400 tracking-wider">{fatura.fatura_no}</span>
+                          <span className={`inline-flex px-2 py-1 rounded text-[8px] font-black tracking-widest uppercase ${fatura.durum === 'Onaylandı' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                            {fatura.durum}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="font-bold text-slate-200 text-sm">{fatura.cari_ad}</div>
+                            <div className="text-[10px] text-slate-500 font-bold">{new Date(fatura.tarih).toLocaleDateString('tr-TR')}</div>
+                          </div>
+                          <div className="text-lg font-black tracking-tighter text-emerald-500">
+                            ₺{Number(fatura.toplam).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/5">
+                          <button
+                            onClick={() => openPrintModal(fatura)}
+                            className="mobile-action-btn bg-indigo-500/10 border border-indigo-500/20 text-indigo-400"
+                          >
+                            <i className="ri-printer-line text-sm"></i>
+                          </button>
+                          <button
+                            onClick={() => handleEdit(fatura)}
+                            className="mobile-action-btn bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
+                          >
+                            <i className="ri-edit-line text-sm"></i>
+                          </button>
+                          <button
+                            onClick={() => { setSelectedFatura(fatura); setShowDeleteModal(true); }}
+                            className="mobile-action-btn bg-red-500/10 border border-red-500/20 text-red-500"
+                          >
+                            <i className="ri-delete-bin-line text-sm"></i>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           </main>

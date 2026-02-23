@@ -218,7 +218,7 @@ const OdemelerPage = () => {
                 </div>
               </div>
 
-              <div className="overflow-x-auto max-h-[calc(100vh-450px)] overflow-y-auto custom-scrollbar">
+              <div className="hidden md:block overflow-x-auto max-h-[calc(100vh-450px)] overflow-y-auto custom-scrollbar">
                 <table className="w-full text-left border-separate border-spacing-0">
                   <thead className="sticky top-0 z-10 bg-[#0f172a]">
                     <tr className="bg-[#0f172a]/50">
@@ -272,27 +272,67 @@ const OdemelerPage = () => {
                   </tbody>
                 </table>
               </div>
+
+              {/* Mobile Card List */}
+              <div className="md:hidden p-4 space-y-3 max-h-[calc(100vh-450px)] overflow-y-auto custom-scrollbar">
+                {loading ? (
+                  [...Array(3)].map((_, i) => (
+                    <div key={i} className="mobile-card animate-skeleton">
+                      <div className="h-4 bg-white/10 rounded w-1/3"></div>
+                      <div className="h-3 bg-white/5 rounded w-1/2"></div>
+                    </div>
+                  ))
+                ) : filteredList.length === 0 ? (
+                  <div className="py-12 text-center text-slate-500 font-bold uppercase tracking-widest text-xs italic">İşlem bulunamadı.</div>
+                ) : (
+                  filteredList.map((o) => (
+                    <div key={o.id} className="mobile-card">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${o.tip === 'Tahsilat' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                            <i className={`text-sm ${o.tip === 'Tahsilat' ? 'ri-arrow-up-line' : 'ri-arrow-down-line'}`}></i>
+                          </div>
+                          <span className="font-black text-white text-[10px] tracking-widest uppercase">{o.tip}</span>
+                        </div>
+                        <span className={`text-lg font-black tracking-tighter ${o.tip === 'Tahsilat' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          ₺{Number(o.tutar).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-black text-slate-200 text-sm uppercase">{o.cari_ad}</div>
+                          <div className="text-[9px] text-slate-600 font-bold truncate max-w-[180px]">{o.aciklama || 'Açıklama yok'}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                        <span className="text-[10px] text-slate-500 font-bold">{new Date(o.tarih).toLocaleDateString('tr-TR')}</span>
+                        <span className="px-2 py-1 bg-white/5 rounded text-[8px] font-black tracking-widest uppercase text-slate-400">{o.odeme_yontemi.toUpperCase()}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </main>
         </div>
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fade-in">
-          <div className="premium-card p-0 w-full max-w-2xl animate-slide-up border-white/10 relative overflow-hidden">
-            <div className="px-10 py-10 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+        <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-end md:items-center justify-center z-[100] p-0 md:p-4 animate-fade-in">
+          <div className="premium-card p-0 w-full h-[95vh] md:h-auto md:max-w-2xl animate-slide-up border-white/10 relative overflow-hidden rounded-t-[32px] md:rounded-[2.5rem]">
+            <div className="px-6 md:px-10 py-8 md:py-10 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
               <div className="space-y-1">
-                <h3 className="text-3xl font-black tracking-tight text-white uppercase leading-none">
+                <h3 className="text-2xl md:text-3xl font-black tracking-tight text-white uppercase leading-none">
                   {formData.tip === 'Tahsilat' ? 'Yeni Tahsilat' : 'Yeni Ödeme'}
                 </h3>
-                <p className="text-slate-500 font-bold text-sm uppercase tracking-widest">Kasa hareketini sisteme kaydedin.</p>
+                <p className="text-slate-500 font-bold text-xs md:text-sm uppercase tracking-widest">Kasa hareketini sisteme kaydedin.</p>
               </div>
               <button onClick={() => setShowModal(false)} className="w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-all">
                 <Plus size={24} className="rotate-45" />
               </button>
             </div>
 
-            <form onSubmit={handleCreate} className="p-10 space-y-8">
+            <form onSubmit={handleCreate} className="p-6 md:p-10 space-y-6 md:space-y-8 overflow-y-auto max-h-[calc(95vh-130px)] md:max-h-none">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">İLGİLİ CARİ</label>
                 <select
@@ -306,7 +346,7 @@ const OdemelerPage = () => {
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">TUTAR (₺)</label>
                   <input
@@ -330,7 +370,7 @@ const OdemelerPage = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">ÖDEME YÖNTEMİ</label>
                   <select

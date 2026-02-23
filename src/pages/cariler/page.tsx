@@ -171,7 +171,7 @@ const CarilerPage = () => {
                 </div>
               </div>
 
-              <div className="overflow-x-auto max-h-[calc(100vh-420px)] overflow-y-auto custom-scrollbar">
+              <div className="overflow-x-auto max-h-[calc(100vh-420px)] overflow-y-auto custom-scrollbar hidden md:block">
                 <table className="w-full text-left border-separate border-spacing-0">
                   <thead className="sticky top-0 z-10">
                     <tr className="bg-[#0f172a] shadow-sm">
@@ -229,7 +229,7 @@ const CarilerPage = () => {
                           </td>
                           <td className="px-8 py-6 text-right">
                             <div className="flex items-center justify-end gap-3 opacity-0 group-hover/row:opacity-100 transition-all">
-                              <button onClick={() => { setFormData(c); setIsEditing(true); setShowModal(true); }} className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 hover:bg-indigo-50 hover:text-indigo-600 border border-indigo-500/20 transition-all flex items-center justify-center">
+                              <button onClick={(e) => { e.stopPropagation(); setFormData(c); setIsEditing(true); setShowModal(true); }} className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 hover:bg-indigo-50 hover:text-indigo-600 border border-indigo-500/20 transition-all flex items-center justify-center">
                                 <Edit2 size={18} />
                               </button>
                             </div>
@@ -240,17 +240,60 @@ const CarilerPage = () => {
                   </tbody>
                 </table>
               </div>
+
+              {/* Mobile Card List */}
+              <div className="md:hidden p-4 space-y-3 max-h-[calc(100vh-420px)] overflow-y-auto custom-scrollbar">
+                {loading ? (
+                  [...Array(3)].map((_, i) => (
+                    <div key={i} className="mobile-card animate-skeleton">
+                      <div className="h-4 bg-white/10 rounded w-1/3"></div>
+                      <div className="h-3 bg-white/5 rounded w-1/2"></div>
+                    </div>
+                  ))
+                ) : filteredList.length === 0 ? (
+                  <div className="py-12 text-center text-slate-500 font-bold uppercase tracking-widest text-xs italic">Kayıtlı cari bulunamadı.</div>
+                ) : (
+                  filteredList.map((c) => (
+                    <div key={c.id} className="mobile-card" onClick={() => navigate(`/cari-detay/${c.id}`)}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-black text-lg shrink-0">
+                          {c.ad.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-black text-slate-200 text-sm leading-none truncate">{c.ad}</div>
+                          <div className="text-[9px] font-bold text-slate-500 mt-1">{c.telefon}</div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className={`text-base font-black tracking-tighter ${!c.bakiye || c.bakiye === 0 ? 'text-slate-500' : c.bakiye > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            ₺{Number(Math.abs(c.bakiye || 0)).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                          </div>
+                          <div className="text-[8px] font-black uppercase text-slate-500">{!c.bakiye || c.bakiye === 0 ? '' : c.bakiye > 0 ? 'ALACAK' : 'BORÇ'}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                        <div className="text-[9px] text-slate-500 font-bold">{c.email || 'E-posta yok'}</div>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setFormData(c); setIsEditing(true); setShowModal(true); }}
+                          className="mobile-action-btn bg-indigo-500/10 border border-indigo-500/20 text-indigo-400"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </main>
         </div>
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[999] flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-[32px] p-8 md:p-12 w-full max-w-xl shadow-2xl animate-scale shadow-indigo-500/10">
+        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[999] flex items-end md:items-center justify-center p-0 md:p-4 animate-fade-in">
+          <div className="bg-white rounded-t-[32px] md:rounded-[32px] p-6 md:p-12 w-full h-[95vh] md:h-auto md:max-w-xl shadow-2xl animate-scale shadow-indigo-500/10 overflow-y-auto">
             <div className="flex justify-between items-start mb-8">
               <div>
-                <h3 className="text-3xl font-black text-slate-900 tracking-tighter uppercase mb-2">
+                <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase mb-2">
                   {isEditing ? 'CARİ GÜNCELLE' : 'YENİ CARİ EKLE'}
                 </h3>
                 <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest italic">

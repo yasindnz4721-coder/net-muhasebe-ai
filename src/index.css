@@ -37,6 +37,36 @@
     select option {
         @apply bg-[#020617] text-white py-4;
     }
+
+    /* Mobile Card Layout Utilities */
+    .mobile-card {
+        @apply bg-white/[0.03] border border-white/5 rounded-2xl p-4 space-y-3 active:bg-white/[0.06] transition-all;
+    }
+
+    .mobile-card-row {
+        @apply flex items-center justify-between gap-2;
+    }
+
+    .mobile-card-label {
+        @apply text-[9px] font-black text-slate-500 uppercase tracking-widest;
+    }
+
+    .mobile-card-value {
+        @apply text-sm font-bold text-slate-200;
+    }
+
+    .mobile-action-btn {
+        @apply w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90;
+    }
+
+    /* Mobile full-screen modal */
+    .mobile-fullscreen-modal {
+        @apply fixed inset-0 z-[999] flex items-end md:items-center justify-center;
+    }
+
+    .mobile-fullscreen-modal>div {
+        @apply w-full h-full md:h-auto md:max-h-[90vh] md:max-w-xl md:rounded-[32px] rounded-none overflow-y-auto;
+    }
 }
 
 @keyframes aurora-1 {
