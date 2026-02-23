@@ -161,7 +161,7 @@ export default function AdminPanel() {
 
                         {/* Admin Stats */}
                         {stats && (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="max-w-sm">
                                 <div className="premium-card p-10 bg-gradient-to-br from-indigo-500/5 to-transparent border-indigo-500/10">
                                     <div className="flex items-center justify-between mb-6">
                                         <div className="w-12 h-12 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-indigo-400">
@@ -170,24 +170,6 @@ export default function AdminPanel() {
                                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">TOPLAM KULLANICI</span>
                                     </div>
                                     <div className="text-4xl font-black tracking-tighter text-slate-200">{stats.users}</div>
-                                </div>
-                                <div className="premium-card p-10 bg-gradient-to-br from-purple-500/5 to-transparent border-purple-500/10">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <div className="w-12 h-12 bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center justify-center text-purple-400">
-                                            <i className="ri-building-line text-2xl"></i>
-                                        </div>
-                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">AKTİF ŞİRKETLER</span>
-                                    </div>
-                                    <div className="text-4xl font-black tracking-tighter text-slate-200">{stats.profiles}</div>
-                                </div>
-                                <div className="premium-card p-10 bg-gradient-to-br from-emerald-500/5 to-transparent border-emerald-500/10">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center text-emerald-400">
-                                            <i className="ri-file-list-3-line text-2xl"></i>
-                                        </div>
-                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">SİSTEM GENELİ FATURA</span>
-                                    </div>
-                                    <div className="text-4xl font-black tracking-tighter text-slate-200">{stats.totalInvoices}</div>
                                 </div>
                             </div>
                         )}
