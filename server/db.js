@@ -7,8 +7,8 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false
   },
-  max: 20, // Maksimum bağlantı sayısı
-  idleTimeoutMillis: 30000, // Boştaki bağlantı süresi
+  max: 50, // Maksimum bağlantı sayısı (50 eşzamanlı kullanıcı için)
+  idleTimeoutMillis: 60000, // Boştaki bağlantı süresi (60 saniye)
   connectionTimeoutMillis: 10000, // Bağlantı zaman aşımı
 });
 

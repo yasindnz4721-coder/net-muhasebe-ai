@@ -21,7 +21,7 @@ app.use(express.json({ limit: '10mb' }));
 // Rate Limiting (Kötüye kullanımı önlemek için)
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 dakika
-    max: 1000, // IP başına limit (1000 isteğe çıkarıldı)
+    max: 2000, // IP başına limit (50 eşzamanlı kullanıcı için artırıldı)
     message: { error: 'Çok fazla istek gönderildi, lütfen daha sonra tekrar deneyin.' }
 });
 app.use('/api/', limiter);
