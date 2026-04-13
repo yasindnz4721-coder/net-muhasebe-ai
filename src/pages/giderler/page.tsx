@@ -131,7 +131,7 @@ export default function GiderlerPage() {
                         {/* Gider Kartları Özeti */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                             {[
-                                { label: 'ANA KASA BAKİYESİ', value: anaKasa?.bakiye || 0, icon: 'ri-wallet-3-line', color: 'indigo' },
+                                { label: 'ANA KASA BAKİYESİ', value: Number(anaKasa?.bakiye || 0), icon: 'ri-wallet-3-line', color: 'indigo' },
                                 { label: 'TOPLAM GİDER', value: expenses.reduce((sum, e) => sum + Number(e.tutar), 0), icon: 'ri-money-dollar-circle-line', color: 'rose' },
                                 { label: 'AYLIK ORTALAMA', value: expenses.reduce((sum, e) => sum + Number(e.tutar), 0) / Math.max(1, new Set(expenses.map(e => e.tarih.substring(0, 7))).size), icon: 'ri-calendar-line', color: 'indigo' },
                                 { label: 'EN YÜKSEK KALEM', value: Math.max(0, ...expenses.map(e => Number(e.tutar))), icon: 'ri-arrow-up-circle-line', color: 'orange' },

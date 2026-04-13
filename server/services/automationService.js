@@ -1,4 +1,4 @@
-const { query } = require('../db');
+const { query, pool } = require('../db');
 const NotificationService = require('./notificationService');
 const EmailService = require('./emailService');
 
@@ -6,8 +6,14 @@ const AutomationService = {
     async checkAndRecordSalaries(profile_id) {
         try {
             const shimbi = new Date();
-            const ay = shimbi.getMonth() + 1;
-            const yil = shimbi.getFullYear();
+            // Maaş ödemelerini ayın 1'inde bir önceki ay için yapalım (daha sağlıklı hesaplama için)
+            // Eğer bugün ayın 1'i değilse ve ayın 25'inden sonraysa da çalışabilir (isteğe bağlı)
+            // Ama kullanıcı "ayı 1'i değil ama tetiklendi" dediği için tam 1'ine sabitleyelim.
+            if (shimbi.getDate() !== 1) return;
+
+            const hedefTarih = new Date(shimbi.getFullYear(), shimbi.getMonth() - 1, 1);
+            const ay = hedefTarih.getMonth() + 1;
+            const yil = hedefTarih.getFullYear();
 
             // Bu ay için maaş ödemesi yapılmamış personelleri bul
             const result = await query(
@@ -19,25 +25,95 @@ const AutomationService = {
                      SELECT personel_id FROM odemeler 
                      WHERE profile_id = $1 AND personel_id IS NOT NULL 
                      AND EXTRACT(MONTH FROM tarih) = $2 AND EXTRACT(YEAR FROM tarih) = $3
+                     AND aciklama LIKE '%Maaş Ödemesi%'
                  )`,
                 [profile_id, ay, yil]
             );
 
             for (const p of result.rows) {
-                // Bugün ayın kaçı? Eğer ayın sonu geldiyse veya 5'inden sonraysa otomatik kaydet (örnek kural)
-                if (shimbi.getDate() >= 25) {
-                    await query(
-                        `INSERT INTO odemeler (profile_id, personel_id, cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, kasa_id)
-                         VALUES ($1, $2, $3, 'Ödeme', $4, CURRENT_DATE, 'Nakit', $5, $6)`,
-                        [profile_id, p.id, p.ad_soyad, p.maas, `${ay}/${yil} Maaş Ödemesi (Otomatik)`, p.kasa_id]
-                    );
+                const brütMaas = parseFloat(p.maas);
 
-                    await NotificationService.create(
-                        profile_id,
-                        'Otomatik Maaş Kaydı',
-                        `${p.ad_soyad} için ${p.maas} TL tutarındaki ${ay}/${yil} ayı maaş ödemesi sisteme gider olarak kaydedildi.`,
-                        'success'
-                    );
+                // 1. Avansları bul
+                const avansResult = await query(
+                    `SELECT COALESCE(SUM(tutar), 0) as toplam_avans 
+                     FROM personel_avanslar 
+                     WHERE personel_id = $1 AND profile_id = $2 
+                     AND EXTRACT(MONTH FROM tarih) = $3 AND EXTRACT(YEAR FROM tarih) = $4`,
+                    [p.id, profile_id, ay, yil]
+                );
+                const toplamAvans = parseFloat(avansResult.rows[0].toplam_avans);
+
+                // 2. Puantaj kesintilerini bul (Eksik gün)
+                const puantajResult = await query(
+                    `SELECT COUNT(*) as eksik_gun FROM personel_puantaj 
+                     WHERE personel_id = $1 AND profile_id = $2 AND durum = 'Gelmedi' 
+                     AND EXTRACT(MONTH FROM tarih) = $3 AND EXTRACT(YEAR FROM tarih) = $4`,
+                    [p.id, profile_id, ay, yil]
+                );
+                const eksikGun = parseInt(puantajResult.rows[0].eksik_gun);
+                const kesinti = (brütMaas / 30) * eksikGun;
+
+                // Net Ödenecek
+                const netTutar = Math.max(0, brütMaas - toplamAvans - kesinti);
+
+                if (netTutar > 0 && p.kasa_id) {
+                    const client = await pool.connect();
+                    try {
+                        await client.query('BEGIN');
+
+                        const aciklama = `${ay}/${yil} Maaş Ödemesi (Otomatik)`;
+
+                        // 1. Giderler tablosuna ekle (Raporlar için) - Önce bunu yapıyoruz ki ID alabilelim
+                        let katRes = await client.query(
+                            "SELECT id FROM gider_kategorileri WHERE profile_id = $1 AND ad = 'Personel Maaşı'",
+                            [profile_id]
+                        );
+                        let kategoriId;
+                        if (katRes.rows.length === 0) {
+                            const newKat = await client.query(
+                                "INSERT INTO gider_kategorileri (profile_id, ad, ikon, renk) VALUES ($1, 'Personel Maaşı', 'ri-user-star-line', '#8b5cf6') RETURNING id",
+                                [profile_id]
+                            );
+                            kategoriId = newKat.rows[0].id;
+                        } else {
+                            kategoriId = katRes.rows[0].id;
+                        }
+
+                        const giderRes = await client.query(
+                            `INSERT INTO giderler (profile_id, kategori_id, tutar, tarih, kasa_id, odeme_yontemi, aciklama, kullanici_email)
+                             VALUES ($1, $2, $3, CURRENT_DATE, $4, 'Nakit', $5, $6) RETURNING id`,
+                            [profile_id, kategoriId, netTutar, p.kasa_id, aciklama, 'sistem@otomasyon']
+                        );
+                        const giderId = giderRes.rows[0].id;
+
+                        // 2. Ödemeler tablosuna ekle (Kasa takibi için) - gider_id ile bağla
+                        await client.query(
+                            `INSERT INTO odemeler (profile_id, personel_id, cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, kasa_id, gider_id)
+                             VALUES ($1, $2, $3, 'Ödeme', $4, CURRENT_DATE, 'Nakit', $5, $6, $7)`,
+                            [profile_id, p.id, p.ad_soyad, netTutar, aciklama, p.kasa_id, giderId]
+                        );
+
+                        // 3. Kasadan düş
+                        await client.query(
+                            "UPDATE kasalar SET bakiye = bakiye - $1, updated_at = NOW() WHERE id = $2",
+                            [netTutar, p.kasa_id]
+                        );
+
+                        await client.query('COMMIT');
+
+                        await NotificationService.create(
+                            profile_id,
+                            'Otomatik Maaş Kaydı',
+                            `${p.ad_soyad} için ${netTutar.toLocaleString('tr-TR')} TL tutarındaki ${ay}/${yil} ayı maaş ödemesi sisteme gider ve ödeme olarak kaydedildi.`,
+                            'success'
+                        );
+
+                    } catch (err) {
+                        await client.query('ROLLBACK');
+                        console.error('Maaş kayıt işlemi hatası:', err);
+                    } finally {
+                        client.release();
+                    }
                 }
             }
         } catch (error) {
@@ -83,21 +159,59 @@ const AutomationService = {
                     const kasaId = kasaRes.rows.length > 0 ? kasaRes.rows[0].id : null;
 
                     if (kasaId) {
-                        await query(
-                            `INSERT INTO odemeler (profile_id, tip, tutar, tarih, odeme_yontemi, aciklama, kasa_id, cari_ad)
-                             VALUES ($1, 'Ödeme', $2, CURRENT_DATE, 'Nakit', $3, $4, 'VERGİ DAİRESİ')`,
-                            [profile_id, netKDV, `AYLIK KDV ÖDEME YÜKÜ (${targetAy}/${targetYil}) - OTOMATIK`, kasaId]
-                        );
+                        const client = await pool.connect();
+                        try {
+                            await client.query('BEGIN');
 
-                        // Kasadan düş
-                        await query("UPDATE kasalar SET bakiye = bakiye - $1 WHERE id = $2", [netKDV, kasaId]);
+                            const aciklama = `AYLIK KDV ÖDEME YÜKÜ (${targetAy}/${targetYil}) - OTOMATİK`;
 
-                        await NotificationService.create(
-                            profile_id,
-                            'Otomatik KDV Tahakkuku',
-                            `${targetAy}/${targetYil} dönemi için ${netKDV.toLocaleString('tr-TR')} TL KDV ödemesi kasadan düşüldü.`,
-                            'info'
-                        );
+                            // 1. Giderler tablosuna ekle
+                            let katRes = await client.query(
+                                "SELECT id FROM gider_kategorileri WHERE profile_id = $1 AND ad = 'Vergi Ödemeleri'",
+                                [profile_id]
+                            );
+                            let kategoriId;
+                            if (katRes.rows.length === 0) {
+                                const newKat = await client.query(
+                                    "INSERT INTO gider_kategorileri (profile_id, ad, ikon, renk) VALUES ($1, 'Vergi Ödemeleri', 'ri-government-line', '#ef4444') RETURNING id",
+                                    [profile_id]
+                                );
+                                kategoriId = newKat.rows[0].id;
+                            } else {
+                                kategoriId = katRes.rows[0].id;
+                            }
+
+                            const giderRes = await client.query(
+                                `INSERT INTO giderler (profile_id, kategori_id, tutar, tarih, kasa_id, odeme_yontemi, aciklama, kullanici_email)
+                                 VALUES ($1, $2, $3, CURRENT_DATE, $4, 'Nakit', $5, $6) RETURNING id`,
+                                [profile_id, kategoriId, netKDV, kasaId, aciklama, 'sistem@otomasyon']
+                            );
+                            const giderId = giderRes.rows[0].id;
+
+                            // 2. Ödemeler tablosuna ekle
+                            await client.query(
+                                `INSERT INTO odemeler (profile_id, tip, tutar, tarih, odeme_yontemi, aciklama, kasa_id, cari_ad, gider_id)
+                                 VALUES ($1, 'Ödeme', $2, CURRENT_DATE, 'Nakit', $3, $4, 'VERGİ DAİRESİ', $5)`,
+                                [profile_id, netKDV, aciklama, kasaId, giderId]
+                            );
+
+                            // 3. Kasadan düş
+                            await client.query("UPDATE kasalar SET bakiye = bakiye - $1 WHERE id = $2", [netKDV, kasaId]);
+
+                            await client.query('COMMIT');
+
+                            await NotificationService.create(
+                                profile_id,
+                                'Otomatik KDV Tahakkuku',
+                                `${targetAy}/${targetYil} dönemi için ${netKDV.toLocaleString('tr-TR')} TL KDV ödemesi kasadan düşüldü ve giderlere işlendi.`,
+                                'info'
+                            );
+                        } catch (err) {
+                            if (client) await client.query('ROLLBACK');
+                            console.error('KDV otomatik kayıt hatası:', err);
+                        } finally {
+                            client.release();
+                        }
                     }
                 }
             }
@@ -158,31 +272,67 @@ const AutomationService = {
             );
 
             for (const payment of duePayments.rows) {
-                // 1. Kasaya (odemeler) gider olarak ekle
-                const odemeResult = await query(
-                    `INSERT INTO odemeler (cari_id, cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, profile_id, kasa_id)
-                     VALUES ($1, $2, 'Ödeme', $3, NOW(), 'Nakit', $4, $5, $6)
-                     RETURNING id`,
-                    [payment.cari_id, payment.cari_ad, payment.tutar, `Taksit Ödemesi: ${payment.plan_aciklama || ''} (Otomatik)`, profile_id, defaultKasaId]
-                );
+                const client = await pool.connect();
+                try {
+                    await client.query('BEGIN');
+                    const aciklama = `Taksit Ödemesi: ${payment.plan_aciklama || ''} (Otomatik)`;
 
-                // 2. Kasa bakiyesini güncelle
-                if (defaultKasaId) {
-                    await query('UPDATE kasalar SET bakiye = bakiye - $1, updated_at = NOW() WHERE id = $2', [payment.tutar, defaultKasaId]);
+                    // 1. Giderler tablosuna ekle
+                    let katRes = await client.query(
+                        "SELECT id FROM gider_kategorileri WHERE profile_id = $1 AND ad = 'Taksit Ödemeleri'",
+                        [profile_id]
+                    );
+                    let kategoriId;
+                    if (katRes.rows.length === 0) {
+                        const newKat = await client.query(
+                            "INSERT INTO gider_kategorileri (profile_id, ad, ikon, renk) VALUES ($1, 'Taksit Ödemeleri', 'ri-bank-card-line', '#6366f1') RETURNING id",
+                            [profile_id]
+                        );
+                        kategoriId = newKat.rows[0].id;
+                    } else {
+                        kategoriId = katRes.rows[0].id;
+                    }
+
+                    const giderRes = await client.query(
+                        `INSERT INTO giderler (profile_id, kategori_id, tutar, tarih, kasa_id, odeme_yontemi, aciklama, kullanici_email)
+                         VALUES ($1, $2, $3, NOW(), $4, 'Nakit', $5, $6) RETURNING id`,
+                        [profile_id, kategoriId, payment.tutar, defaultKasaId, aciklama, 'sistem@otomasyon']
+                    );
+                    const giderId = giderRes.rows[0].id;
+
+                    // 2. Kasaya (odemeler) ekle (gider_id ile bağla)
+                    const odemeResult = await client.query(
+                        `INSERT INTO odemeler (cari_id, cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, profile_id, kasa_id, gider_id)
+                         VALUES ($1, $2, 'Ödeme', $3, NOW(), 'Nakit', $4, $5, $6, $7)
+                         RETURNING id`,
+                        [payment.cari_id, payment.cari_ad, payment.tutar, aciklama, profile_id, defaultKasaId, giderId]
+                    );
+
+                    // 3. Kasa bakiyesini güncelle
+                    if (defaultKasaId) {
+                        await client.query('UPDATE kasalar SET bakiye = bakiye - $1, updated_at = NOW() WHERE id = $2', [payment.tutar, defaultKasaId]);
+                    }
+
+                    // 4. Taksit ödemesini 'Ödendi' olarak işaretle
+                    await client.query(
+                        `UPDATE taksit_odemeleri SET durum = 'Ödendi', odeme_tarihi = NOW(), odeme_id = $1, kasa_id = $2 WHERE id = $3`,
+                        [odemeResult.rows[0].id, defaultKasaId, payment.id]
+                    );
+
+                    await client.query('COMMIT');
+
+                    await NotificationService.create(
+                        profile_id,
+                        'Taksit Otomatik Ödendi',
+                        `${payment.cari_ad} için ${payment.tutar} TL tutarındaki taksit ödemesi kasadan düşüldü ve giderlere işlendi.`,
+                        'success'
+                    );
+                } catch (err) {
+                    await client.query('ROLLBACK');
+                    console.error('Taksit otomasyon hatası:', err);
+                } finally {
+                    client.release();
                 }
-
-                // 3. Taksit ödemesini 'Ödendi' olarak işaretle
-                await query(
-                    `UPDATE taksit_odemeleri SET durum = 'Ödendi', odeme_tarihi = NOW(), odeme_id = $1, kasa_id = $2 WHERE id = $3`,
-                    [odemeResult.rows[0].id, defaultKasaId, payment.id]
-                );
-
-                await NotificationService.create(
-                    profile_id,
-                    'Taksit Otomatik Ödendi',
-                    `${payment.cari_ad} için ${payment.tutar} TL tutarındaki taksit ödemesi kasadan düşüldü.`,
-                    'success'
-                );
             }
         } catch (error) {
             console.error('Taksit otomasyon hatası:', error);
@@ -203,36 +353,72 @@ const AutomationService = {
             );
 
             for (const adv of dueAdvances.rows) {
-                // 1. Varsayılan kasayı bul (her bir işlem için güncel bakiye kontrolü için)
-                const kasaResult = await query('SELECT id FROM kasalar WHERE profile_id = $1 AND is_default = TRUE', [profile_id]);
-                const defaultKasaId = kasaResult.rows.length > 0 ? kasaResult.rows[0].id : null;
-                const targetKasaId = adv.kasa_id || defaultKasaId;
+                const client = await pool.connect();
+                try {
+                    await client.query('BEGIN');
 
-                // 2. Ödemeler defterine ekle
-                const odemeResult = await query(
-                    `INSERT INTO odemeler (cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, profile_id, kasa_id)
-                     VALUES ($1, 'Ödeme', $2, $3, 'Nakit', $4, $5, $6)
-                     RETURNING id`,
-                    [adv.ad_soyad, adv.tutar, adv.tarih, `Personel Avansı: ${adv.aciklama || ''} (Otomatik)`, profile_id, targetKasaId]
-                );
+                    // 1. Varsayılan kasayı bul
+                    const kasaResult = await client.query('SELECT id FROM kasalar WHERE profile_id = $1 AND is_default = TRUE', [profile_id]);
+                    const defaultKasaId = kasaResult.rows.length > 0 ? kasaResult.rows[0].id : null;
+                    const targetKasaId = adv.kasa_id || defaultKasaId;
+                    const aciklama = `Personel Avansı: ${adv.aciklama || ''} (Otomatik)`;
 
-                // 3. Kasa bakiyesini güncelle
-                if (targetKasaId) {
-                    await query('UPDATE kasalar SET bakiye = bakiye - $1, updated_at = NOW() WHERE id = $2', [adv.tutar, targetKasaId]);
+                    // 2. Giderler tablosuna ekle
+                    let katRes = await client.query(
+                        "SELECT id FROM gider_kategorileri WHERE profile_id = $1 AND ad = 'Personel Avansı'",
+                        [profile_id]
+                    );
+                    let kategoriId;
+                    if (katRes.rows.length === 0) {
+                        const newKat = await client.query(
+                            "INSERT INTO gider_kategorileri (profile_id, ad, ikon, renk) VALUES ($1, 'Personel Avansı', 'ri-hand-coin-line', '#f59e0b') RETURNING id",
+                            [profile_id]
+                        );
+                        kategoriId = newKat.rows[0].id;
+                    } else {
+                        kategoriId = katRes.rows[0].id;
+                    }
+
+                    const giderRes = await client.query(
+                        `INSERT INTO giderler (profile_id, kategori_id, tutar, tarih, kasa_id, odeme_yontemi, aciklama, kullanici_email)
+                         VALUES ($1, $2, $3, $4, $5, 'Nakit', $6, $7) RETURNING id`,
+                        [profile_id, kategoriId, adv.tutar, adv.tarih, targetKasaId, aciklama, 'sistem@otomasyon']
+                    );
+                    const giderId = giderRes.rows[0].id;
+
+                    // 3. Ödemeler defterine ekle (gider_id ile bağla)
+                    const odemeResult = await client.query(
+                        `INSERT INTO odemeler (cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, profile_id, kasa_id, gider_id)
+                         VALUES ($1, 'Ödeme', $2, $3, 'Nakit', $4, $5, $6, $7)
+                         RETURNING id`,
+                        [adv.ad_soyad, adv.tutar, adv.tarih, aciklama, profile_id, targetKasaId, giderId]
+                    );
+
+                    // 4. Kasa bakiyesini güncelle
+                    if (targetKasaId) {
+                        await client.query('UPDATE kasalar SET bakiye = bakiye - $1, updated_at = NOW() WHERE id = $2', [adv.tutar, targetKasaId]);
+                    }
+
+                    // 5. Avansı 'Ödendi' olarak işaretle
+                    await client.query(
+                        `UPDATE personel_avanslar SET durum = 'Ödendi', odeme_id = $1 WHERE id = $2`,
+                        [odemeResult.rows[0].id, adv.id]
+                    );
+
+                    await client.query('COMMIT');
+
+                    await NotificationService.create(
+                        profile_id,
+                        'Personel Avansı Otomatik Ödendi',
+                        `${adv.ad_soyad} için ${adv.tutar} TL tutarındaki avans ödemesi kasadan düşüldü ve giderlere işlendi.`,
+                        'success'
+                    );
+                } catch (err) {
+                    await client.query('ROLLBACK');
+                    console.error('Personel avans otomasyon hatası:', err);
+                } finally {
+                    client.release();
                 }
-
-                // 4. Avansı 'Ödendi' olarak işaretle
-                await query(
-                    `UPDATE personel_avanslar SET durum = 'Ödendi', odeme_id = $1 WHERE id = $2`,
-                    [odemeResult.rows[0].id, adv.id]
-                );
-
-                await NotificationService.create(
-                    profile_id,
-                    'Personel Avansı Otomatik Ödendi',
-                    `${adv.ad_soyad} için ${adv.tutar} TL tutarındaki avans ödemesi kasadan düşüldü.`,
-                    'success'
-                );
             }
         } catch (error) {
             console.error('Personel avans otomasyon hatası:', error);

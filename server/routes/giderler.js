@@ -88,9 +88,9 @@ router.post('/', async (req, res) => {
 
         // 2. Ödemeler tablosuna kaydet (Kasa takibi için)
         await client.query(
-            `INSERT INTO odemeler (profile_id, tip, tutar, tarih, odeme_yontemi, aciklama, kasa_id, cari_ad)
-             VALUES ($1, 'Ödeme', $2, $3, $4, $5, $6, $7)`,
-            [profile_id, tutar, tarih || new Date(), odeme_yontemi || 'Nakit', `Gider Kaydı: ${aciklama || 'Genel Gider'}`, kasa_id, 'GENEL GİDER']
+            `INSERT INTO odemeler (profile_id, tip, tutar, tarih, odeme_yontemi, aciklama, kasa_id, cari_ad, gider_id)
+             VALUES ($1, 'Ödeme', $2, $3, $4, $5, $6, $7, $8)`,
+            [profile_id, tutar, tarih || new Date(), odeme_yontemi || 'Nakit', `Gider Kaydı: ${aciklama || 'Genel Gider'}`, kasa_id, 'GENEL GİDER', gider.id]
         );
 
         // 3. Kasa bakiyesini düş
