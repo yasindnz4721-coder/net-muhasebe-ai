@@ -20,6 +20,7 @@ interface UrunItem {
   urun_id: string;
   urun_ad: string;
   miktar: number;
+  birim: string;
   birim_fiyat: number;
   toplam: number;
 }
@@ -61,7 +62,7 @@ export default function SatisFaturasi() {
     fatura_no: '',
     tarih: new Date().toISOString().split('T')[0],
     aciklama: '',
-    urunler: [{ urun_id: '', urun_ad: '', miktar: 1, birim_fiyat: 0, toplam: 0 }],
+    urunler: [{ urun_id: '', urun_ad: '', miktar: 1, birim: 'Adet', birim_fiyat: 0, toplam: 0 }],
     kdv_orani: 20,
     kdv_uygula: true,
     durum: 'Onaylandı'
@@ -218,6 +219,7 @@ export default function SatisFaturasi() {
       const urun = urunler.find(u => u.id === value);
       if (urun) {
         newUrunler[index].urun_ad = urun.ad;
+        newUrunler[index].birim = urun.birim || 'Adet';
         newUrunler[index].birim_fiyat = 0;
       }
     }
@@ -243,7 +245,7 @@ export default function SatisFaturasi() {
   const addUrunRow = () => {
     setFormData({
       ...formData,
-      urunler: [...formData.urunler, { urun_id: '', urun_ad: '', miktar: 1, birim_fiyat: 0, toplam: 0 }]
+      urunler: [...formData.urunler, { urun_id: '', urun_ad: '', miktar: 1, birim: 'Adet', birim_fiyat: 0, toplam: 0 }]
     });
   };
 
@@ -287,6 +289,7 @@ export default function SatisFaturasi() {
           urun_id: u.urun_id,
           urun_ad: u.urun_ad,
           miktar: Number(u.miktar),
+          birim: u.birim || 'Adet',
           birim_fiyat: Number(u.birim_fiyat),
           toplam: Number(u.toplam)
         })),
@@ -347,7 +350,7 @@ export default function SatisFaturasi() {
       fatura_no: newFaturaNo,
       tarih: new Date().toISOString().split('T')[0],
       aciklama: '',
-      urunler: [{ urun_id: '', urun_ad: '', miktar: 1, birim_fiyat: 0, toplam: 0 }],
+      urunler: [{ urun_id: '', urun_ad: '', miktar: 1, birim: 'Adet', birim_fiyat: 0, toplam: 0 }],
       kdv_orani: 20,
       kdv_uygula: true,
       durum: 'Onaylandı'
@@ -781,15 +784,20 @@ export default function SatisFaturasi() {
                         </div>
                         <div className="md:col-span-2 space-y-2">
                           <label className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] ml-1">MİKTAR</label>
-                          <input
-                            type="number"
-                            value={urun.miktar}
-                            onChange={(e) => handleUrunChange(index, 'miktar', parseFloat(e.target.value) || 0)}
-                            className="premium-input h-12 text-center font-black"
-                            min="0.01"
-                            step="0.01"
-                            required
-                          />
+                          <div className="relative">
+                            <input
+                              type="number"
+                              value={urun.miktar}
+                              onChange={(e) => handleUrunChange(index, 'miktar', parseFloat(e.target.value) || 0)}
+                              className="premium-input h-12 text-center font-black pr-12"
+                              min="0.01"
+                              step="0.01"
+                              required
+                            />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-indigo-500/10 text-indigo-400 text-[8px] font-black px-2 py-1 rounded-md border border-indigo-500/20 uppercase tracking-widest pointer-events-none">
+                              {urun.birim}
+                            </div>
+                          </div>
                         </div>
                         <div className="md:col-span-2 space-y-2">
                           <label className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] ml-1">BİRİM FİYAT</label>

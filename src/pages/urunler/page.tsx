@@ -283,7 +283,7 @@ const UrunlerPage = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-8">
+              <div className="grid grid-cols-2 gap-8">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">ALIŞ FİYATI</label>
                   <input type="number" value={formData.alis_fiyati} onChange={e => setFormData({ ...formData, alis_fiyati: Number(e.target.value) })} className="premium-input h-14" />
@@ -292,9 +292,27 @@ const UrunlerPage = () => {
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">SATIŞ FİYATI</label>
                   <input type="number" value={formData.satis_fiyati} onChange={e => setFormData({ ...formData, satis_fiyati: Number(e.target.value) })} className="premium-input h-14" />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-8">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">STOK MİKTARI</label>
                   <input type="number" value={formData.stok_miktari} onChange={e => setFormData({ ...formData, stok_miktari: Number(e.target.value) })} className="premium-input h-14" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">BİRİM</label>
+                  <select 
+                    value={formData.birim} 
+                    onChange={e => setFormData({ ...formData, birim: e.target.value })} 
+                    className="premium-input h-14 font-black"
+                  >
+                    <option value="Adet">ADET</option>
+                    <option value="Kg">KİLOGRAM (KG)</option>
+                    <option value="Litre">LİTRE (L)</option>
+                    <option value="Metre">METRE (M)</option>
+                    <option value="Paket">PAKET</option>
+                    <option value="Koli">KOLİ</option>
+                  </select>
                 </div>
               </div>
 

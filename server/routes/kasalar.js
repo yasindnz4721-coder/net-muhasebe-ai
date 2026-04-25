@@ -11,10 +11,23 @@ router.get('/', async (req, res) => {
         const { profile_id } = req.query;
         if (!profile_id) return res.status(400).json({ error: 'profile_id gerekli' });
 
-        const result = await query(
+        let result = await query(
             'SELECT * FROM kasalar WHERE profile_id = $1 ORDER BY is_default DESC, ad ASC',
             [profile_id]
         );
+
+        // Eğer hiç kasa yoksa otomatik oluştur
+        if (result.rows.length === 0) {
+            await query(
+                'INSERT INTO kasalar (ad, bakiye, profile_id, is_default) VALUES ($1, $2, $3, $4)',
+                ['Ana Kasa', 0, profile_id, true]
+            );
+            result = await query(
+                'SELECT * FROM kasalar WHERE profile_id = $1 ORDER BY is_default DESC, ad ASC',
+                [profile_id]
+            );
+        }
+
         res.json(result.rows);
     } catch (error) {
         console.error('Kasalar getirme hatası:', error);

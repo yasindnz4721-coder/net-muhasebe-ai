@@ -36,6 +36,12 @@ router.post('/register', async (req, res) => {
             [profileId, profileName, '']
         );
 
+        // Otomatik Ana Kasa oluştur
+        await query(
+            'INSERT INTO kasalar (ad, bakiye, profile_id, is_default) VALUES ($1, $2, $3, $4)',
+            ['Ana Kasa', 0, profileId, true]
+        );
+
         const createdUsers = [];
 
         // 2. Her e-posta için kullanıcı oluştur (zaten varsa sadece bağla)

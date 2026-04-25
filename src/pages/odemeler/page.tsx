@@ -61,6 +61,9 @@ const OdemelerPage = () => {
         setKasalar(kasalarRes.data);
         const defaultKasa = kasalarRes.data.find(k => k.is_default) || kasalarRes.data[0];
         setAnaKasa(defaultKasa);
+        if (defaultKasa) {
+          setFormData(prev => ({ ...prev, kasa_id: defaultKasa.id }));
+        }
       }
       if (carilerRes.data) setCariler(carilerRes.data);
     } catch (err) {
