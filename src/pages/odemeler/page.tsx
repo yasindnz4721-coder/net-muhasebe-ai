@@ -40,6 +40,11 @@ const OdemelerPage = () => {
     odeme_yontemi: 'Nakit',
     aciklama: ''
   });
+  const [showKasaModal, setShowKasaModal] = useState(false);
+  const [kasaFormData, setKasaFormData] = useState({
+    ad: '',
+    bakiye: 0
+  });
 
   useEffect(() => {
     if (selectedProfile) {
@@ -158,6 +163,12 @@ const OdemelerPage = () => {
                   className="bg-rose-600 hover:bg-rose-700 text-white px-8 h-16 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-rose-600/20 flex items-center gap-3"
                 >
                   <ArrowDownLeft size={20} /> ÖDEME EKLE
+                </button>
+                <button
+                  onClick={() => setShowKasaModal(true)}
+                  className="bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 px-8 h-16 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:bg-indigo-600 hover:text-white transition-all flex items-center gap-3"
+                >
+                  <Plus size={20} /> KASA EKLE
                 </button>
               </div>
             </div>
@@ -321,6 +332,7 @@ const OdemelerPage = () => {
       </div>
 
       {showModal && (
+        // ... (existing modal code)
         <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-end md:items-center justify-center z-[100] p-0 md:p-4 animate-fade-in">
           <div className="premium-card p-0 w-full h-[95vh] md:h-auto md:max-w-2xl animate-slide-up border-white/10 relative overflow-hidden rounded-t-[32px] md:rounded-[2.5rem]">
             <div className="px-6 md:px-10 py-8 md:py-10 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
@@ -419,6 +431,61 @@ const OdemelerPage = () => {
                 >
                   {formData.tip === 'Tahsilat' ? 'TAHSİLAT KAYDET' : 'ÖDEME KAYDET'}
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showKasaModal && (
+        <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fade-in">
+          <div className="premium-card p-0 w-full max-w-md animate-slide-up border-white/10 relative overflow-hidden rounded-[2.5rem]">
+            <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+              <div className="space-y-1">
+                <h3 className="text-2xl font-black tracking-tight text-white uppercase leading-none">YENİ KASA EKLE</h3>
+                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">Yeni bir nakit/banka hesabı tanımlayın.</p>
+              </div>
+              <button onClick={() => setShowKasaModal(false)} className="w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                <Plus size={24} className="rotate-45" />
+              </button>
+            </div>
+
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              if (selectedProfile) {
+                const res = await kasalarApi.create({ ...kasaFormData, profile_id: selectedProfile.id });
+                if (res.data) {
+                  setShowKasaModal(false);
+                  loadOdemeler();
+                  setKasaFormData({ ad: '', bakiye: 0 });
+                }
+              }
+            }} className="p-10 space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">KASA ADI</label>
+                <input
+                  type="text"
+                  required
+                  value={kasaFormData.ad}
+                  onChange={e => setKasaFormData({ ...kasaFormData, ad: e.target.value })}
+                  className="premium-input h-14"
+                  placeholder="ÖR: MERKEZ KASA, YAPI KREDİ VB."
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">AÇILIŞ BAKİYESİ (₺)</label>
+                <input
+                  type="number"
+                  required
+                  value={kasaFormData.bakiye}
+                  onChange={e => setKasaFormData({ ...kasaFormData, bakiye: Number(e.target.value) })}
+                  className="premium-input h-14"
+                  placeholder="0.00"
+                />
+              </div>
+              <div className="flex gap-4 pt-4">
+                <button type="button" onClick={() => setShowKasaModal(false)} className="flex-1 h-14 border border-white/10 rounded-2xl text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-all">İPTAL</button>
+                <button type="submit" className="flex-1 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-600/20 transition-all">KASAYI OLUŞTUR</button>
               </div>
             </form>
           </div>

@@ -555,6 +555,12 @@ export const personel = {
             body: JSON.stringify(data),
         });
     },
+    async saveMaasOdeme(id: string, data: { tutar: number; tarih: string; aciklama?: string; profile_id: string; kasa_id: string }) {
+        return fetchApi<{ success: boolean; message: string }>(`/api/personel/${id}/maas-odemesi`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
 };
 
 // Taksit API

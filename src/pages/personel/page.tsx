@@ -4,6 +4,7 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import {
     personel as personelApi,
+    api,
     Personel,
     PuantajRecord
 } from '../../lib/api';
@@ -46,6 +47,15 @@ const PersonelPage = () => {
         advanceAmount: 0,
         advanceDate: new Date().toISOString().split('T')[0]
     });
+    const [showMaasModal, setShowMaasModal] = useState(false);
+    const [selectedMaasPersonel, setSelectedMaasPersonel] = useState<Personel | null>(null);
+    const [maasFormData, setMaasFormData] = useState({
+        tutar: 0,
+        tarih: new Date().toISOString().split('T')[0],
+        kasa_id: '',
+        aciklama: ''
+    });
+    const [kasalar, setKasalar] = useState<any[]>([]);
     const [maasOzetleri, setMaasOzetleri] = useState<Record<string, any>>({});
 
     useEffect(() => {
@@ -72,6 +82,13 @@ const PersonelPage = () => {
                     if (mRes.data) ozetler[p.id] = mRes.data;
                 }));
                 setMaasOzetleri(ozetler);
+            }
+
+            const kRes = await api.get<any[]>(`/api/kasalar?profile_id=${selectedProfile!.id}`);
+            if (kRes.data) {
+                setKasalar(kRes.data);
+                const defaultKasa = kRes.data.find((k: any) => k.is_default) || kRes.data[0];
+                if (defaultKasa) setMaasFormData(prev => ({ ...prev, kasa_id: defaultKasa.id }));
             }
         } catch (err) {
             console.error(err);
@@ -381,6 +398,23 @@ const PersonelPage = () => {
                                                             >
                                                                 <Trash2 size={18} />
                                                             </button>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setSelectedMaasPersonel(p);
+                                                                    const ozet = maasOzetleri[p.id];
+                                                                    setMaasFormData(prev => ({
+                                                                        ...prev,
+                                                                        tutar: ozet?.odenecek_maas || Number(p.maas),
+                                                                        aciklama: `${new Date().toLocaleString('tr-TR', { month: 'long' })} Maaşı`
+                                                                    }));
+                                                                    setShowMaasModal(true);
+                                                                }}
+                                                                className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white border border-emerald-500/20 transition-all flex items-center justify-center"
+                                                                title="Maaş Öde"
+                                                            >
+                                                                <i className="ri-money-dollar-circle-line text-xl"></i>
+                                                            </button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -496,6 +530,85 @@ const PersonelPage = () => {
                                 <button type="submit" className="flex-1 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-600/20 transition-all">
                                     {isEditing ? 'GÜNCELLE' : 'PERSONEL EKLE'}
                                 </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Maaş Ödeme Modalı */}
+            {showMaasModal && selectedMaasPersonel && (
+                <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[110] p-4 animate-fade-in">
+                    <div className="premium-card p-0 w-full max-w-md animate-slide-up border-white/10 relative overflow-hidden rounded-[2.5rem]">
+                        <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+                            <div className="space-y-1">
+                                <h3 className="text-2xl font-black tracking-tight text-white uppercase leading-none">MAAŞ ÖDEMESİ</h3>
+                                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">{selectedMaasPersonel.ad_soyad}</p>
+                            </div>
+                            <button onClick={() => setShowMaasModal(false)} className="w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                                <Plus size={24} className="rotate-45" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            if (selectedProfile && selectedMaasPersonel) {
+                                const res = await personelApi.saveMaasOdeme(selectedMaasPersonel.id, {
+                                    ...maasFormData,
+                                    profile_id: selectedProfile.id
+                                });
+                                if (res.data) {
+                                    setShowMaasModal(false);
+                                    loadPersonel();
+                                }
+                            }
+                        }} className="p-10 space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">ÖDENECEK TUTAR (₺)</label>
+                                <input
+                                    type="number"
+                                    required
+                                    value={maasFormData.tutar}
+                                    onChange={e => setMaasFormData({ ...maasFormData, tutar: Number(e.target.value) })}
+                                    className="premium-input h-14 text-emerald-400 font-bold text-xl"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">TARİH</label>
+                                    <input
+                                        type="date"
+                                        required
+                                        value={maasFormData.tarih}
+                                        onChange={e => setMaasFormData({ ...maasFormData, tarih: e.target.value })}
+                                        className="premium-input h-14"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">KASA</label>
+                                    <select
+                                        required
+                                        value={maasFormData.kasa_id}
+                                        onChange={e => setMaasFormData({ ...maasFormData, kasa_id: e.target.value })}
+                                        className="premium-input h-14"
+                                    >
+                                        {kasalar.map(k => <option key={k.id} value={k.id}>{k.ad}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">AÇIKLAMA</label>
+                                <input
+                                    type="text"
+                                    value={maasFormData.aciklama}
+                                    onChange={e => setMaasFormData({ ...maasFormData, aciklama: e.target.value })}
+                                    className="premium-input h-14"
+                                    placeholder="Açıklama girin..."
+                                />
+                            </div>
+                            <div className="flex gap-4 pt-4">
+                                <button type="button" onClick={() => setShowMaasModal(false)} className="flex-1 h-14 border border-white/10 rounded-2xl text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-all">İPTAL</button>
+                                <button type="submit" className="flex-1 h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-emerald-600/20 transition-all">ÖDEMEYİ YAP</button>
                             </div>
                         </form>
                     </div>

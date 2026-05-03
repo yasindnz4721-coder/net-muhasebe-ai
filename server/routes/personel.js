@@ -309,4 +309,68 @@ router.get('/:id/maas-ozeti', async (req, res) => {
     }
 });
 
+// Maaş Öde (Gider Kaydı Oluşturur)
+router.post('/:id/maas-odemesi', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { tutar, tarih, aciklama, profile_id, kasa_id } = req.body;
+
+        if (!tutar || !profile_id || !kasa_id) {
+            return res.status(400).json({ error: 'Tutar, profile_id ve kasa_id gerekli' });
+        }
+
+        // 1. Personel bilgilerini al
+        const pResult = await query('SELECT ad_soyad FROM personeller WHERE id = $1', [id]);
+        if (pResult.rows.length === 0) return res.status(404).json({ error: 'Personel bulunamadı' });
+        const adSoyad = pResult.rows[0].ad_soyad;
+
+        // 2. Ödemeler tablosuna kaydet
+        const odemeResult = await query(
+            `INSERT INTO odemeler (cari_ad, tip, tutar, tarih, odeme_yontemi, aciklama, profile_id, kasa_id)
+             VALUES ($1, 'Ödeme', $2, $3, 'Nakit', $4, $5, $6)
+             RETURNING id`,
+            [adSoyad, tutar, tarih || new Date(), `Maaş Ödemesi: ${aciklama || ''}`, profile_id, kasa_id]
+        );
+
+        // 3. Kasadan düş
+        await query('UPDATE kasalar SET bakiye = bakiye - $1, updated_at = NOW() WHERE id = $2', [tutar, kasa_id]);
+
+        // 4. "Personel Maaşı" kategorisini bul veya oluştur
+        let katResult = await query(
+            "SELECT id FROM gider_kategorileri WHERE profile_id = $1 AND ad = 'Personel Maaşı'",
+            [profile_id]
+        );
+        if (katResult.rows.length === 0) {
+            katResult = await query(
+                "INSERT INTO gider_kategorileri (profile_id, ad, ikon, renk) VALUES ($1, 'Personel Maaşı', 'ri-user-star-line', '#8b5cf6') RETURNING id",
+                [profile_id]
+            );
+        }
+        const kategoriId = katResult.rows[0].id;
+
+        // 5. Gider kaydı oluştur
+        const giderResult = await query(
+            `INSERT INTO giderler (profile_id, kategori_id, tutar, tarih, kasa_id, odeme_yontemi, aciklama, kullanici_email)
+             VALUES ($1, $2, $3, $4, $5, 'Nakit', $6, $7)
+             RETURNING id`,
+            [profile_id, kategoriId, tutar, tarih || new Date(), kasa_id, `Maaş Ödemesi: ${adSoyad} - ${aciklama || ''}`, req.user.email]
+        );
+
+        // 6. Denetim kaydı
+        await AuditService.log(
+            profile_id,
+            'EKLEME',
+            'giderler',
+            giderResult.rows[0].id,
+            `Maaş ödemesi giderlere işlendi: ${adSoyad} - ${tutar} TL`,
+            req.user.email
+        );
+
+        res.json({ success: true, message: 'Maaş ödemesi başarıyla kaydedildi' });
+    } catch (error) {
+        console.error('Maaş ödeme hatası:', error);
+        res.status(500).json({ error: 'Maaş ödemesi kaydedilemedi' });
+    }
+});
+
 module.exports = router;

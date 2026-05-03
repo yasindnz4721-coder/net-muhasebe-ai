@@ -25,6 +25,7 @@ import TanitimPage from '../pages/tanitim/page';
 import LandingPage from '../pages/landing/page';
 import NotFoundPage from '../pages/NotFound';
 import ComingSoonPage from '../pages/ComingSoon';
+import CariEkstrePage from '../pages/cari-ekstre/page';
 import SMSVerificationPage from '../pages/sms-verification/page';
 import PersonelPage from '../pages/personel/page';
 import PuantajTakibiPage from '../pages/personel/puantaj';
@@ -69,7 +70,7 @@ const routes: RouteObject[] = [
   { path: '/taksit-takibi', element: <TaksitTakibiPage /> },
   { path: '/taksitler', element: <TaksitlerPage /> },
   { path: '/kdv-raporu', element: stub('KDV Raporu') },
-  { path: '/cari-ekstre', element: stub('Cari Ekstre Raporu') },
+  { path: '/cari-ekstre', element: <CariEkstrePage /> },
   { path: '/zimmet-listesi', element: stub('Zimmet Takibi') },
   { path: '/denetim', element: <DenetimPage /> },
 
