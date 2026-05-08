@@ -11,10 +11,19 @@ router.get('/', async (req, res) => {
         const { profile_id } = req.query;
         if (!profile_id) return res.status(400).json({ error: 'profile_id gerekli' });
 
-        let result = await query(
-            'SELECT * FROM kasalar WHERE profile_id = $1 ORDER BY is_default DESC, tip ASC, ad ASC',
-            [profile_id]
-        );
+        let result;
+        try {
+            result = await query(
+                'SELECT * FROM kasalar WHERE profile_id = $1 ORDER BY is_default DESC, tip ASC, ad ASC',
+                [profile_id]
+            );
+        } catch (e) {
+            // tip sütunu henüz yoksa basit sıralama kullan
+            result = await query(
+                'SELECT * FROM kasalar WHERE profile_id = $1 ORDER BY is_default DESC, ad ASC',
+                [profile_id]
+            );
+        }
 
         // Eğer hiç kasa yoksa otomatik oluştur
         if (result.rows.length === 0) {
@@ -41,10 +50,22 @@ router.post('/', async (req, res) => {
         const { ad, bakiye, profile_id, tip, banka_adi, iban, hesap_no } = req.body;
         if (!ad || !profile_id) return res.status(400).json({ error: 'Ad ve profile_id gerekli' });
 
-        const result = await query(
-            'INSERT INTO kasalar (ad, bakiye, profile_id, tip, banka_adi, iban, hesap_no) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-            [ad, bakiye || 0, profile_id, tip || 'Nakit', banka_adi || '', iban || '', hesap_no || '']
-        );
+        let result;
+        try {
+            // Önce yeni sütunlarla dene
+            result = await query(
+                'INSERT INTO kasalar (ad, bakiye, profile_id, tip, banka_adi, iban, hesap_no) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+                [ad, bakiye || 0, profile_id, tip || 'Nakit', banka_adi || '', iban || '', hesap_no || '']
+            );
+        } catch (insertError) {
+            // Yeni sütunlar yoksa sadece temel alanlarla ekle
+            console.log('Banka sütunları bulunamadı, temel alanlarla ekleniyor:', insertError.message);
+            result = await query(
+                'INSERT INTO kasalar (ad, bakiye, profile_id) VALUES ($1, $2, $3) RETURNING *',
+                [ad, bakiye || 0, profile_id]
+            );
+        }
+        
         res.status(201).json(result.rows[0]);
     } catch (error) {
         console.error('Kasa/Banka ekleme hatası:', error);

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 interface EkstreHareketi {
     tarih: string;
@@ -183,6 +184,39 @@ const CariEkstrePage = () => {
         doc.save(`${cari.ad}_Ekstre_${startDate}_${endDate}.pdf`);
     };
 
+    const handleExcelExport = () => {
+        const cari = cariler.find(c => c.id === selectedCari);
+        if (!cari) return;
+
+        const data = ekstre.map(h => ({
+            'Tarih': new Date(h.tarih).toLocaleDateString('tr-TR'),
+            'İşlem': h.tip,
+            'Belge No': h.belge_no,
+            'Açıklama': h.aciklama,
+            'Borç': h.borc,
+            'Alacak': h.alacak,
+            'Bakiye': h.bakiye
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Ekstre");
+        
+        // Sütun genişliklerini ayarla
+        const wscols = [
+            { wch: 12 },
+            { wch: 10 },
+            { wch: 15 },
+            { wch: 30 },
+            { wch: 12 },
+            { wch: 12 },
+            { wch: 12 }
+        ];
+        worksheet['!cols'] = wscols;
+
+        XLSX.writeFile(workbook, `${cari.ad}_Ekstre_${startDate}_${endDate}.xlsx`);
+    };
+
     if (!selectedProfile) return null;
 
     return (
@@ -212,12 +246,20 @@ const CariEkstrePage = () => {
                             </div>
 
                             {ekstre.length > 0 && (
-                                <button
-                                    onClick={handlePdfExport}
-                                    className="bg-rose-600 hover:bg-rose-700 text-white px-8 h-16 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-rose-600/20 flex items-center gap-3"
-                                >
-                                    <Download size={20} /> PDF OLARAK İNDİR
-                                </button>
+                                <div className="flex gap-4">
+                                    <button
+                                        onClick={handleExcelExport}
+                                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 h-16 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-emerald-600/20 flex items-center gap-3"
+                                    >
+                                        <i className="ri-file-excel-2-line text-xl"></i> EXCEL'E AKTAR
+                                    </button>
+                                    <button
+                                        onClick={handlePdfExport}
+                                        className="bg-rose-600 hover:bg-rose-700 text-white px-8 h-16 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:scale-105 active:scale-95 transition-all shadow-xl shadow-rose-600/20 flex items-center gap-3"
+                                    >
+                                        <Download size={20} /> PDF OLARAK İNDİR
+                                    </button>
+                                </div>
                             )}
                         </div>
 

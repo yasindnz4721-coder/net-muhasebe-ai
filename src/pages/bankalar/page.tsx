@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   kasalar as kasalarApi,
   Kasa
@@ -155,8 +156,11 @@ const BankalarPage = () => {
                    <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">Henüz kayıtlı banka hesabı bulunamadı.</p>
                 </div>
               ) : (
-                bankaList.map((banka) => (
-                  <div key={banka.id} className="premium-card p-8 group hover:border-blue-500/30 transition-all relative overflow-hidden">
+                                  <Link
+                    key={banka.id}
+                    to={`/banka-detay/${banka.id}`}
+                    className="premium-card p-8 group hover:border-blue-500/30 transition-all relative overflow-hidden"
+                  >
                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                       <Building2 size={120} />
                     </div>
@@ -184,16 +188,16 @@ const BankalarPage = () => {
                            <div className="space-y-1">
                              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">GÜNCEL BAKİYE</p>
                              <div className="text-3xl font-black tracking-tighter text-white">
-                               ₺{Number(banka.bakiye).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                                ₺{Number(banka.bakiye).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                              </div>
                            </div>
-                           <button className="w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center transition-all">
+                           <div className="w-10 h-10 rounded-full bg-blue-600 group-hover:bg-blue-500 flex items-center justify-center transition-all group-hover:translate-x-1">
                              <ChevronRight size={20} />
-                           </button>
+                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))
               )}
             </div>
