@@ -315,8 +315,8 @@ export default function HomePage() {
         })
         .reduce((sum, g) => sum + Number(g.tutar), 0);
 
-      const toplamGider = toplamGiderRaw;
-      const toplamPersonel = Math.max(0, (personeller || []).reduce((sum, p) => sum + Number(p.maas || 0), 0) - personelGiderleri);
+      const toplamGider = Math.max(0, toplamGiderRaw - personelGiderleri);
+      const toplamPersonel = (personeller || []).reduce((sum, p) => sum + Number(p.maas || 0), 0);
 
       const netKar = toplamSatis - (toplamAlis + toplamGider + toplamPersonel);
 
@@ -449,8 +449,8 @@ export default function HomePage() {
         })
         .reduce((sum, g) => sum + Number(g.tutar), 0);
 
-      const toplamGider = toplamGiderRaw;
-      const toplamPersonel = Math.max(0, (personeller || []).reduce((sum, p) => sum + Number(p.maas || 0), 0) - personelGiderleri);
+      const toplamGider = Math.max(0, toplamGiderRaw - personelGiderleri);
+      const toplamPersonel = (personeller || []).reduce((sum, p) => sum + Number(p.maas || 0), 0);
 
       const netKar = toplamSatis - (toplamAlis + toplamGider + toplamPersonel);
 
