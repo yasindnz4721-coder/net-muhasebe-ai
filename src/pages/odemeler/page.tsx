@@ -11,7 +11,6 @@ import { useProfile } from '../../contexts/ProfileContext';
 import Sidebar from '../../components/feature/Sidebar';
 import Header from '../../components/feature/Header';
 import {
-  CreditCard,
   Search,
   Plus,
   TrendingUp,
@@ -19,9 +18,7 @@ import {
   Calendar,
   Wallet,
   ArrowUpRight,
-  ArrowDownLeft,
-  ChevronDown,
-  Download
+  ArrowDownLeft
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 

@@ -12,12 +12,9 @@ import {
 } from '../../lib/api';
 import {
     Search,
-    FileText,
-    Download,
     Calendar,
     ArrowUpRight,
-    ArrowDownLeft,
-    Filter
+    ArrowDownLeft
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';

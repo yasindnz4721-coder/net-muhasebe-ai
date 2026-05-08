@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { giderler as giderApi, kasalar as kasaApi } from '../../lib/api';
 import { useProfile } from '../../contexts/ProfileContext';
 import Header from '../../components/feature/Header';
