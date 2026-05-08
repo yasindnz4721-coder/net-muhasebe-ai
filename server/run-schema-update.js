@@ -211,12 +211,10 @@ async function updateSchema() {
         await query("ALTER TABLE personeller ADD COLUMN IF NOT EXISTS bakiye DECIMAL(15, 2) DEFAULT 0");
 
         console.log('✅ Veritabanı şeması başarıyla güncellendi.');
-        process.exit(0);
     } catch (error) {
-
         console.error('❌ Şema güncelleme hatası:', error);
-        process.exit(1);
+        throw error;
     }
 }
 
-updateSchema();
+module.exports = { updateSchema };

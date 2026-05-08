@@ -95,6 +95,14 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../out/index.html'));
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server http://0.0.0.0:${PORT} adresinde çalışıyor`);
+// Veritabanı şemasını güncelle ve sunucuyu başlat
+const { updateSchema } = require('./run-schema-update');
+
+updateSchema().then(() => {
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`🚀 Server http://0.0.0.0:${PORT} adresinde çalışıyor`);
+    });
+}).catch(err => {
+    console.error('Kritik Hata: Veritabanı şeması güncellenemedi, sunucu başlatılamıyor.', err);
+    process.exit(1);
 });
