@@ -135,16 +135,22 @@ export default function GiderlerPage() {
                                 <p className="text-slate-500 text-lg font-medium max-w-xl">Kira, maaş ve faturalarınızı tek noktadan yönetin, nakit akışınızı kontrol altında tutun.</p>
                             </div>
 
-                                <span>YENİ GİDER KAYDET</span>
-                                <i className="ri-add-line text-2xl"></i>
-                            </button>
-                            <button
-                                onClick={handleExcelExport}
-                                className="premium-button px-8 h-16 text-[10px] uppercase tracking-widest bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white transition-all flex items-center justify-center gap-4 shadow-xl shadow-emerald-600/10"
-                            >
-                                <span>EXCEL'E AKTAR</span>
-                                <i className="ri-file-excel-2-line text-xl"></i>
-                            </button>
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={() => setShowAddModal(true)}
+                                    className="premium-button px-8 h-16 text-[10px] uppercase tracking-widest bg-rose-600 hover:bg-rose-700 border-rose-500/30 shadow-xl shadow-rose-600/20 flex items-center justify-center gap-4"
+                                >
+                                    <span>YENİ GİDER KAYDET</span>
+                                    <i className="ri-add-line text-2xl"></i>
+                                </button>
+                                <button
+                                    onClick={handleExcelExport}
+                                    className="premium-button px-8 h-16 text-[10px] uppercase tracking-widest bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white transition-all flex items-center justify-center gap-4 shadow-xl shadow-emerald-600/10"
+                                >
+                                    <span>EXCEL'E AKTAR</span>
+                                    <i className="ri-file-excel-2-line text-xl"></i>
+                                </button>
+                            </div>
                         </div>
 
                         {/* Gider Kartları Özeti */}
