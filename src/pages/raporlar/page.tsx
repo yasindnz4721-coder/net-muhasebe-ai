@@ -51,39 +51,41 @@ export default function Raporlar() {
   };
 
   const filteredSatisFaturalari = satisFaturalari.filter(f => {
-    const tarih = new Date(f.tarih);
-    const baslangic = new Date(dateRange.baslangic);
-    const bitis = new Date(dateRange.bitis);
-    return tarih >= baslangic && tarih <= bitis;
+    const fDate = f.tarih.split('T')[0];
+    return fDate >= dateRange.baslangic && fDate <= dateRange.bitis;
   });
 
   const filteredAlisFaturalari = alisFaturalari.filter(f => {
-    const tarih = new Date(f.tarih);
-    const baslangic = new Date(dateRange.baslangic);
-    const bitis = new Date(dateRange.bitis);
-    return tarih >= baslangic && tarih <= bitis;
+    const fDate = f.tarih.split('T')[0];
+    return fDate >= dateRange.baslangic && fDate <= dateRange.bitis;
   });
 
   const filteredOdemeler = odemeler.filter(o => {
-    const tarih = new Date(o.tarih);
-    const baslangic = new Date(dateRange.baslangic);
-    const bitis = new Date(dateRange.bitis);
-    return tarih >= baslangic && tarih <= bitis;
+    const oDate = o.tarih.split('T')[0];
+    return oDate >= dateRange.baslangic && oDate <= dateRange.bitis;
   });
 
   const filteredExpenses = expenses.filter(e => {
-    const tarih = new Date(e.tarih);
-    const baslangic = new Date(dateRange.baslangic);
-    const bitis = new Date(dateRange.bitis);
-    return tarih >= baslangic && tarih <= bitis;
+    const eDate = e.tarih.split('T')[0];
+    return eDate >= dateRange.baslangic && eDate <= dateRange.bitis;
   });
+
+  // Personel ile ilgili giderleri daha esnek arayalım (Avans ve Maaş Ödemeleri)
+  const personelGiderleri = filteredExpenses
+    .filter(g => {
+        const katAd = (g.kategori_ad || "").toLocaleLowerCase('tr-TR');
+        return katAd.includes('avans') || katAd.includes('maaş') || katAd.includes('maas');
+    })
+    .reduce((sum, g) => sum + Number(g.tutar || 0), 0);
 
   // Mali hesaplamalar
   const toplamSatis = filteredSatisFaturalari.reduce((sum, f) => sum + Number(f.toplam || 0), 0);
   const toplamAlis = filteredAlisFaturalari.reduce((sum, f) => sum + Number(f.toplam || 0), 0);
   const toplamAlinanOdeme = filteredOdemeler.filter(o => o.tip === 'Tahsilat' || o.tip === 'Alınan Ödeme').reduce((sum, o) => sum + Number(o.tutar || 0), 0);
   const toplamVerilenOdeme = filteredOdemeler.filter(o => o.tip === 'Tediye' || o.tip === 'Verilen Ödeme').reduce((sum, o) => sum + Number(o.tutar || 0), 0);
-  const toplamEkstraGider = filteredExpenses.reduce((sum, e) => sum + Number(e.tutar || 0), 0);
+  
+  // Personel harici genel giderler
+  const toplamEkstraGider = filteredExpenses.reduce((sum, e) => sum + Number(e.tutar || 0), 0) - personelGiderleri;
 
   // KDV Hesaplamaları (Varsayılan %20)
   const kdvOrani = 0.20;
@@ -93,12 +95,14 @@ export default function Raporlar() {
   const alisKDV = toplamAlis - alisMatrah;
   const odenecekKDV = Math.max(0, satisKDV - alisKDV);
 
-  // Personel Maliyetleri (Aylık toplam)
-  const toplamPersonelMaliyeti = personeller.reduce((sum, p) => sum + (Number(p.maas) || 0), 0);
+  // Personel Maliyetleri (Aylık toplamdan ödenenleri düşerek NET kalan maliyeti göstermiyoruz, 
+  // çünkü ödenenler zaten Gider kaleminde. Burada personelin toplam maliyetini sabit tutuyoruz.)
+  const toplamPersonelMaliyetiFull = personeller.reduce((sum, p) => sum + (Number(p.maas) || 0), 0);
+  const toplamPersonelMaliyeti = Math.max(0, toplamPersonelMaliyetiFull - personelGiderleri);
 
   // Gelir-Gider Tablosu
   const brutKar = toplamSatis - toplamAlis;
-  const netKar = brutKar - odenecekKDV - toplamPersonelMaliyeti - toplamEkstraGider;
+  const netKar = brutKar - odenecekKDV - toplamPersonelMaliyetiFull - toplamEkstraGider;
 
   // Mizan (Cari Bazlı)
   const cariMizan: any[] = [];
@@ -562,7 +566,7 @@ export default function Raporlar() {
                       <tr className="bg-rose-500/5">
                         <td className="px-10 py-8 font-black text-white">BRÜT GİDER TOPLAMI</td>
                         <td className="px-10 py-8 text-right font-black text-slate-700">—</td>
-                        <td className="px-10 py-8 text-right font-black text-rose-500 text-xl tracking-tighter">₺{(toplamAlis + toplamVerilenOdeme + odenecekKDV + toplamEkstraGider).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-10 py-8 text-right font-black text-rose-500 text-xl tracking-tighter">₺{(toplamAlis + toplamVerilenOdeme + odenecekKDV + toplamEkstraGider + toplamPersonelMaliyeti).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
                       </tr>
 
                       <tr className={`border-t-4 ${netKar >= 0 ? 'border-indigo-500 bg-indigo-500/10' : 'border-rose-500 bg-rose-500/10'}`}>

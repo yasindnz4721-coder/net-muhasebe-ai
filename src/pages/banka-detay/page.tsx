@@ -69,7 +69,10 @@ const BankaDetayPage = () => {
                 // Seçilen tarih aralığından önceki bakiyeyi hesapla
                 let openingBalance = 0;
                 allKasaTransactions
-                    .filter(o => o.tarih < startDate)
+                    .filter(o => {
+                        const oDate = o.tarih.split('T')[0];
+                        return oDate < startDate;
+                    })
                     .forEach(o => {
                         const isIncome = ['Tahsilat', 'Alınan Ödeme', 'Gelir'].includes(o.tip);
                         openingBalance += isIncome ? Number(o.tutar) : -Number(o.tutar);
@@ -77,7 +80,10 @@ const BankaDetayPage = () => {
 
                 let hareketler: BankaHareketi[] = [];
                 allKasaTransactions
-                    .filter(o => o.tarih >= startDate && o.tarih <= endDate)
+                    .filter(o => {
+                        const oDate = o.tarih.split('T')[0];
+                        return oDate >= startDate && oDate <= endDate;
+                    })
                     .forEach(o => {
                         const isIncome = ['Tahsilat', 'Alınan Ödeme', 'Gelir'].includes(o.tip);
                         hareketler.push({
