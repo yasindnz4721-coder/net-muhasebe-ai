@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import type {
+  Odeme,
+  Cari,
+  Kasa
+} from '../../lib/api';
 import {
   odemeler as odemelerApi,
-  Odeme,
   cariler as carilerApi,
-  Cari,
-  kasalar as kasalarApi,
-  Kasa
+  kasalar as kasalarApi
 } from '../../lib/api';
 import { useProfile } from '../../contexts/ProfileContext';
 import Sidebar from '../../components/feature/Sidebar';
@@ -276,7 +278,7 @@ const OdemelerPage = () => {
                         </tr>
                       ))
                     ) : filteredList.length === 0 ? (
-                      <tr><td colSpan={5} className="px-8 py-20 text-center text-slate-500 font-bold uppercase tracking-widest text-xs italic">İşlem bulunamadı.</td></tr>
+                      <tr><td colSpan={6} className="px-8 py-20 text-center text-slate-500 font-bold uppercase tracking-widest text-xs italic">İşlem bulunamadı.</td></tr>
                     ) : (
                       filteredList.map((o) => (
                         <tr key={o.id} className="hover:bg-white/[0.02] transition-colors group">

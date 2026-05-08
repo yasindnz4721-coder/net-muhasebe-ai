@@ -3,12 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { useProfile } from '../../contexts/ProfileContext';
 import Sidebar from '../../components/feature/Sidebar';
 import Header from '../../components/feature/Header';
+import type { Cari } from '../../lib/api';
 import {
     cariler as carilerApi,
     satisFaturalari as satisApi,
     alisFaturalari as alisApi,
-    odemeler as odemelerApi,
-    Cari
+    odemeler as odemelerApi
 } from '../../lib/api';
 import {
     Search,
