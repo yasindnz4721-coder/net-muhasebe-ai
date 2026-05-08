@@ -1,3 +1,4 @@
+// Banka Detay ve Ekstre Sayfası
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useProfile } from '../../contexts/ProfileContext';

@@ -1,3 +1,4 @@
+// Cari Ekstre Sayfası - Excel Export Destekli
 import React, { useState, useEffect } from 'react';
 import { useProfile } from '../../contexts/ProfileContext';
 import Sidebar from '../../components/feature/Sidebar';
