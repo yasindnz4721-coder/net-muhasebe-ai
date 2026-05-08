@@ -7,6 +7,7 @@ import Sidebar from '../../components/feature/Sidebar';
 
 export default function Raporlar() {
   const { selectedProfile } = useProfile();
+  // Raporlama verilerini filtreleyen ve mahsuplaşma yapan ana fonksiyonlar
   const [dateRange, setDateRange] = useState({
     baslangic: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
     bitis: new Date().toISOString().split('T')[0]
