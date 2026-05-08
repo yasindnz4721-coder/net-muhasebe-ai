@@ -156,7 +156,8 @@ const BankalarPage = () => {
                    <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">Henüz kayıtlı banka hesabı bulunamadı.</p>
                 </div>
               ) : (
-                                  <Link
+                bankaList.map(banka => (
+                  <Link
                     key={banka.id}
                     to={`/banka-detay/${banka.id}`}
                     className="premium-card p-8 group hover:border-blue-500/30 transition-all relative overflow-hidden"
