@@ -15,7 +15,8 @@ import {
     Calendar,
     ArrowUpRight,
     ArrowDownLeft,
-    Filter
+    Filter,
+    Download
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
