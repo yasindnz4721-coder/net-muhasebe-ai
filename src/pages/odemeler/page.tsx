@@ -20,8 +20,10 @@ import {
   Wallet,
   ArrowUpRight,
   ArrowDownLeft,
-  ChevronDown
+  ChevronDown,
+  Download
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 const OdemelerPage = () => {
   const { selectedProfile } = useProfile();
@@ -106,6 +108,25 @@ const OdemelerPage = () => {
       console.error(err);
     }
   };
+  
+  const handleExcelExport = () => {
+    const data = filteredList.map(o => {
+      const kasa = kasalar.find(k => k.id === o.kasa_id);
+      return {
+        'İşlem Tipi': o.tip,
+        'Cari / Müşteri': o.cari_ad,
+        'Tarih': new Date(o.tarih).toLocaleDateString('tr-TR'),
+        'Ödeme Yöntemi': o.odeme_yontemi,
+        'Kasa': kasa ? (kasa.tip === 'Banka' ? `[BANKA] ${kasa.banka_adi} - ${kasa.ad}` : `[KASA] ${kasa.ad}`) : '-',
+        'Tutar': Number(o.tutar)
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Odemeler");
+    XLSX.writeFile(workbook, `Odemeler_Listesi_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
 
   const filteredList = odemeList.filter(o => {
     const matchesSearch = o.cari_ad.toLowerCase().includes(searchTerm.toLowerCase());
@@ -170,6 +191,12 @@ const OdemelerPage = () => {
                 >
                   <Plus size={20} /> KASA EKLE
                 </button>
+                <button
+                  onClick={handleExcelExport}
+                  className="bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 px-8 h-16 rounded-2xl font-black text-[10px] tracking-widest uppercase hover:bg-emerald-600 hover:text-white transition-all flex items-center gap-3"
+                >
+                  <i className="ri-file-excel-2-line text-xl"></i> EXCEL
+                </button>
               </div>
             </div>
 
@@ -178,7 +205,7 @@ const OdemelerPage = () => {
               <div className="premium-card p-8 group transition-all flex items-center justify-between">
                 <div className="space-y-1">
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">KASA BAKİYESİ (ANA KASA)</span>
-                  <div className="text-4xl font-black tracking-tighter text-white">₺{(toplamTahsilat - toplamOdeme).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
+                  <div className="text-4xl font-black tracking-tighter text-white">₺{Number(anaKasa?.bakiye || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</div>
                 </div>
                 <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-400">
                   <Wallet size={24} />
@@ -239,6 +266,7 @@ const OdemelerPage = () => {
                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">İŞLEM TİPİ</th>
                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">CARİ / MÜŞTERİ</th>
                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">TARİH</th>
+                      <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">KASA</th>
                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ÖDEME YÖNTEMİ</th>
                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">TUTAR</th>
                     </tr>
@@ -269,6 +297,16 @@ const OdemelerPage = () => {
                           </td>
                           <td className="px-8 py-6 text-slate-400 font-bold">
                             {new Date(o.tarih).toLocaleDateString('tr-TR')}
+                          </td>
+                          <td className="px-8 py-6">
+                            {(() => {
+                              const kasa = kasalar.find(k => k.id === o.kasa_id);
+                              return (
+                                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 py-1 px-3 bg-indigo-500/5 rounded-lg border border-indigo-500/10">
+                                  {kasa ? (kasa.tip === 'Banka' ? kasa.banka_adi : kasa.ad) : 'Nakit Kasa'}
+                                </span>
+                              );
+                            })()}
                           </td>
                           <td className="px-8 py-6">
                             <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-black tracking-widest uppercase text-slate-400">

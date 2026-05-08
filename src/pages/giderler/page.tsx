@@ -3,6 +3,7 @@ import { giderler as giderApi, kasalar as kasaApi } from '../../lib/api';
 import { useProfile } from '../../contexts/ProfileContext';
 import Header from '../../components/feature/Header';
 import Sidebar from '../../components/feature/Sidebar';
+import * as XLSX from 'xlsx';
 
 export default function GiderlerPage() {
     const { selectedProfile } = useProfile();
@@ -83,6 +84,21 @@ export default function GiderlerPage() {
         }
     };
 
+    const handleExcelExport = () => {
+        const data = expenses.map(e => ({
+            'Tarih': new Date(e.tarih).toLocaleDateString('tr-TR'),
+            'Kategori': e.kategori_ad || 'Genel',
+            'Açıklama': e.aciklama,
+            'Kasa': e.kasa_ad || 'Nakit Kasa',
+            'Tutar': Number(e.tutar)
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Giderler");
+        XLSX.writeFile(workbook, `Giderler_Listesi_${new Date().toISOString().split('T')[0]}.xlsx`);
+    };
+
     const handleDelete = async (id: string) => {
         if (!window.confirm('Bu gider kaydını silmek istediğinize emin misiniz? Kasa bakiyesi iade edilecektir.')) return;
 
@@ -119,12 +135,15 @@ export default function GiderlerPage() {
                                 <p className="text-slate-500 text-lg font-medium max-w-xl">Kira, maaş ve faturalarınızı tek noktadan yönetin, nakit akışınızı kontrol altında tutun.</p>
                             </div>
 
-                            <button
-                                onClick={() => setShowAddModal(true)}
-                                className="premium-button px-8 h-16 text-[10px] uppercase tracking-widest bg-rose-600 hover:bg-rose-700 border-rose-500/30 shadow-xl shadow-rose-600/20 flex items-center justify-center gap-4"
-                            >
                                 <span>YENİ GİDER KAYDET</span>
                                 <i className="ri-add-line text-2xl"></i>
+                            </button>
+                            <button
+                                onClick={handleExcelExport}
+                                className="premium-button px-8 h-16 text-[10px] uppercase tracking-widest bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white transition-all flex items-center justify-center gap-4 shadow-xl shadow-emerald-600/10"
+                            >
+                                <span>EXCEL'E AKTAR</span>
+                                <i className="ri-file-excel-2-line text-xl"></i>
                             </button>
                         </div>
 

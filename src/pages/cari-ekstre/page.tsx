@@ -67,7 +67,10 @@ const CariEkstrePage = () => {
 
             // Satışlar (Cari Borçlanır)
             if (satisRes.data) {
-                satisRes.data.filter(f => f.cari_id === selectedCari && f.tarih >= startDate && f.tarih <= endDate)
+                satisRes.data.filter(f => {
+                    const fDate = f.tarih.split('T')[0];
+                    return f.cari_id === selectedCari && fDate >= startDate && fDate <= endDate;
+                })
                     .forEach(f => {
                         hareketler.push({
                             tarih: f.tarih,
@@ -83,7 +86,10 @@ const CariEkstrePage = () => {
 
             // Alışlar (Cari Alacaklanır)
             if (alisRes.data) {
-                alisRes.data.filter(f => f.cari_id === selectedCari && f.tarih >= startDate && f.tarih <= endDate)
+                alisRes.data.filter(f => {
+                    const fDate = f.tarih.split('T')[0];
+                    return f.cari_id === selectedCari && fDate >= startDate && fDate <= endDate;
+                })
                     .forEach(f => {
                         hareketler.push({
                             tarih: f.tarih,
@@ -99,7 +105,10 @@ const CariEkstrePage = () => {
 
             // Ödemeler
             if (odemeRes.data) {
-                odemeRes.data.filter(o => o.cari_id === selectedCari && o.tarih >= startDate && o.tarih <= endDate)
+                odemeRes.data.filter(o => {
+                    const oDate = o.tarih.split('T')[0];
+                    return o.cari_id === selectedCari && oDate >= startDate && oDate <= endDate;
+                })
                     .forEach(o => {
                         if (o.tip === 'Tahsilat') {
                             // Tahsilat (Cari Alacaklanır - Bize ödeme yaptı)
