@@ -176,9 +176,18 @@ export default function HomePage() {
 
       const gunlukNetKasa = gunlukTahsilatToplam - gunlukOdemeToplam;
 
-      // Aylık Personel Maliyeti
+      // Aylık Personel Maliyeti & Kar Zarar
       const toplamPersonelMaas = personeller?.reduce((sum: number, p: any) => sum + (Number(p.maas) || 0), 0) || 0;
-      const aylikKarZararValue = aylikSatisToplam - aylikAlisToplam - toplamPersonelMaas;
+      
+      // Giderleri de hesaba katalım
+      const aylikGiderToplam = (odemeler || [])
+        .filter((o: any) => {
+          const d = new Date(o.tarih);
+          return d.getMonth() === buAy && d.getFullYear() === buYil && (o.tip === 'Gider' || o.tip === 'Ödeme');
+        })
+        .reduce((sum: number, o: any) => sum + (Number(o.tutar) || 0), 0);
+
+      const aylikKarZararValue = aylikSatisToplam - aylikAlisToplam - aylikGiderToplam - (toplamPersonelMaas > aylikGiderToplam ? toplamPersonelMaas - aylikGiderToplam : 0);
 
       // En Çok Gelir Getiren Müşteri
       const musteriler = satisFaturalari?.reduce((acc: any, f: any) => {
@@ -296,8 +305,15 @@ export default function HomePage() {
 
       const toplamSatis = fSatislar.reduce((sum, f) => sum + Number(f.toplam), 0);
       const toplamAlis = fAlislar.reduce((sum, f) => sum + Number(f.toplam), 0);
-      const toplamGider = fGiderler.reduce((sum, g) => sum + Number(g.tutar), 0);
-      const toplamPersonel = (personeller || []).reduce((sum, p) => sum + Number(p.maas || 0), 0);
+      const toplamGiderRaw = fGiderler.reduce((sum, g) => sum + Number(g.tutar), 0);
+      
+      // Personel ile ilgili giderleri bulalım (Avans ve Maaş Ödemeleri)
+      const personelGiderleri = fGiderler
+        .filter(g => g.kategori_ad === 'Personel Avansı' || g.kategori_ad === 'Personel Maaşı')
+        .reduce((sum, g) => sum + Number(g.tutar), 0);
+
+      const toplamGider = toplamGiderRaw;
+      const toplamPersonel = Math.max(0, (personeller || []).reduce((sum, p) => sum + Number(p.maas || 0), 0) - personelGiderleri);
 
       const netKar = toplamSatis - (toplamAlis + toplamGider + toplamPersonel);
 
@@ -421,8 +437,16 @@ export default function HomePage() {
       // Summary Table
       const toplamSatis = fSatislar.reduce((sum, f) => sum + Number(f.toplam), 0);
       const toplamAlis = fAlislar.reduce((sum, f) => sum + Number(f.toplam), 0);
-      const toplamGider = fGiderler.reduce((sum, g) => sum + Number(g.tutar), 0);
-      const toplamPersonel = (personeller || []).reduce((sum, p) => sum + Number(p.maas || 0), 0);
+      const toplamGiderRaw = fGiderler.reduce((sum, g) => sum + Number(g.tutar), 0);
+      
+      // Personel ile ilgili giderleri bulalım (Avans ve Maaş Ödemeleri)
+      const personelGiderleri = fGiderler
+        .filter(g => g.kategori_ad === 'Personel Avansı' || g.kategori_ad === 'Personel Maaşı')
+        .reduce((sum, g) => sum + Number(g.tutar), 0);
+
+      const toplamGider = toplamGiderRaw;
+      const toplamPersonel = Math.max(0, (personeller || []).reduce((sum, p) => sum + Number(p.maas || 0), 0) - personelGiderleri);
+
       const netKar = toplamSatis - (toplamAlis + toplamGider + toplamPersonel);
 
       autoTable(doc, {
