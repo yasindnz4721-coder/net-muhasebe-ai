@@ -249,6 +249,9 @@ router.post('/:id/avanslar', async (req, res) => {
                  VALUES ($1, $2, $3, $4, $5, 'Nakit', $6, $7)`,
                 [profile_id, kategoriId, tutar, tarih, defaultKasaId, `Personel Avansı: ${adSoyad} - ${aciklama || ''}`, req.user.email]
             );
+
+            // 6. Personel bakiyesini güncelle (borçlandır/alacağını azalt)
+            await query('UPDATE personeller SET bakiye = bakiye - $1, updated_at = NOW() WHERE id = $2', [tutar, id]);
         }
 
         res.json(result.rows[0]);
@@ -366,10 +369,48 @@ router.post('/:id/maas-odemesi', async (req, res) => {
             req.user.email
         );
 
+        // 7. Personel bakiyesini güncelle
+        await query('UPDATE personeller SET bakiye = bakiye - $1, updated_at = NOW() WHERE id = $2', [tutar, id]);
+
         res.json({ success: true, message: 'Maaş ödemesi başarıyla kaydedildi' });
     } catch (error) {
         console.error('Maaş ödeme hatası:', error);
         res.status(500).json({ error: 'Maaş ödemesi kaydedilemedi' });
+    }
+});
+
+// Maaş Tahakkuku (Hakediş Kaydı - Bakiyeyi Artırır)
+router.post('/:id/maas-tahakkuku', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { tutar, tarih, aciklama, profile_id } = req.body;
+
+        if (!tutar || !profile_id) {
+            return res.status(400).json({ error: 'Tutar ve profile_id gerekli' });
+        }
+
+        // Personel bilgilerini al
+        const pResult = await query('SELECT ad_soyad FROM personeller WHERE id = $1', [id]);
+        if (pResult.rows.length === 0) return res.status(404).json({ error: 'Personel bulunamadı' });
+        const adSoyad = pResult.rows[0].ad_soyad;
+
+        // Personel bakiyesini artır (Alacaklandır)
+        await query('UPDATE personeller SET bakiye = bakiye + $1, updated_at = NOW() WHERE id = $2', [tutar, id]);
+
+        // Denetim kaydı
+        await AuditService.log(
+            profile_id,
+            'GÜNCELLEME',
+            'personeller',
+            id,
+            `Maaş hakedişi kaydedildi: ${adSoyad} - ${tutar} TL`,
+            req.user.email
+        );
+
+        res.json({ success: true, message: 'Maaş hakedişi başarıyla kaydedildi' });
+    } catch (error) {
+        console.error('Maaş hakediş hatası:', error);
+        res.status(500).json({ error: 'Maaş hakedişi kaydedilemedi' });
     }
 });
 

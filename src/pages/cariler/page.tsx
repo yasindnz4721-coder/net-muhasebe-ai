@@ -228,7 +228,7 @@ const CarilerPage = () => {
                             </div>
                           </td>
                           <td className="px-8 py-6 text-right">
-                            <div className="flex items-center justify-end gap-3 opacity-0 group-hover/row:opacity-100 transition-all">
+                            <div className="flex items-center justify-end gap-3 transition-all">
                               <button onClick={(e) => { e.stopPropagation(); setFormData(c); setIsEditing(true); setShowModal(true); }} className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 hover:bg-indigo-50 hover:text-indigo-600 border border-indigo-500/20 transition-all flex items-center justify-center">
                                 <Edit2 size={18} />
                               </button>

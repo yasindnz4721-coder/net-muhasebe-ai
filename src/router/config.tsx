@@ -34,6 +34,7 @@ import TaksitTakibiPage from '../pages/taksit-takibi/page';
 import TrialExpiredPage from '../pages/TrialExpired';
 import UretimPage from '../pages/uretim/page';
 import DenetimPage from '../pages/denetim/page';
+import BankalarPage from '../pages/bankalar/page';
 
 // Helper to create stub routes
 const stub = (title: string) => <ComingSoonPage title={title} />;
@@ -65,7 +66,7 @@ const routes: RouteObject[] = [
   { path: '/stok-transferi', element: stub('Depo Transferi') },
   { path: '/stok-karlilik', element: stub('Kârlılık Analizi') },
   { path: '/urun-ekstre', element: stub('Ürün Hareket Ekstresi') },
-  { path: '/bankalar', element: stub('Banka Hesapları') },
+  { path: '/bankalar', element: <BankalarPage /> },
   { path: '/cek-senet', element: stub('Çek ve Senetler') },
   { path: '/taksit-takibi', element: <TaksitTakibiPage /> },
   { path: '/taksitler', element: <TaksitlerPage /> },

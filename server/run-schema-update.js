@@ -203,9 +203,17 @@ async function updateSchema() {
         // Varsayılan kategorileri ekle (her profil için ilk seferde tetiklenebilir ama burada genel bir tablo gibi düşünelim)
         // Gerçek uygulamada profil seçildiğinde kontrol edilir ama basitlik için şemada bırakalım.
 
+        console.log('🔄 Veritabanı şeması güncelleniyor (Banka & Personel Geliştirmeleri)...');
+        await query("ALTER TABLE kasalar ADD COLUMN IF NOT EXISTS tip VARCHAR(20) DEFAULT 'Nakit'");
+        await query("ALTER TABLE kasalar ADD COLUMN IF NOT EXISTS banka_adi VARCHAR(255) DEFAULT ''");
+        await query("ALTER TABLE kasalar ADD COLUMN IF NOT EXISTS iban VARCHAR(34) DEFAULT ''");
+        await query("ALTER TABLE kasalar ADD COLUMN IF NOT EXISTS hesap_no VARCHAR(50) DEFAULT ''");
+        await query("ALTER TABLE personeller ADD COLUMN IF NOT EXISTS bakiye DECIMAL(15, 2) DEFAULT 0");
+
         console.log('✅ Veritabanı şeması başarıyla güncellendi.');
         process.exit(0);
     } catch (error) {
+
         console.error('❌ Şema güncelleme hatası:', error);
         process.exit(1);
     }

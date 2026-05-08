@@ -57,6 +57,12 @@ const PersonelPage = () => {
     });
     const [kasalar, setKasalar] = useState<any[]>([]);
     const [maasOzetleri, setMaasOzetleri] = useState<Record<string, any>>({});
+    const [showTahakkukModal, setShowTahakkukModal] = useState(false);
+    const [tahakkukFormData, setTahakkukFormData] = useState({
+        tutar: 0,
+        tarih: new Date().toISOString().split('T')[0],
+        aciklama: ''
+    });
 
     useEffect(() => {
         if (selectedProfile) {
@@ -311,7 +317,7 @@ const PersonelPage = () => {
                                         <tr className="bg-[#0f172a]/50">
                                             <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">PERSONEL</th>
                                             <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">İLETİŞİM</th>
-                                            <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">MAAŞ</th>
+                                            <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">MAAŞ / BAKİYE</th>
                                             <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">DURUM</th>
                                             <th className="px-8 py-6 text-right text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">AKSİYON</th>
                                         </tr>
@@ -355,22 +361,12 @@ const PersonelPage = () => {
                                                     </td>
                                                     <td className="px-8 py-6">
                                                         <div className="flex flex-col">
-                                                            <div className="text-lg font-black text-emerald-400 tracking-tighter leading-none">
-                                                                ₺{Number(maasOzetleri[p.id]?.odenecek_maas || p.maas).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                                                            <div className="text-lg font-black text-white tracking-tighter leading-none">
+                                                                ₺{Number(p.maas).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
                                                             </div>
-                                                            {maasOzetleri[p.id]?.toplam_kesinti > 0 ? (
-                                                                <div className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wider flex flex-col gap-0.5">
-                                                                    <span>₺{Number(p.maas).toLocaleString()} MAAŞ</span>
-                                                                    {maasOzetleri[p.id].kesinti > 0 && (
-                                                                        <span className="text-rose-400">- ₺{Number(maasOzetleri[p.id].kesinti).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} DEVAMSIZLIK</span>
-                                                                    )}
-                                                                    {maasOzetleri[p.id].toplam_avans > 0 && (
-                                                                        <span className="text-orange-400">- ₺{Number(maasOzetleri[p.id].toplam_avans).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} AVANS</span>
-                                                                    )}
-                                                                </div>
-                                                            ) : (
-                                                                <div className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wider italic opacity-50">TAM MAAŞ</div>
-                                                            )}
+                                                            <div className={`text-sm font-black mt-1 ${Number(p.bakiye || 0) > 0 ? 'text-emerald-400' : Number(p.bakiye || 0) < 0 ? 'text-rose-400' : 'text-slate-500'}`}>
+                                                                BAKİYE: ₺{Number(p.bakiye || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}
+                                                            </div>
                                                         </div>
                                                     </td>
                                                     <td className="px-8 py-6">
@@ -414,6 +410,22 @@ const PersonelPage = () => {
                                                                 title="Maaş Öde"
                                                             >
                                                                 <i className="ri-money-dollar-circle-line text-xl"></i>
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setSelectedMaasPersonel(p);
+                                                                    setTahakkukFormData(prev => ({
+                                                                        ...prev,
+                                                                        tutar: Number(p.maas),
+                                                                        aciklama: `${new Date().toLocaleString('tr-TR', { month: 'long' })} Maaş Hak Edişi`
+                                                                    }));
+                                                                    setShowTahakkukModal(true);
+                                                                }}
+                                                                className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white border border-blue-500/20 transition-all flex items-center justify-center"
+                                                                title="Hak Ediş Kaydet (Tahakkuk)"
+                                                            >
+                                                                <i className="ri-hand-coin-line text-xl"></i>
                                                             </button>
                                                         </div>
                                                     </td>
@@ -592,7 +604,11 @@ const PersonelPage = () => {
                                         onChange={e => setMaasFormData({ ...maasFormData, kasa_id: e.target.value })}
                                         className="premium-input h-14"
                                     >
-                                        {kasalar.map(k => <option key={k.id} value={k.id}>{k.ad}</option>)}
+                                        {kasalar.map(k => (
+                                          <option key={k.id} value={k.id}>
+                                            {k.tip === 'Banka' ? `[BANKA] ${k.banka_adi} - ${k.ad}` : `[KASA] ${k.ad}`}
+                                          </option>
+                                        ))}
                                     </select>
                                 </div>
                             </div>
@@ -609,6 +625,72 @@ const PersonelPage = () => {
                             <div className="flex gap-4 pt-4">
                                 <button type="button" onClick={() => setShowMaasModal(false)} className="flex-1 h-14 border border-white/10 rounded-2xl text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-all">İPTAL</button>
                                 <button type="submit" className="flex-1 h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-emerald-600/20 transition-all">ÖDEMEYİ YAP</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+            {/* Maaş Tahakkuk Modalı */}
+            {showTahakkukModal && selectedMaasPersonel && (
+                <div className="fixed inset-0 bg-[#020617]/90 backdrop-blur-md flex items-center justify-center z-[110] p-4 animate-fade-in">
+                    <div className="premium-card p-0 w-full max-w-md animate-slide-up border-white/10 relative overflow-hidden rounded-[2.5rem]">
+                        <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+                            <div className="space-y-1">
+                                <h3 className="text-2xl font-black tracking-tight text-white uppercase leading-none">MAAŞ HAK EDİŞİ (TAHAKKUK)</h3>
+                                <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">{selectedMaasPersonel.ad_soyad}</p>
+                            </div>
+                            <button onClick={() => setShowTahakkukModal(false)} className="w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                                <Plus size={24} className="rotate-45" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            if (selectedProfile && selectedMaasPersonel) {
+                                const res = await personelApi.saveMaasTahakkuku(selectedMaasPersonel.id, {
+                                    ...tahakkukFormData,
+                                    profile_id: selectedProfile.id
+                                });
+                                if (res.data) {
+                                    setShowTahakkukModal(false);
+                                    loadPersonel();
+                                }
+                            }
+                        }} className="p-10 space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">HAK EDİLEN TUTAR (₺)</label>
+                                <input
+                                    type="number"
+                                    required
+                                    value={tahakkukFormData.tutar}
+                                    onChange={e => setTahakkukFormData({ ...tahakkukFormData, tutar: Number(e.target.value) })}
+                                    className="premium-input h-14 text-blue-400 font-bold text-xl"
+                                />
+                                <p className="text-[9px] text-slate-500 uppercase tracking-widest ml-2 italic">BU İŞLEM PERSONELİN ALACAĞINI ARTIRIR.</p>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">TARİH</label>
+                                <input
+                                    type="date"
+                                    required
+                                    value={tahakkukFormData.tarih}
+                                    onChange={e => setTahakkukFormData({ ...tahakkukFormData, tarih: e.target.value })}
+                                    className="premium-input h-14"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-2">AÇIKLAMA</label>
+                                <input
+                                    type="text"
+                                    value={tahakkukFormData.aciklama}
+                                    onChange={e => setTahakkukFormData({ ...tahakkukFormData, aciklama: e.target.value })}
+                                    className="premium-input h-14"
+                                    placeholder="Açıklama girin..."
+                                />
+                            </div>
+                            <div className="flex gap-4 pt-4">
+                                <button type="button" onClick={() => setShowTahakkukModal(false)} className="flex-1 h-14 border border-white/10 rounded-2xl text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-all">İPTAL</button>
+                                <button type="submit" className="flex-1 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-blue-600/20 transition-all">HAK EDİŞİ KAYDET</button>
                             </div>
                         </form>
                     </div>

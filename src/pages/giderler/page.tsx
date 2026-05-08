@@ -276,7 +276,9 @@ export default function GiderlerPage() {
                                 >
                                     <option value="">Seçiniz...</option>
                                     {kasalar.map(k => (
-                                        <option key={k.id} value={k.id}>{k.ad} (₺{Number(k.bakiye).toLocaleString('tr-TR')})</option>
+                                        <option key={k.id} value={k.id}>
+                                            {k.tip === 'Banka' ? `[BANKA] ${k.banka_adi} - ${k.ad}` : `[KASA] ${k.ad}`} (₺{Number(k.bakiye).toLocaleString('tr-TR')})
+                                        </option>
                                     ))}
                                 </select>
                             </div>

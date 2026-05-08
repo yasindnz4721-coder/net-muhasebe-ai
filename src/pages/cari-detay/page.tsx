@@ -178,16 +178,19 @@ export default function CariDetay() {
               </div>
 
               <div className="flex gap-4">
-                <button className="premium-button px-8 h-16 text-[10px] uppercase tracking-widest bg-emerald-600/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-600 hover:text-white group">
-                  <i className="ri-add-line text-xl group-hover:rotate-90 transition-transform"></i>
-                  <span>İŞLEM KAYDET</span>
+                <button
+                  onClick={() => navigate(`/cari-ekstre`)}
+                  className="premium-button px-8 h-16 text-[10px] uppercase tracking-widest bg-blue-600/10 border-blue-500/20 text-blue-400 hover:bg-blue-600 hover:text-white"
+                >
+                  <i className="ri-file-list-3-line text-xl"></i>
+                  <span>CARİ EKSTRE</span>
                 </button>
                 <button
-                  onClick={() => navigate(`/cariler/duzenle/${id}`)}
+                  onClick={() => navigate('/cariler')}
                   className="premium-button px-8 h-16 text-[10px] uppercase tracking-widest"
                 >
                   <i className="ri-edit-line text-xl text-indigo-400"></i>
-                  <span>CARİ DÜZENLE</span>
+                  <span>DÜZENLE (LİSTEDEN)</span>
                 </button>
               </div>
             </div>

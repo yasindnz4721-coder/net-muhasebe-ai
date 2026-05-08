@@ -393,6 +393,10 @@ export interface Kasa {
     bakiye: number;
     is_default: boolean;
     profile_id: string;
+    tip?: 'Nakit' | 'Banka';
+    banka_adi?: string;
+    iban?: string;
+    hesap_no?: string;
     created_at?: string;
     updated_at?: string;
 }
@@ -561,6 +565,12 @@ export const personel = {
             body: JSON.stringify(data),
         });
     },
+    async saveMaasTahakkuku(id: string, data: { tutar: number; tarih: string; aciklama?: string; profile_id: string }) {
+        return fetchApi<{ success: boolean; message: string }>(`/api/personel/${id}/maas-tahakkuku`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    },
 };
 
 // Taksit API
@@ -652,6 +662,7 @@ export interface Personel {
     maas: number | string;
     iban?: string;
     durum: string;
+    bakiye?: number;
     profile_id?: string;
     created_at?: string;
     updated_at?: string;

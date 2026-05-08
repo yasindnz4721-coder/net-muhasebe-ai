@@ -406,8 +406,11 @@ const OdemelerPage = () => {
                     onChange={e => setFormData({ ...formData, kasa_id: e.target.value })}
                     className="premium-input h-14"
                   >
-                    <option value="">Kasa Seçin...</option>
-                    {kasalar.map(k => <option key={k.id} value={k.id}>{k.ad}</option>)}
+                    {kasalar.map(k => (
+                      <option key={k.id} value={k.id}>
+                        {k.tip === 'Banka' ? `[BANKA] ${k.banka_adi} - ${k.ad}` : `[KASA] ${k.ad}`}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
