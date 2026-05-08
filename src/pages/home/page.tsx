@@ -307,9 +307,12 @@ export default function HomePage() {
       const toplamAlis = fAlislar.reduce((sum, f) => sum + Number(f.toplam), 0);
       const toplamGiderRaw = fGiderler.reduce((sum, g) => sum + Number(g.tutar), 0);
       
-      // Personel ile ilgili giderleri bulalım (Avans ve Maaş Ödemeleri)
+      // Personel ile ilgili giderleri daha esnek arayalım (Avans ve Maaş Ödemeleri)
       const personelGiderleri = fGiderler
-        .filter(g => g.kategori_ad === 'Personel Avansı' || g.kategori_ad === 'Personel Maaşı')
+        .filter(g => {
+            const katAd = (g.kategori_ad || "").toLocaleLowerCase('tr-TR');
+            return katAd.includes('avans') || katAd.includes('maaş') || katAd.includes('maas');
+        })
         .reduce((sum, g) => sum + Number(g.tutar), 0);
 
       const toplamGider = toplamGiderRaw;
@@ -434,14 +437,16 @@ export default function HomePage() {
       doc.text(`Donem: ${excelDates.startDate} - ${excelDates.endDate}`, 14, 30);
       doc.text(`Olusturulma Tarihi: ${new Date().toLocaleString('tr-TR')}`, 14, 37);
 
-      // Summary Table
       const toplamSatis = fSatislar.reduce((sum, f) => sum + Number(f.toplam), 0);
       const toplamAlis = fAlislar.reduce((sum, f) => sum + Number(f.toplam), 0);
       const toplamGiderRaw = fGiderler.reduce((sum, g) => sum + Number(g.tutar), 0);
       
-      // Personel ile ilgili giderleri bulalım (Avans ve Maaş Ödemeleri)
+      // Personel ile ilgili giderleri daha esnek arayalım (Avans ve Maaş Ödemeleri)
       const personelGiderleri = fGiderler
-        .filter(g => g.kategori_ad === 'Personel Avansı' || g.kategori_ad === 'Personel Maaşı')
+        .filter(g => {
+            const katAd = (g.kategori_ad || "").toLocaleLowerCase('tr-TR');
+            return katAd.includes('avans') || katAd.includes('maaş') || katAd.includes('maas');
+        })
         .reduce((sum, g) => sum + Number(g.tutar), 0);
 
       const toplamGider = toplamGiderRaw;
