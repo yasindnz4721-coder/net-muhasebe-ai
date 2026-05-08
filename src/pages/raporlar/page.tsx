@@ -547,7 +547,7 @@ export default function Raporlar() {
                       <tr className="hover:bg-white/[0.01]">
                         <td className="px-16 py-5 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Personel Maaş Ödemeleri (Net)</td>
                         <td className="px-10 py-5 text-right font-black text-slate-700">—</td>
-                        <td className="px-10 py-5 text-right font-black text-rose-500">₺{toplamPersonelMaliyeti.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-10 py-5 text-right font-black text-rose-500">₺{toplamPersonelMaliyetiFull.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
                       </tr>
                       <tr className="hover:bg-white/[0.01]">
                         <td className="px-16 py-5 text-slate-400 font-bold uppercase tracking-widest text-[10px]">Yapılan Cari Ödemeler</td>
