@@ -189,7 +189,17 @@ const MuhasebeDashboard = () => {
 
       const toplamSatis = fSatislar.reduce((sum, f) => sum + Number(f.toplam), 0);
       const toplamAlis = fAlislar.reduce((sum, f) => sum + Number(f.toplam), 0);
-      const toplamGider = fGiderler.reduce((sum, g) => sum + Number(g.tutar), 0);
+      const toplamGiderRaw = fGiderler.reduce((sum, g) => sum + Number(g.tutar), 0);
+      
+      // Personel ile ilgili giderleri filtrele (Avans ve Maaş Ödemeleri)
+      const personelGiderleri = fGiderler
+        .filter(g => {
+            const katAd = (g.kategori_ad || "").toLocaleLowerCase('tr-TR');
+            return katAd.includes('avans') || katAd.includes('maaş') || katAd.includes('maas');
+        })
+        .reduce((sum, g) => sum + Number(g.tutar), 0);
+
+      const toplamGider = Math.max(0, toplamGiderRaw - personelGiderleri);
       const toplamPersonel = (personeller || []).reduce((sum, p) => sum + Number(p.maas || 0), 0);
 
       const netKar = toplamSatis - (toplamAlis + toplamGider + toplamPersonel);
@@ -306,7 +316,17 @@ const MuhasebeDashboard = () => {
 
       const toplamSatis = fSatislar.reduce((sum, f) => sum + Number(f.toplam), 0);
       const toplamAlis = fAlislar.reduce((sum, f) => sum + Number(f.toplam), 0);
-      const toplamGider = fGiderler.reduce((sum, g) => sum + Number(g.tutar), 0);
+      const toplamGiderRaw = fGiderler.reduce((sum, g) => sum + Number(g.tutar), 0);
+      
+      // Personel ile ilgili giderleri filtrele (Avans ve Maaş Ödemeleri)
+      const personelGiderleri = fGiderler
+        .filter(g => {
+            const katAd = (g.kategori_ad || "").toLocaleLowerCase('tr-TR');
+            return katAd.includes('avans') || katAd.includes('maaş') || katAd.includes('maas');
+        })
+        .reduce((sum, g) => sum + Number(g.tutar), 0);
+
+      const toplamGider = Math.max(0, toplamGiderRaw - personelGiderleri);
       const toplamPersonel = (personeller || []).reduce((sum, p) => sum + Number(p.maas || 0), 0);
       const netKar = toplamSatis - (toplamAlis + toplamGider + toplamPersonel);
 

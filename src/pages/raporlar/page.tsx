@@ -567,7 +567,7 @@ export default function Raporlar() {
                       <tr className="bg-rose-500/5">
                         <td className="px-10 py-8 font-black text-white">BRÜT GİDER TOPLAMI</td>
                         <td className="px-10 py-8 text-right font-black text-slate-700">—</td>
-                        <td className="px-10 py-8 text-right font-black text-rose-500 text-xl tracking-tighter">₺{(toplamAlis + toplamVerilenOdeme + odenecekKDV + toplamEkstraGider + toplamPersonelMaliyeti).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
+                        <td className="px-10 py-8 text-right font-black text-rose-500 text-xl tracking-tighter">₺{(toplamAlis + toplamVerilenOdeme + odenecekKDV + toplamEkstraGider + toplamPersonelMaliyetiFull).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</td>
                       </tr>
 
                       <tr className={`border-t-4 ${netKar >= 0 ? 'border-indigo-500 bg-indigo-500/10' : 'border-rose-500 bg-rose-500/10'}`}>
